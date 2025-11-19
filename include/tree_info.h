@@ -9,7 +9,6 @@
 
 struct tree_node_t {
     char*        value;
-    unsigned long hash;
     bool         can_free;
     tree_node_t* parent;
     tree_node_t* left;

@@ -1,7 +1,6 @@
 #include "tree_verification.h"
 #include "logger.h"
 #include "asserts.h"
-#include "constants.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -28,6 +27,12 @@ error_code tree_dump(const tree_t* tree,
 }
 
 #else
+
+#define BUFFER_SIZE_TIME  64
+#define BUFFER_SIZE_PATH  256
+#define BUFFER_SIZE_CMD   512
+#define MAX_NODES_COLLECT 4096
+
 
 #define LIGHT1_BLUE   "#6b8fd6"
 #define LIGHT2_BLUE   "#e9f2ff"
@@ -74,7 +79,7 @@ static void vfmt(char* buf, size_t cap, const char* fmt, va_list ap) {
 }
 
 static int run_dot_to_svg(const char *dot_path, const char *svg_path) {
-    char cmd[BUFFER_SIZE_512] = {};
+    char cmd[BUFFER_SIZE_CMD] = {};
     snprintf(cmd, sizeof(cmd), "dot -Tsvg \"%s\" -o \"%s\"", dot_path, svg_path);
     return system(cmd) == 0;
 }
@@ -161,8 +166,8 @@ static void print_node_label(const tree_node_t* node, FILE* file, node_type_t no
 
 static int dump_make_graphviz_svg(const tree_t* tree, const char* base) {
     if (!tree || !tree->root) return 0;
-    char dot_path[BUFFER_SIZE_256] = {};
-    char svg_path[BUFFER_SIZE_256] = {};
+    char dot_path[BUFFER_SIZE_PATH] = {};
+    char svg_path[BUFFER_SIZE_PATH] = {};
     snprintf(dot_path, sizeof(dot_path), "%s.dot", base);
     snprintf(svg_path, sizeof(svg_path), "%s.svg", base);
 
@@ -224,7 +229,7 @@ static error_code write_html(const tree_t* tree,
     FILE* html = tree->dump_file;
 
     time_t t = time(nullptr);
-    char ts[BUFFER_SIZE_64] = {};
+    char ts[BUFFER_SIZE_TIME] = {};
     strftime(ts, sizeof ts, "%Y-%m-%d %H:%M:%S", localtime(&t));
 
     fprintf(html,
@@ -299,15 +304,15 @@ error_code tree_dump(const tree_t* tree,
     static int dump_idx = 0;
     system("mkdir -p dumps");
 
-    char comment[BUFFER_SIZE_512] = {};
+    char comment[BUFFER_SIZE_CMD] = {};
     va_list ap = {};
     va_start(ap, fmt);
     vfmt(comment, sizeof(comment), fmt, ap);
     va_end(ap);
 
-    char base[BUFFER_SIZE_256] = {};
+    char base[BUFFER_SIZE_PATH] = {};
     snprintf(base, sizeof base, "dumps/tree_dump_%03d", dump_idx);
-    char svg_path[BUFFER_SIZE_300] = {};
+    char svg_path[BUFFER_SIZE_PATH + 5] = {};
     if (is_visual && tree->root) {
         if (dump_make_graphviz_svg(tree, base)) {
             snprintf(svg_path, sizeof svg_path, "%s.svg", base);

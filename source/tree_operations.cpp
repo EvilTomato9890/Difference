@@ -26,10 +26,8 @@ static tree_node_t* allocate_node(const char* value, tree_node_t* parent, bool c
         } else {
             node->value = (char*)value;
         }
-        node->hash = tree_hash_string(value);
     } else {
         node->value = nullptr;
-        node->hash = 0;
     }
     node->can_free = can_free;
     node->parent = parent;
@@ -232,7 +230,6 @@ error_code tree_replace_value(tree_node_t* node, const char* value) {
     }
     node->value = newv;
     node->can_free = true;
-    node->hash = tree_hash_string(value);
     return ERROR_NO;
 }
 

@@ -29,10 +29,8 @@ static tree_node_t* allocate_node_from_buffer(const char* value, tree_node_t* pa
     }
     if (value != nullptr) {
         node->value = (char*)value;
-        node->hash = tree_hash_string(value);
     } else {
         node->value = nullptr;
-        node->hash = 0;
     }
     node->can_free = false;
     node->parent = parent;

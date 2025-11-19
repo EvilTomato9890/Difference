@@ -12,14 +12,14 @@ BIN_DIR := bin
 TARGET := $(BIN_DIR)/tree_demo
 
 ALL_SOURCES := $(wildcard $(SRC_DIR)/*.cpp) 
-OBJECTS_CONSOLE := $(SOURCES_CONSOLE:%.cpp=$(BUILD_DIR)/%.o)
+OBJECTS_CONSOLE := $(ALL_SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 
 $(TARGET): $(OBJECTS_CONSOLE) | $(BIN_DIR)
 	@$(CXX) $(OBJECTS_CONSOLE) $(LDFLAGS_CONSOLE) -o $@
 
 $(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
-	@$(CXX) $(CXXFLAGS) $(RAYLIB_INCLUDE) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD_DIR):
 	mkdir -p $@
