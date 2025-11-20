@@ -65,7 +65,10 @@ error_code tree_dump(const tree_t* tree,
 #define HEAD_FILL
 #define LEAF_COLOR      LIGHT1_GREEN
 #define LEAF_FILL       LIGHT2_GREEN
-enum node_type_t {
+
+static const int MAX_STRLEN_VALUE = 128;
+
+enum graph_node_type_t {
     NODE_BASIC,
     NODE_ROOT,
     NODE_HEAD,
@@ -126,14 +129,30 @@ static error_code collect_nodes_dynamic(const tree_node_t* root, const tree_node
     return error;
 }
 
-#define NODE_PRINT(node_color, node_fill)                                           \
-    fprintf(file, "  node_%p[shape=record,"                                         \
-            "label=\"{ {ptr: %p} | {val: %s} | { prev: %p | next: %p } }\","        \
-            "color=\"" node_color "\",fillcolor=\"" node_fill "\"];\n",             \
-            self, self, val, left, right);  
+static const char* node_val_to_str(const tree_node_t* node,
+                                   char* buf, size_t buf_size)
+{
+    HARD_ASSERT(node != nullptr, "node_val_to_str: node is nullptr");
+    HARD_ASSERT(buf  != nullptr, "node_val_to_str: buff is nullptr");
 
+    if (node == nullptr) return "<null>";
 
-static void print_node_label(const tree_node_t* node, FILE* file, node_type_t node_type) {
+    switch (node->type) {
+        case CONSTANT:
+            snprintf(buf, buf_size, "%lld",
+                     (long long)node->value.constant);
+            return buf;
+        case VARIABLE:
+            return node->value.var_name ? node->value.var_name : "<null>";
+        case FUNCTION:
+            return stringify(node->value.func);
+        default:
+            return "<??>";
+    }
+}
+
+static void print_node_label(const tree_node_t* node, FILE* file, 
+                             graph_node_type_t graph_node_type) {
     HARD_ASSERT(file != nullptr, "file pointer is nullptr");
     HARD_ASSERT(node != nullptr, "node pointer is nullptr");
 
@@ -141,9 +160,21 @@ static void print_node_label(const tree_node_t* node, FILE* file, node_type_t no
     const void* self  = node;
     const void* left  = (node ? node->left  : nullptr);
     const void* right = (node ? node->right : nullptr);
-    const char* val   = (node && node->value) ? node->value : "(null)";
 
-    switch(node_type) {
+
+    #define NODE_PRINT(node_color, node_fill)                                           \
+        do {                                                                            \
+            char val_buf[MAX_STRLEN_VALUE];                                                           \
+            const char* val_str = node_val_to_str((tree_node_t*)self, val_buf, sizeof val_buf);       \
+            fprintf(file,                                                               \
+                    "  node_%p[shape=record,"                                           \
+                    "label=\"{ {ptr: %p} | {val: %s} | { prev: %p | next: %p } }\","    \
+                    "color=\"" node_color "\",fillcolor=\"" node_fill "\"];\n",         \
+                    self, self, val_str,                                                \
+                    left, right);                                                       \
+        } while (0)
+
+    switch(graph_node_type) {
         case NODE_BASIC:
             NODE_PRINT(NODE_COLOR, NODE_FILL);
             return;
@@ -160,9 +191,11 @@ static void print_node_label(const tree_node_t* node, FILE* file, node_type_t no
             LOGGER_ERROR("print_node_labes: Unknown node_type");
             return;
     }
+
+    #undef NODE_PRINT
 }
 
-#undef NODE_PRINT_FORMAT
+
 
 static int dump_make_graphviz_svg(const tree_t* tree, const char* base) {
     if (!tree || !tree->root) return 0;
@@ -275,7 +308,8 @@ static error_code write_html(const tree_t* tree,
     size_t i = 0;
     for (i = 0; i < n; ++i) {
         const tree_node_t* node = nodes[i];
-        const char* value = (node && node->value) ? node->value : "(null)";
+        char  str_buf[MAX_STRLEN_VALUE] = {};
+        const char* value = node_val_to_str(node, str_buf, MAX_STRLEN_VALUE);
         fprintf(html, "%-4zu  %-14p  %-14p  %-14p  %-14p  %s\n",
                 i, node,
                 (node ? node->parent : nullptr),
@@ -332,5 +366,5 @@ error_code tree_dump(const tree_t* tree,
     return error;
 }
 
-#endif /* VERIFY_DEBUG */
+#endif 
 
