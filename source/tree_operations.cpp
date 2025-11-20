@@ -12,7 +12,7 @@
 #include "error_handler.h"
 //================================================================================
 
- inline value_t make_union(node_type_t type, ...) {
+inline value_t make_union(node_type_t type, ...) {
     value_t val = {};
 
     va_list ap = {};

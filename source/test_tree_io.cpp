@@ -98,7 +98,7 @@ static void test_DSL() {
     tree.dump_file = fopen("test_dump_DSL.html", "w");
     HARD_ASSERT(tree.dump_file != nullptr, "failed to create file");
     #endif
-    tree.root = ADD_(SIN_(CONST_(1)), CONST_(2));
+    tree.root = ADD_(SIN_(c(1)), c(2));
     tree.head->left = tree.root;
 
     tree_dump(&tree, VER_INIT, true, "FF");
