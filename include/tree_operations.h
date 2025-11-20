@@ -6,7 +6,7 @@
 
 
 error_code tree_init(tree_t* tree ON_DEBUG(, ver_info_t ver_info));
-tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_node_t* parent);
+tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* parent, tree_node_t* left, tree_node_t* right);
 
 error_code tree_destroy(tree_t* tree);
 
@@ -29,5 +29,7 @@ struct tree_path_stack_t {
 
 error_code tree_read_from_file(tree_t* tree, const char* filename);
 error_code tree_write_to_file(const tree_t* tree, const char* filename);
+
+const char* get_func_name_by_type(func_type_t func_type_value);
 
 #endif

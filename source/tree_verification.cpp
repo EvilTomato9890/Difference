@@ -1,6 +1,7 @@
 #include "tree_verification.h"
 #include "logger.h"
 #include "asserts.h"
+#include "tree_operations.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -64,8 +65,8 @@ error_code tree_dump(const tree_t* tree,
 #define ROOT_COLOR      CYAN
 #define ROOT_FILL       LIGHT_CIAN
 #define EDGE_COLOR      LIGHT1_GRAY
-#define HEAD_COLOR      
-#define HEAD_FILL
+#define HEAD_COLOR      LIGHT1_BLUE
+#define HEAD_FILL       LIGHT2_BLUE
 #define LEAF_COLOR      LIGHT1_GREEN
 #define LEAF_FILL       LIGHT2_GREEN
 
@@ -150,7 +151,7 @@ static const char* node_val_to_str(const tree_node_t* node,
         case VARIABLE:
             return node->value.var_name ? node->value.var_name : "<null>";
         case FUNCTION:
-            return stringify(node->value.func);
+            return get_func_name_by_type(node->value.func);
         default:
             return "<??>";
     }
