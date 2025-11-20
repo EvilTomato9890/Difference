@@ -12,39 +12,6 @@
 #include "logger.h"
 
 //================================================================================
-// Вспомогательные функции для создания тестовых деревьев
-
-static inline value_t make_union(node_type_t type, ...) {
-    value_t val = {};
-    va_list ap = {};
-    va_start(ap, type);
-
-    switch (type) {
-        case CONSTANT: {
-            const_val_type constant = va_arg(ap, const_val_type);
-            val.constant = constant;
-            break;
-        }
-        case VARIABLE: {
-            const char* var = va_arg(ap, const char*);
-            val.var_name = var;
-            break;
-        }
-        case FUNCTION: {
-            int func = va_arg(ap, int);
-            val.func = (func_type_t)func;
-            break;
-        }
-        default:
-            LOGGER_ERROR("make_union: unknown node_type_t %d", type);
-            break;
-    }
-    va_end(ap);
-    return val;
-}
-
-//================================================================================
-// Тесты для tree_read_from_file
 
 static void test_read_empty_tree() {
     LOGGER_INFO("=== Тест: чтение пустого дерева ===");
@@ -52,8 +19,7 @@ static void test_read_empty_tree() {
     tree_t tree = {};
     error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
-    
-    // Создаём временный файл с пустым деревом
+
     const char* filename = "test_empty.tree";
     FILE* file = fopen(filename, "w");
     LOGGER_DEBUG("FILE OPENED: NAME %s", filename);
@@ -169,7 +135,6 @@ static void test_read_nonexistent_file() {
 }
 
 //================================================================================
-// Тесты для tree_write_to_file
 
 static void test_write_empty_tree() {
     LOGGER_INFO("=== Тест: запись пустого дерева ===");
@@ -182,13 +147,11 @@ static void test_write_empty_tree() {
     error = tree_write_to_file(&tree, filename);
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     
-    // Проверяем, что файл создан и содержит "nil"
     FILE* file = fopen(filename, "r");
     HARD_ASSERT(file != nullptr, "output file should exist");
     char buffer[10] = {};
     fread(buffer, 1, sizeof(buffer) - 1, file);
     fclose(file);
-    //HARD_ASSERT(strcmp(buffer, "nil") == 0, "file should contain 'nil'");
     
     tree_destroy(&tree);
     remove(filename);
@@ -210,7 +173,6 @@ static void test_write_constant_tree() {
     error = tree_write_to_file(&tree, filename);
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     
-    // Читаем обратно и проверяем
     tree_t read_tree = {};
     error = tree_init(&read_tree ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
@@ -242,7 +204,6 @@ static void test_write_variable_tree() {
     error = tree_write_to_file(&tree, filename);
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     
-    // Читаем обратно и проверяем
     tree_t read_tree = {};
     error = tree_init(&read_tree ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
@@ -282,7 +243,6 @@ static void test_write_complex_tree() {
     error = tree_write_to_file(&tree, filename);
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     tree_dump(&tree, VER_INIT, true, "Aaa");
-    // Читаем обратно и проверяем
     tree_t read_tree = {};
     error = tree_init(&read_tree ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
@@ -295,12 +255,10 @@ static void test_write_complex_tree() {
     
     tree_destroy(&tree);
     tree_destroy(&read_tree);
-    //remove(filename);
     LOGGER_INFO("Тест пройден: запись сложного дерева\n");
 }
 
 //================================================================================
-// Тесты для tree_dump
 
 static void test_dump_empty_tree() {
     LOGGER_INFO("=== Тест: дамп пустого дерева ===");
@@ -315,8 +273,7 @@ static void test_dump_empty_tree() {
     #endif
     
     error = tree_dump(&tree, VER_INIT, false, "Test dump empty tree");
-    // tree_dump может вернуть ERROR_NULL_ARG если dump_file не установлен (без VERIFY_DEBUG)
-    // Это нормально, так как дамп работает только в debug режиме
+
     #ifdef VERIFY_DEBUG
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
     #endif
@@ -366,33 +323,33 @@ static void test_dump_tree_with_nodes() {
 }
 
 //================================================================================
-// Главная функция для запуска всех тестов
 
 int run_tests() {
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Начало тестирования функций чтения/записи и дампа\n");
     LOGGER_INFO("========================================\n\n");
     
-    // Тесты чтения
     test_read_empty_tree();
     test_read_single_constant();
     test_read_single_variable();
     test_read_complex_tree();
     test_read_nonexistent_file();
     
-    // Тесты записи
     test_write_empty_tree();
     test_write_constant_tree();
     test_write_variable_tree();
     test_write_complex_tree();
     
-    // Тесты дампа
     test_dump_empty_tree();
     
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
     LOGGER_INFO("========================================\n");
+
+
     
+
+
     return 0;
 }
 

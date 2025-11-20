@@ -31,5 +31,6 @@ error_code tree_read_from_file(tree_t* tree, const char* filename);
 error_code tree_write_to_file(const tree_t* tree, const char* filename);
 
 const char* get_func_name_by_type(func_type_t func_type_value);
+inline value_t make_union(node_type_t type, ...);
 
 #endif
