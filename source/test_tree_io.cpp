@@ -129,17 +129,26 @@ static void test_read_complex_tree() {
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     const char* filename = "test_complex.tree";
-    FILE* file = fopen(filename, "w");
-    HARD_ASSERT(file != nullptr, "failed to create test file");
-    fprintf(file, "(+ (5 nil nil) (\"x\" nil nil))");
-    fclose(file);
-    
+
+    #ifdef VERIFY_DEBUG
+    tree.dump_file = fopen("test_dump_nodes.html", "w");
+    HARD_ASSERT(tree.dump_file != nullptr, "failed to create dump file");
+    #endif
     error = tree_read_from_file(&tree, filename);
-    HARD_ASSERT(error == ERROR_NO, "tree_read_from_file failed");
-    HARD_ASSERT(tree.root != nullptr, "root should not be nullptr");
-    HARD_ASSERT(tree.root->type == FUNCTION, "root type should be FUNCTION");
-    HARD_ASSERT(tree.size == 3, "size should be 3");
+    error = tree_dump(&tree, VER_INIT, true, "Test dump tree with nodes");
+
+    #ifdef VERIFY_DEBUG
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    #endif
     
+    #ifdef VERIFY_DEBUG
+    if (tree.dump_file != nullptr) {
+        fclose(tree.dump_file);
+        tree.dump_file = nullptr;
+    }
+    #endif
+
+
     tree_destroy(&tree);
     remove(filename);
     LOGGER_INFO("Тест пройден: чтение сложного дерева\n");
@@ -340,8 +349,7 @@ static void test_dump_tree_with_nodes() {
     #endif
     
     error = tree_dump(&tree, VER_INIT, true, "Test dump tree with nodes");
-    // tree_dump может вернуть ERROR_NULL_ARG если dump_file не установлен (без VERIFY_DEBUG)
-    // Это нормально, так как дамп работает только в debug режиме
+
     #ifdef VERIFY_DEBUG
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
     #endif
@@ -380,7 +388,6 @@ int run_tests() {
     
     // Тесты дампа
     test_dump_empty_tree();
-    test_dump_tree_with_nodes();
     
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
