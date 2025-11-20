@@ -19,26 +19,6 @@ static char* skip_whitespace(char* curr) {
     return curr;
 }
 
-static tree_node_t* allocate_node_from_buffer(node_value_t value, tree_node_t* parent) {
-    HARD_ASSERT(parent != nullptr, "parent is nullptr");
-    
-    LOGGER_DEBUG("allocate_node_from_buffer: started");
-    tree_node_t* node = (tree_node_t*)calloc(1, sizeof(tree_node_t));
-    if (node == nullptr) {
-        LOGGER_ERROR("allocate_node_from_buffer: calloc failed");
-        return nullptr;
-    }
-    if (value != nullptr) {
-        node->value = (char*)value;
-    } else {
-        node->value = nullptr;
-    }
-    node->parent = parent;
-    node->left = nullptr;
-    node->right = nullptr;
-    return node;
-}
-
 static void cleanup_failed_node(tree_t* tree, tree_node_t* failed_node, tree_node_t* parent) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     
@@ -110,10 +90,10 @@ static void debug_print_buffer_remainder(tree_t* tree, const char* value_start, 
 
 
 
-static tree_node_t* read_node(tree_t* tree, char** curr_ptr, tree_node_t* parent, bool* error_flag, char* buffer_start, size_t buffer_size) {
-    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+static tree_node_t* read_node(tree_t* tree, char** curr_ptr, tree_node_t* parent, error_code* error, char* buffer_start, size_t buffer_size) {
+    HARD_ASSERT(tree     != nullptr, "tree is nullptr");
     HARD_ASSERT(curr_ptr != nullptr, "curr_ptr is nullptr");
-    HARD_ASSERT(error_flag != nullptr, "error_flag is nullptr");
+    HARD_ASSERT(error    != nullptr, "error is nullptr");
     
     char* curr = skip_whitespace(*curr_ptr);
     
@@ -121,31 +101,30 @@ static tree_node_t* read_node(tree_t* tree, char** curr_ptr, tree_node_t* parent
         curr++;
         curr = skip_whitespace(curr);
         
-        if (*curr != '"') {
-            LOGGER_ERROR("read_node: expected '\"' after '('");
-            *error_flag = true;
+        if (*curr == '(' || *curr == ')') {
+            LOGGER_ERROR("read_node: expected not ( or ) after '('");
+            *error |= ERROR_READ_FILE;
             return nullptr;
         }
-        
-        curr++;
+
+        if (curr* == '\"')
         char* value_start = curr;
-        
         char* value_end = value_start;
-        while (*value_end != '\0' && *value_end != '"') {
+        while (*value_end != '\0' && *value_end != ' ') {
             value_end++;
         }
         
-        if (*value_end != '"') {
-            LOGGER_ERROR("read_node: missing closing '\"'");
-            *error_flag = true;
+        if (*value_end != ' ') {
+            LOGGER_ERROR("read_node: missing closing ' '");
+            *error |= ERROR_READ_FILE;
             return nullptr;
         }
         
         *value_end = '\0';
         
-        tree_node_t* new_node = allocate_node_from_buffer(value_start, parent);
+        tree_node_t* new_node = init_node(value_start, parent);
         if (new_node == nullptr) {
-            *error_flag = true;
+            *error |= ERROR_READ_FILE;
             return nullptr;
         }
         
@@ -156,16 +135,16 @@ static tree_node_t* read_node(tree_t* tree, char** curr_ptr, tree_node_t* parent
         curr = value_end + 1;
         curr = skip_whitespace(curr);
         
-        new_node->left = read_node(tree, &curr, new_node, error_flag, buffer_start, buffer_size);
-        if (*error_flag) {
+        new_node->left = read_node(tree, &curr, new_node, error, buffer_start, buffer_size);
+        if (*error) {
             cleanup_failed_node(tree, new_node, parent);
             return nullptr;
         }
         
         curr = skip_whitespace(curr);
         
-        new_node->right = read_node(tree, &curr, new_node, error_flag, buffer_start, buffer_size);
-        if (*error_flag) {
+        new_node->right = read_node(tree, &curr, new_node, error, buffer_start, buffer_size);
+        if (*error) {
             cleanup_failed_node(tree, new_node, parent);
             return nullptr;
         }
@@ -175,7 +154,7 @@ static tree_node_t* read_node(tree_t* tree, char** curr_ptr, tree_node_t* parent
         if (*curr != ')') {
             LOGGER_ERROR("read_node: expected ')' after children");
             cleanup_failed_node(tree, new_node, parent);
-            *error_flag = true;
+            *error |= ERROR_READ_FILE;
             return nullptr;
         }
         
@@ -191,12 +170,12 @@ static tree_node_t* read_node(tree_t* tree, char** curr_ptr, tree_node_t* parent
             return nullptr;
         }
         LOGGER_ERROR("read_node: expected 'nil'");
-        *error_flag = true;
+        *error |= ERROR_READ_FILE;
         return nullptr;
     }
     
     LOGGER_ERROR("read_node: unexpected character '%c'", *curr);
-    *error_flag = true;
+    *error |= ERROR_READ_FILE;
     return nullptr;
 }
 
@@ -293,7 +272,7 @@ static error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buff
         return ERROR_NO;
     }
     
-    bool parse_error = false;
+    error_code parse_error = 0;
     tree_node_t* root = read_node(tree, &curr, tree->head, &parse_error, buffer, buffer_size);
     if (parse_error) {
         LOGGER_ERROR("parse_tree_from_buffer: failed to parse tree");
@@ -366,7 +345,7 @@ static error_code write_node(FILE* file, tree_node_t* node) {
         return ERROR_OPEN_FILE;
     }
     
-    if (node->value != nullptr) {
+    if (node->type == VARIABLE && node->value.var_name != nullptr) {
         if (fprintf(file, "%s", node->value) < 0) {
             LOGGER_ERROR("write_node: fprintf failed for value");
             return ERROR_OPEN_FILE;
