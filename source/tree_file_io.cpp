@@ -9,6 +9,7 @@
 #include "tree_operations.h"
 #include "tree_verification.h"
 #include "error_handler.h"
+#include "tree_info.h"
 
 static char* skip_whitespace(char* curr) {
     HARD_ASSERT(curr != nullptr, "curr is nullptr");
@@ -18,7 +19,7 @@ static char* skip_whitespace(char* curr) {
     return curr;
 }
 
-static tree_node_t* allocate_node_from_buffer(const char* value, tree_node_t* parent) {
+static tree_node_t* allocate_node_from_buffer(node_value_t value, tree_node_t* parent) {
     HARD_ASSERT(parent != nullptr, "parent is nullptr");
     
     LOGGER_DEBUG("allocate_node_from_buffer: started");
@@ -32,7 +33,6 @@ static tree_node_t* allocate_node_from_buffer(const char* value, tree_node_t* pa
     } else {
         node->value = nullptr;
     }
-    node->can_free = false;
     node->parent = parent;
     node->left = nullptr;
     node->right = nullptr;

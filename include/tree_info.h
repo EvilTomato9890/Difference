@@ -6,10 +6,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "debug_meta.h"
+#include "node_info.h"
 
 struct tree_node_t {
-    char*        value;
-    bool         can_free;
+    node_type_t  type;
+    value_t      value;
     tree_node_t* parent;
     tree_node_t* left;
     tree_node_t* right;

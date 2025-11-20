@@ -2,39 +2,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "asserts.h"
 #include "logger.h"
 #include "tree_operations.h"
 #include "tree_verification.h"
+#include "tree_info.h"
+#include "error_handler.h"
 
+static inline value_t make_union(node_type_t type, ...) {
+    value_t val = {};
 
-static tree_node_t* allocate_node(const char* value, tree_node_t* parent, bool can_free) {
+    va_list ap = {};
+    va_start(ap, type);
+
+    switch (type) {
+        case CONSTANT: {
+            const_val_type constant = va_arg(ap, const_val_type);
+            val.constant = constant;
+            break;
+        }
+        case VARIABLE: {
+            const char* var = va_arg(ap, const char*);
+            val.var_name = var;
+            break;
+        }
+        case FUNCTION: {
+            int func = va_arg(ap, int);
+            val.func = (func_type_t)func;
+            break;
+        }
+        default:
+            LOGGER_ERROR("make_union: unknown node_type_t %d", type);
+            break;
+    }
+    va_end(ap);
+    return val;
+}
+
+static tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_node_t* parent) {
     tree_node_t* node = (tree_node_t*)calloc(1, sizeof(tree_node_t));
     if (node == nullptr) {
         LOGGER_ERROR("allocate_node: calloc failed");
         return nullptr;
     }
-    if(value != nullptr) {
-        if (can_free) {
-            char* owned_value = strdup(value);
-            if (owned_value == nullptr) {
-                free(node);
-                return nullptr;
-            }
-            node->value = owned_value;
-        } else {
-            node->value = (char*)value;
-        }
-    } else {
-        node->value = nullptr;
-    }
-    node->can_free = can_free;
+    node->type   = node_type;
+    node->value  = value;
     node->parent = parent;
-    node->left   = nullptr;
-    node->right  = nullptr;
+    node->left   = left;
+    node->right  = right;
     return node;
 }
+
 
 error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out) {
     error_code error = ERROR_NO;
@@ -49,9 +69,6 @@ error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out) {
     size_t right_removed = 0;
     error |= destroy_node_recursive(node->right, &right_removed);
 
-    if (node->can_free && node->value != nullptr) {
-        free(node->value);
-    }
     free(node);
     removed_local = 1 + left_removed + right_removed;
     if (removed_out != nullptr) *removed_out = removed_local;
@@ -79,13 +96,14 @@ static void detach_from_parent(tree_t* tree, tree_node_t* node) {
 }
 
 error_code tree_init(tree_t* tree ON_DEBUG(, ver_info_t ver_info)) {
-    HARD_ASSERT(tree != nullptr,      "tree pointer is nullptr");
+    HARD_ASSERT(tree != nullptr, "tree pointer is nullptr");
 
     LOGGER_DEBUG("tree_init: started");
+
     tree->root = nullptr;
     tree->size = 0;
     tree->file_buffer = nullptr;
-    tree->head = allocate_node(nullptr, nullptr, false);
+    tree->head = init_node(CONSTANT, make_union(CONSTANT, 0), nullptr, nullptr, nullptr);
     if(!tree->head) {
         LOGGER_ERROR("Tree_init: failed calloc head");
         return ERROR_MEM_ALLOC;
@@ -126,10 +144,8 @@ bool tree_is_empty(const tree_t* tree) {
     return tree->root == nullptr;
 }
 
-tree_node_t* tree_init_root(tree_t* tree, const char* value) {
+tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) {
     HARD_ASSERT(tree   != nullptr,    "tree pointer is nullptr");
-    HARD_ASSERT(value  != nullptr,    "value is nullptr");
-    HARD_ASSERT(value[0] != '\0',     "value is empty");
 
     LOGGER_DEBUG("tree_init_roo: started");
     ON_DEBUG({
@@ -144,7 +160,7 @@ tree_node_t* tree_init_root(tree_t* tree, const char* value) {
         LOGGER_ERROR("tree_init_root: root already exists");
         return nullptr;
     }
-    tree_node_t* node = allocate_node(value, tree->head, true);
+    tree_node_t* node = init_node(node_type, value, tree->head, nullptr, nullptr);
     if (node == nullptr) return nullptr;
     tree->root = node;
     tree->size = 1;
@@ -160,76 +176,46 @@ tree_node_t* tree_init_root(tree_t* tree, const char* value) {
     return node;
 }
 
-tree_node_t* tree_insert_left(tree_t* tree, tree_node_t* parent, const char* value) {
+tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent) {
     HARD_ASSERT(tree   != nullptr,    "tree pointer is nullptr");
     HARD_ASSERT(parent != nullptr,    "parent pointer is nullptr");
-    HARD_ASSERT(value  != nullptr,    "value pointer is nullptr");
-    ON_DEBUG({
-        error_code verify_error = ERROR_NO;
-        verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "Before insert_left(\"%s\")", value ? value : "(null)");
-        if (verify_error != ERROR_NO) return nullptr;
-    })
+
     if (parent->left != nullptr) {
         LOGGER_ERROR("tree_insert_left: left child already exists");
         return nullptr;
     }
-    tree_node_t* node = allocate_node(value, parent, true);
+    tree_node_t* node = init_node(node_type, value, parent, nullptr, nullptr);
     if (node == nullptr) return nullptr;
     parent->left = node;
     tree->size += 1;
-    ON_DEBUG({
-        error_code verify_error = ERROR_NO;
-        verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "After insert_left");
-        (void)verify_error;
-    })
     return node;
 }
 
-tree_node_t* tree_insert_right(tree_t* tree, tree_node_t* parent, const char* value) {
+tree_node_t* tree_insert_right(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent) {
     HARD_ASSERT(tree   != nullptr,    "tree pointer is nullptr");
     HARD_ASSERT(parent != nullptr,    "parent pointer is nullptr");
-    HARD_ASSERT(value  != nullptr,    "value pointer is nullptr");
-    ON_DEBUG({
-        error_code verify_error = ERROR_NO;
-        verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "Before insert_right(\"%s\")", value ? value : "(null)");
-        if (verify_error != ERROR_NO) return nullptr;
-    })
+
     if (parent->right != nullptr) {
         LOGGER_ERROR("tree_insert_right: right child already exists");
         return nullptr;
     }
-    tree_node_t* node = allocate_node(value, parent, true);
+    tree_node_t* node = init_node(node_type, value, parent, nullptr, nullptr);
     if (node == nullptr) return nullptr;
     parent->right = node;
     tree->size += 1;
-    ON_DEBUG({
-        error_code verify_error = ERROR_NO;
-        verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "After insert_right");
-        (void)verify_error;
-    })
+
     return node;
 }
 
 
 
-error_code tree_replace_value(tree_node_t* node, const char* value) {
+error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t value) {
     HARD_ASSERT(node     != nullptr,  "node pointer is nullptr");
-    HARD_ASSERT(value    != nullptr,  "value is nullptr");
-    HARD_ASSERT(value[0] != '\0',     "value is empty");
     
     LOGGER_DEBUG("tree_replace_value: started");
     
-    if (node->can_free && node->value != nullptr) {
-        free(node->value);
-    }
-    
-    char* newv = strdup(value);
-    if (newv == nullptr) {
-        LOGGER_ERROR("tree_replace_value: strdup failed");
-        return ERROR_MEM_ALLOC;
-    }
-    node->value = newv;
-    node->can_free = true;
+    node->type  = node_type;
+    node->value = value;
     return ERROR_NO;
 }
 
