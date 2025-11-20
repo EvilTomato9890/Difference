@@ -258,13 +258,21 @@ error_code tree_verify(const tree_t* tree,
     }
     return error;
 }
-
+static const char* node_type_to_string(node_type_t type) {
+    switch (type) {
+        case FUNCTION: return "FUNCTION";
+        case CONSTANT: return "CONSTANT";
+        case VARIABLE: return "VARIABLE";
+        default: return "UNKNOWN";
+    }
+}
 static error_code write_html(const tree_t* tree,
                              ver_info_t ver_info_called,
                              int idx, const char* comment,
                              const char* svg_path, int is_visual) {
     if (!tree || !tree->dump_file) return ERROR_NULL_ARG;
     FILE* html = tree->dump_file;
+    
 
     time_t t = time(nullptr);
     char ts[BUFFER_SIZE_TIME] = {};
@@ -299,7 +307,7 @@ static error_code write_html(const tree_t* tree,
     fprintf(html, "func: %s\n", ver_info_called.func);
     fprintf(html, "line: %d\n", ver_info_called.line);
 
-    fprintf(html, "\nIDX   NODE PTR        PARENT PTR      LEFT PTR        RIGHT PTR       VALUE\n");
+    fprintf(html, "\nIDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE\n");
     fprintf(html, "----  --------------  --------------  --------------  --------------  --------------------\n");
 
     const tree_node_t** nodes = nullptr;
@@ -315,9 +323,10 @@ static error_code write_html(const tree_t* tree,
         const tree_node_t* node = nodes[i];
         char  str_buf[MAX_STRLEN_VALUE] = {};
         const char* value = node_val_to_str(node, str_buf, MAX_STRLEN_VALUE);
-        fprintf(html, "%-4zu  %-14p  %-14p  %-14p  %-14p  %s\n",
+        const char* type_str = node ? node_type_to_string(node->type) : "NULL";
+        fprintf(html, "%-4zu  %-14p  %-14s  %-14p  %-14p  %s\n",
                 i, node,
-                (node ? node->parent : nullptr),
+                type_str,
                 (node ? node->left   : nullptr),
                 (node ? node->right  : nullptr),
                 value);
@@ -339,6 +348,7 @@ error_code tree_dump(const tree_t* tree,
                      ver_info_t ver_info,
                      bool is_visual,
                      const char* fmt, ...) {
+    LOGGER_DEBUG("Dump started");
     if (!tree) return ERROR_NULL_ARG;
     static int dump_idx = 0;
     system("mkdir -p dumps");
@@ -362,7 +372,6 @@ error_code tree_dump(const tree_t* tree,
     } else {
         LOGGER_DEBUG("tree_dump: SVG not generated: is_visual=%d, root=%p", is_visual, tree->root);
     }
-
     error_code error = write_html(tree, ver_info, dump_idx, comment, svg_path, is_visual);
     LOGGER_INFO("Dump #%d written%s%s", dump_idx,
                 svg_path[0] ? " with SVG: " : "",

@@ -6,7 +6,7 @@
 
 
 error_code tree_init(tree_t* tree ON_DEBUG(, ver_info_t ver_info));
-tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* parent, tree_node_t* left, tree_node_t* right);
+tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right);
 
 error_code tree_destroy(tree_t* tree);
 
@@ -17,7 +17,6 @@ tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value
 tree_node_t* tree_insert_right(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent);
 
 error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t value);
-error_code tree_remove_subtree(tree_t* tree, tree_node_t* subtree_root);
 
 error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out);
 

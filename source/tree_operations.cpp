@@ -42,7 +42,7 @@
     return val;
 }
 
-tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* parent, tree_node_t* left, tree_node_t* right) {
+tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right) {
     tree_node_t* node = (tree_node_t*)calloc(1, sizeof(tree_node_t));
     if (node == nullptr) {
         LOGGER_ERROR("allocate_node: calloc failed");
@@ -50,7 +50,6 @@ tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* parent
     }
     node->type   = node_type;
     node->value  = value;
-    node->parent = parent;
     node->left   = left;
     node->right  = right;
     return node;
@@ -75,25 +74,6 @@ error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out) {
     return error;
 }
 
-static void detach_from_parent(tree_t* tree, tree_node_t* node) {
-    HARD_ASSERT(tree != nullptr, "tree is nullptr");
-
-    LOGGER_DEBUG("detach: started");
-    if (node == nullptr) return;
-    tree_node_t* parent = node->parent;
-    if (parent == nullptr) {
-        tree->root = nullptr;
-        return;
-    }
-    if (parent->left == node) {
-        parent->left = nullptr;
-    } else if (parent->right == node) {
-        parent->right = nullptr;
-    } else {
-        LOGGER_WARNING("detach_from_parent: node %p not attached to parent %p",
-                       (void*)node, (void*)parent);
-    }
-}
 
 error_code tree_init(tree_t* tree ON_DEBUG(, ver_info_t ver_info)) {
     HARD_ASSERT(tree != nullptr, "tree pointer is nullptr");
@@ -103,7 +83,7 @@ error_code tree_init(tree_t* tree ON_DEBUG(, ver_info_t ver_info)) {
     tree->root = nullptr;
     tree->size = 0;
     tree->file_buffer = nullptr;
-    tree->head = init_node(CONSTANT, make_union(CONSTANT, 0), nullptr, nullptr, nullptr);
+    tree->head = init_node(CONSTANT, make_union(CONSTANT, 0), nullptr, nullptr);
     if(!tree->head) {
         LOGGER_ERROR("Tree_init: failed calloc head");
         return ERROR_MEM_ALLOC;
@@ -135,7 +115,6 @@ error_code tree_destroy(tree_t* tree) {
         free(tree->file_buffer);
         tree->file_buffer = nullptr;
     }
-    
     return error;
 }
 
@@ -162,7 +141,7 @@ tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) 
         LOGGER_ERROR("tree_init_root: root already exists");
         return nullptr;
     }
-    tree_node_t* node = init_node(node_type, value, tree->head, nullptr, nullptr);
+    tree_node_t* node = init_node(node_type, value, nullptr, nullptr);
     if (node == nullptr) return nullptr;
     tree->root = node;
     tree->size = 1;
@@ -186,7 +165,7 @@ tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value
         LOGGER_ERROR("tree_insert_left: left child already exists");
         return nullptr;
     }
-    tree_node_t* node = init_node(node_type, value, parent, nullptr, nullptr);
+    tree_node_t* node = init_node(node_type, value, nullptr, nullptr);
     if (node == nullptr) return nullptr;
     parent->left = node;
     tree->size += 1;
@@ -201,7 +180,7 @@ tree_node_t* tree_insert_right(tree_t* tree, node_type_t node_type, value_t valu
         LOGGER_ERROR("tree_insert_right: right child already exists");
         return nullptr;
     }
-    tree_node_t* node = init_node(node_type, value, parent, nullptr, nullptr);
+    tree_node_t* node = init_node(node_type, value, nullptr, nullptr);
     if (node == nullptr) return nullptr;
     parent->right = node;
     tree->size += 1;
@@ -217,31 +196,6 @@ error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t 
     node->type  = node_type;
     node->value = value;
     return ERROR_NO;
-}
-
-error_code tree_remove_subtree(tree_t* tree, tree_node_t* subtree_root) {
-    HARD_ASSERT(tree         != nullptr, "tree pointer is nullptr");
-    HARD_ASSERT(subtree_root != nullptr, "subtree_root is nullptr");
-    
-    LOGGER_DEBUG("tree_remove_subtree: started");
-    
-    ON_DEBUG({
-        error_code verify_error = ERROR_NO;
-        verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "Before remove_subtree(%p)", (void*)subtree_root);
-        if (verify_error != ERROR_NO) return verify_error;
-    })
-    detach_from_parent(tree, subtree_root);
-    size_t removed = 0;
-    error_code error = ERROR_NO;
-    error |= destroy_node_recursive(subtree_root, &removed);
-    if (tree->size >= removed) tree->size -= removed;
-    else tree->size = 0;
-    ON_DEBUG({
-        error_code verify_error = ERROR_NO;
-        verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "After remove_subtree");
-        (void)verify_error;
-    })
-    return error;
 }
 
 
