@@ -1,8 +1,9 @@
 #include <stddef.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <errno.h>
 
 #include "asserts.h"
 #include "logger.h"
@@ -90,94 +91,199 @@ static void debug_print_buffer_remainder(tree_t* tree, const char* value_start, 
 
 
 
-static tree_node_t* read_node(tree_t* tree, char** curr_ptr, tree_node_t* parent, error_code* error, char* buffer_start, size_t buffer_size) {
-    HARD_ASSERT(tree     != nullptr, "tree is nullptr");
-    HARD_ASSERT(curr_ptr != nullptr, "curr_ptr is nullptr");
-    HARD_ASSERT(error    != nullptr, "error is nullptr");
+
+
+static int is_integer_token(const char* text_ptr) {
+    if (text_ptr == NULL || *text_ptr == '\0') {
+        return 0;
+    }
+
+    const unsigned char* scan_pointer = (const unsigned char*)text_ptr;
+    while (*scan_pointer != '\0') {
+        if (!isdigit(*scan_pointer)) {
+            return 0;
+        }
+        scan_pointer++;
+    }
+    return 1;
+}
+
+static int try_parse_node_value(char** current_ptr_ref, node_type_t* node_type_ptr, value_t* node_value_ptr,
+                            char** value_start_ptr_ref, char** value_end_ptr_ref,
+                            error_code* error_code_ptr)
+{
+    HARD_ASSERT(current_ptr_ref      != nullptr, "current_ptr_ref is nullptr");
+    HARD_ASSERT(node_type_ptr        != nullptr, "node_type_ptr is nullptr");
+    HARD_ASSERT(node_value_ptr       != nullptr, "node_value_ptr is nullptr");
+    HARD_ASSERT(value_start_ptr_ref  != nullptr, "value_start_ptr_ref is nullptr");
+    HARD_ASSERT(value_end_ptr_ref    != nullptr, "value_end_ptr_ref is nullptr");
+    HARD_ASSERT(error_code_ptr       != nullptr, "error_code_ptr is nullptr");
+
+    char* current_ptr     = *current_ptr_ref;
+    char* value_start_ptr = nullptr;
+    char* value_end_ptr   = nullptr;
+
+    if (*current_ptr == '\"') {
+        current_ptr++;
+        value_start_ptr = current_ptr;
+        char* scan_pointer = current_ptr;
+        while (*scan_pointer != '\0' && *scan_pointer != '\"') {
+            scan_pointer++;
+        }
+        if (*scan_pointer != '\"') {
+            LOGGER_ERROR("read_node: missing closing '\"' for variable");
+            *error_code_ptr |= ERROR_READ_FILE;
+            return 0;
+        }
+        *scan_pointer = '\0';
+        value_end_ptr = scan_pointer;
+
+        *node_type_ptr = VARIABLE;
+        node_value_ptr->var_name = value_start_ptr;
+
+        current_ptr = scan_pointer + 1;
+    } else {
+        value_start_ptr = current_ptr;
+        char* scan_pointer = current_ptr;
+
+        while (*scan_pointer != '\0' &&
+               !isspace((unsigned char)*scan_pointer)) {
+            scan_pointer++;
+        }
+
+        value_end_ptr = scan_pointer;
+        char delimiter_char = *value_end_ptr;
+        *value_end_ptr = '\0';
+
+        int is_number_flag = is_integer_token(value_start_ptr);
+        if (is_number_flag) {
+            errno = 0;
+            char* number_end_ptr = nullptr;
+            unsigned long long numeric_val = strtoull(value_start_ptr, &number_end_ptr, 10);
+            if (errno != 0 || number_end_ptr == value_start_ptr || *number_end_ptr != '\0') {
+                LOGGER_ERROR("read_node: invalid constant '%s'", value_start_ptr);
+                *error_code_ptr |= ERROR_READ_FILE;
+                return 0;
+            }
+            *node_type_ptr = CONSTANT;
+            node_value_ptr->constant = (const_val_type)numeric_val;
+        } else {
+            *node_type_ptr = FUNCTION;
+            node_value_ptr->func = get_op_code(value_start_ptr);
+        }
+
+        if (delimiter_char == '\0') {
+            current_ptr = value_end_ptr;
+        } else {
+            current_ptr = value_end_ptr + 1;
+        }
+    }
+
+    *current_ptr_ref     = current_ptr;
+    *value_start_ptr_ref = value_start_ptr;
+    *value_end_ptr_ref   = value_end_ptr;
+    return 1;
+}
+
+static tree_node_t* read_node(tree_t* tree_ptr,
+                              char** current_ptr_ref,
+                              tree_node_t* parent_node_ptr,
+                              error_code* error_code_ptr,
+                              char* buffer_start_ptr,
+                              size_t buffer_size_val)
+{
+    HARD_ASSERT(tree_ptr        != nullptr, "tree_ptr is nullptr");
+    HARD_ASSERT(current_ptr_ref != nullptr, "current_ptr_ref is nullptr");
+    HARD_ASSERT(error_code_ptr  != nullptr, "error_code_ptr is nullptr");
     
-    char* curr = skip_whitespace(*curr_ptr);
-    
-    if (*curr == '(') {
-        curr++;
-        curr = skip_whitespace(curr);
-        
-        if (*curr == '(' || *curr == ')') {
-            LOGGER_ERROR("read_node: expected not ( or ) after '('");
-            *error |= ERROR_READ_FILE;
+    char* current_ptr = skip_whitespace(*current_ptr_ref);
+
+    if (*current_ptr == '(') {
+        current_ptr++;
+        current_ptr = skip_whitespace(current_ptr);
+
+        if (*current_ptr == '(' || *current_ptr == ')' || *current_ptr == '\0') {
+            LOGGER_ERROR("read_node: expected token after '('");
+            *error_code_ptr |= ERROR_READ_FILE;
             return nullptr;
         }
 
-        if (curr* == '\"')
-        char* value_start = curr;
-        char* value_end = value_start;
-        while (*value_end != '\0' && *value_end != ' ') {
-            value_end++;
-        }
-        
-        if (*value_end != ' ') {
-            LOGGER_ERROR("read_node: missing closing ' '");
-            *error |= ERROR_READ_FILE;
+        node_type_t node_type  = {};
+        value_t     node_value = {};
+
+        char* value_start_ptr = nullptr;
+        char* value_end_ptr   = nullptr;
+
+        if (!try_parse_node_value(&current_ptr, &node_type, &node_value,
+                              &value_start_ptr, &value_end_ptr,
+                              error_code_ptr)) {
             return nullptr;
         }
-        
-        *value_end = '\0';
-        
-        tree_node_t* new_node = init_node(value_start, parent);
-        if (new_node == nullptr) {
-            *error |= ERROR_READ_FILE;
+
+        tree_node_t* new_node_ptr = init_node(node_type, node_value, parent_node_ptr, nullptr, nullptr);
+        if (new_node_ptr == nullptr) {
+            *error_code_ptr |= ERROR_READ_FILE;
             return nullptr;
         }
-        
-        attach_node_to_parent(tree, new_node, parent);
-        
-        debug_print_buffer_remainder(tree, value_start, value_end, buffer_start, buffer_size);
-        
-        curr = value_end + 1;
-        curr = skip_whitespace(curr);
-        
-        new_node->left = read_node(tree, &curr, new_node, error, buffer_start, buffer_size);
-        if (*error) {
-            cleanup_failed_node(tree, new_node, parent);
+
+        attach_node_to_parent(tree_ptr, new_node_ptr, parent_node_ptr);
+
+        if (value_start_ptr != nullptr && value_end_ptr != nullptr) {
+            debug_print_buffer_remainder(tree_ptr,
+                                         value_start_ptr,
+                                         value_end_ptr,
+                                         buffer_start_ptr,
+                                         buffer_size_val);
+        }
+
+        current_ptr = skip_whitespace(current_ptr);
+        new_node_ptr->left = read_node(tree_ptr, &current_ptr, new_node_ptr, error_code_ptr, buffer_start_ptr, buffer_size_val);
+        if (*error_code_ptr) {
+            cleanup_failed_node(tree_ptr, new_node_ptr, parent_node_ptr);
             return nullptr;
         }
-        
-        curr = skip_whitespace(curr);
-        
-        new_node->right = read_node(tree, &curr, new_node, error, buffer_start, buffer_size);
-        if (*error) {
-            cleanup_failed_node(tree, new_node, parent);
+
+        current_ptr = skip_whitespace(current_ptr);
+        new_node_ptr->right = read_node(tree_ptr, &current_ptr, new_node_ptr, error_code_ptr, buffer_start_ptr, buffer_size_val);
+        if (*error_code_ptr) {
+            cleanup_failed_node(tree_ptr, new_node_ptr, parent_node_ptr);
             return nullptr;
         }
-        
-        curr = skip_whitespace(curr);
-        
-        if (*curr != ')') {
+
+        current_ptr = skip_whitespace(current_ptr);
+        if (*current_ptr != ')') {
             LOGGER_ERROR("read_node: expected ')' after children");
-            cleanup_failed_node(tree, new_node, parent);
-            *error |= ERROR_READ_FILE;
+            cleanup_failed_node(tree_ptr, new_node_ptr, parent_node_ptr);
+            *error_code_ptr |= ERROR_READ_FILE;
             return nullptr;
         }
-        
-        curr++;
-        *curr_ptr = curr;
-        return new_node;
+
+        current_ptr++;
+        *current_ptr_ref = current_ptr;
+        return new_node_ptr;
     }
-    
-    if (*curr == 'n') {
-        if (strncmp(curr, "nil", 3) == 0) {
-            curr += 3;
-            *curr_ptr = curr;
+
+    if (*current_ptr == 'n') {
+        if (strncmp(current_ptr, "nil", 3) == 0) {
+            current_ptr += 3;
+            *current_ptr_ref = current_ptr;
+            return nullptr;
+        }
+        if (strncmp(current_ptr, "nill", 4) == 0) {
+            current_ptr += 4;
+            *current_ptr_ref = current_ptr;
             return nullptr;
         }
         LOGGER_ERROR("read_node: expected 'nil'");
-        *error |= ERROR_READ_FILE;
+        *error_code_ptr |= ERROR_READ_FILE;
         return nullptr;
     }
-    
-    LOGGER_ERROR("read_node: unexpected character '%c'", *curr);
-    *error |= ERROR_READ_FILE;
+
+    LOGGER_ERROR("read_node: unexpected character '%c'", *current_ptr);
+    *error_code_ptr |= ERROR_READ_FILE;
     return nullptr;
 }
+
 
 static size_t count_nodes(tree_node_t* node) {
     if (node == nullptr) return 0;

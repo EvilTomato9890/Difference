@@ -6,6 +6,8 @@
 
 
 error_code tree_init(tree_t* tree ON_DEBUG(, ver_info_t ver_info));
+tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_node_t* parent);
+
 error_code tree_destroy(tree_t* tree);
 
 bool tree_is_empty(const tree_t* tree);

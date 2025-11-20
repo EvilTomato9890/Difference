@@ -41,7 +41,7 @@ static inline value_t make_union(node_type_t type, ...) {
     return val;
 }
 
-static tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_node_t* parent) {
+tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_node_t* parent) {
     tree_node_t* node = (tree_node_t*)calloc(1, sizeof(tree_node_t));
     if (node == nullptr) {
         LOGGER_ERROR("allocate_node: calloc failed");
