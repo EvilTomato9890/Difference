@@ -479,23 +479,30 @@ static error_code write_node(FILE* file, tree_node_t* node) {
         return ERROR_NO;
     }
     
-    if (fprintf(file, "(\"") < 0) {
+    if (fprintf(file, "(") < 0) {
         LOGGER_ERROR("write_node: fprintf failed for opening");
         return ERROR_OPEN_FILE;
     }
     
     if (node->type == VARIABLE && node->value.var_name != nullptr) {
-        if (fprintf(file, "%s", node->value) < 0) {
+        if (fprintf(file, "\"%s\"", node->value) < 0) {
             LOGGER_ERROR("write_node: fprintf failed for value");
             return ERROR_OPEN_FILE;
         }
     }
-    
-    if (fprintf(file, "\" ") < 0) {
-        LOGGER_ERROR("write_node: fprintf failed for closing quote");
-        return ERROR_OPEN_FILE;
+    if(node->type == CONSTANT) {
+        if (fprintf(file, "%ld", node->value) < 0) {
+            LOGGER_ERROR("write_node: fprintf failed for value");
+            return ERROR_OPEN_FILE;
+        }
     }
-    
+    if(node->type == FUNCTION) {
+        if (fprintf(file, stringify(node->value)) < 0) {
+            LOGGER_ERROR("write_node: fprintf failed for value");
+            return ERROR_OPEN_FILE;
+        }
+    }
+
     error_code error = write_node(file, node->left);
     if (error != ERROR_NO) return error;
     
