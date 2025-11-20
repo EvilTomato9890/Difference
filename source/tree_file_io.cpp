@@ -19,14 +19,14 @@ struct func_struct {
     const char* func_name;
 };
 
-#define HANDLE_COMMAND(op_code, str_name) \
-    {op_code, str_name},
+#define HANDLE_FUNC(op_code, str_name) \
+    {op_code, #str_name},
 
 static func_struct op_codes[] = {
     #include "copy_past_file"
 };
 
-#undef HANDLE_COMMAND
+#undef HANDLE_FUNC
 
 const int op_codes_num = sizeof(op_codes) / sizeof(func_struct);
 
@@ -35,7 +35,9 @@ const int op_codes_num = sizeof(op_codes) / sizeof(func_struct);
 static func_type_t get_op_code(const char* func_name, error_code* error) {
     HARD_ASSERT(func_name != nullptr, "func_name nullptr");
 
+    LOGGER_DEBUG("A: %d", op_codes_num);
     for(size_t i = 0; i < op_codes_num; i++) {
+        LOGGER_DEBUG("AA: %d и %s", op_codes[i].func_type, op_codes[i].func_name);
         if(strcmp(func_name, op_codes[i].func_name) == 0) return op_codes[i].func_type;
     }
 
@@ -201,7 +203,8 @@ static int try_parse_node_value(char** current_ptr_ref, node_type_t* node_type_p
             *node_type_ptr = FUNCTION;
             node_value_ptr->func = get_op_code(value_start_ptr, error_code_ptr);
             if(errno != 0) {
-                LOGGER_ERROR("AAA");
+                LOGGER_ERROR("try_parse_node_value: invalid function '%s'", value_start_ptr);
+                *error_code_ptr |= ERROR_READ_FILE;
                 return 0;
             }
         }
@@ -351,6 +354,8 @@ static error_code read_file_to_buffer(const char* filename, char** buffer_out, s
     HARD_ASSERT(buffer_out != nullptr, "buffer_out is nullptr");
     HARD_ASSERT(buffer_size_out != nullptr, "buffer_size_out is nullptr");
     
+    LOGGER_DEBUG("read_file_to_buffer: started");
+
     FILE* file = fopen(filename, "r");
     if (file == nullptr) {
         LOGGER_ERROR("read_file_to_buffer: failed to open file '%s'", filename);
@@ -410,9 +415,12 @@ static error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buff
         LOGGER_DEBUG("parse_tree_from_buffer: empty file, returning empty tree");
         return ERROR_NO;
     }
+
+    
     
     error_code parse_error = 0;
     tree_node_t* root = read_node(tree, &curr, tree->head, &parse_error, buffer, buffer_size);
+
     if (parse_error) {
         LOGGER_ERROR("parse_tree_from_buffer: failed to parse tree");
         return ERROR_INVALID_STRUCTURE;
@@ -458,7 +466,7 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
     if (error != ERROR_NO) {
         return error;
     }
-    
+
     error = parse_tree_from_buffer(tree, buffer, buffer_size);
     if (error != ERROR_NO) {
         return error;
@@ -468,53 +476,68 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
     return ERROR_NO;
 }
 
-static error_code write_node(FILE* file, tree_node_t* node) {
-    HARD_ASSERT(file != nullptr, "file is nullptr");
+const char* get_func_name_by_type(func_type_t func_type_value) {
+    for (size_t index_value = 0; index_value < (size_t)op_codes_num; ++index_value) {
+        if (op_codes[index_value].func_type == func_type_value) {
+            return op_codes[index_value].func_name;
+        }
+    }
+
+    LOGGER_ERROR("write_node: unknown func_type %d", (int)func_type_value);
+    return "";
+}
+
+static error_code write_node(FILE* file_ptr, tree_node_t* node_ptr) {
+    HARD_ASSERT(file_ptr != nullptr, "file is nullptr");
     
-    if (node == nullptr) {
-        if (fprintf(file, "nil") < 0) {
+    if (node_ptr == nullptr) {
+        if (fprintf(file_ptr, "nil") < 0) {
             LOGGER_ERROR("write_node: fprintf failed for nil");
             return ERROR_OPEN_FILE;
         }
         return ERROR_NO;
     }
     
-    if (fprintf(file, "(") < 0) {
+    if (fprintf(file_ptr, "(") < 0) {
         LOGGER_ERROR("write_node: fprintf failed for opening");
         return ERROR_OPEN_FILE;
     }
     
-    if (node->type == VARIABLE && node->value.var_name != nullptr) {
-        if (fprintf(file, "\"%s\"", node->value) < 0) {
-            LOGGER_ERROR("write_node: fprintf failed for value");
+    if (node_ptr->type == VARIABLE && node_ptr->value.var_name != nullptr) {
+        if (fprintf(file_ptr, "\"%s\"", node_ptr->value.var_name) < 0) {
+            LOGGER_ERROR("write_node: fprintf failed for variable");
             return ERROR_OPEN_FILE;
         }
-    }
-    if(node->type == CONSTANT) {
-        if (fprintf(file, "%ld", node->value) < 0) {
-            LOGGER_ERROR("write_node: fprintf failed for value");
+    } else if (node_ptr->type == CONSTANT) {
+        if (fprintf(file_ptr, "%llu", (unsigned long long)node_ptr->value.constant) < 0) {
+            LOGGER_ERROR("write_node: fprintf failed for constant");
             return ERROR_OPEN_FILE;
         }
-    }
-    if(node->type == FUNCTION) {
-        if (fprintf(file, stringify(node->value)) < 0) {
-            LOGGER_ERROR("write_node: fprintf failed for value");
+    } else if (node_ptr->type == FUNCTION) {
+        const char* func_name_ptr = get_func_name_by_type(node_ptr->value.func);
+        if (fprintf(file_ptr, "%s", func_name_ptr) < 0) {
+            LOGGER_ERROR("write_node: fprintf failed for function");
             return ERROR_OPEN_FILE;
         }
     }
 
-    error_code error = write_node(file, node->left);
-    if (error != ERROR_NO) return error;
+    if (fprintf(file_ptr, " ") < 0) {
+        LOGGER_ERROR("write_node: fprintf failed for space after value");
+        return ERROR_OPEN_FILE;
+    }
+
+    error_code error_value = write_node(file_ptr, node_ptr->left);
+    if (error_value != ERROR_NO) return error_value;
     
-    if (fprintf(file, " ") < 0) {
-        LOGGER_ERROR("write_node: fprintf failed for space");
+    if (fprintf(file_ptr, " ") < 0) {
+        LOGGER_ERROR("write_node: fprintf failed for space between children");
         return ERROR_OPEN_FILE;
     }
     
-    error = write_node(file, node->right);
-    if (error != ERROR_NO) return error;
+    error_value = write_node(file_ptr, node_ptr->right);
+    if (error_value != ERROR_NO) return error_value;
     
-    if (fprintf(file, ")") < 0) {
+    if (fprintf(file_ptr, ")") < 0) {
         LOGGER_ERROR("write_node: fprintf failed for closing paren");
         return ERROR_OPEN_FILE;
     }
