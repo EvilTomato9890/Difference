@@ -2,7 +2,6 @@
 #include "logger.h"
 #include "asserts.h"
 #include "tree_operations.h"
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
