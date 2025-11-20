@@ -12,7 +12,7 @@
 #include "error_handler.h"
 //================================================================================
 
-inline value_t make_union(node_type_t type, ...) {
+value_t make_union(node_type_t type, ...) {
     value_t val = {};
 
     va_list ap = {};
@@ -197,5 +197,3 @@ error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t 
     node->value = value;
     return ERROR_NO;
 }
-
-

@@ -3,7 +3,7 @@
 
 #include "tree_info.h"
 #include "error_handler.h"
-
+#include "asserts.h"
 
 error_code tree_init(tree_t* tree ON_DEBUG(, ver_info_t ver_info));
 tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right);
@@ -30,6 +30,9 @@ error_code tree_read_from_file(tree_t* tree, const char* filename);
 error_code tree_write_to_file(const tree_t* tree, const char* filename);
 
 const char* get_func_name_by_type(func_type_t func_type_value);
-inline value_t make_union(node_type_t type, ...);
-
+value_t make_union(node_type_t type, ...);
+inline tree_node_t* clone_node(const tree_node_t* node) {
+    HARD_ASSERT(node != nullptr, "node is nullptr");
+    return init_node(node->type, node->value, node->left, node->right);
+}
 #endif
