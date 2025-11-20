@@ -11,6 +11,7 @@
 #include "error_handler.h"
 #include "logger.h"
 #include "DSL.h"
+#include "differentiator.h"
 //================================================================================
 
 static void test_read_empty_tree() {
@@ -133,9 +134,20 @@ static void test_read_complex_tree() {
     LOGGER_DEBUG("AAAA1: %p", tree.root);
     error = tree_dump(&tree, VER_INIT, true, "Test dump tree with nodes");
 
-    #ifdef VERIFY_DEBUG
+
+
+    tree_t tree_diff = {};
+    error = tree_init(&tree_diff ON_DEBUG(, VER_INIT));
+    ON_DEBUG({
+    tree_diff.dump_file = fopen("test_dump_nodes.html", "a");
+    })
+    ON_DEBUG(LOGGER_ERROR("ERRORaaa: %p", tree_diff.dump_file);)
+    tree_diff.root = get_diff(tree.root);
+    tree_diff.head = tree_diff.root;
+    
+    error = tree_dump(&tree_diff, VER_INIT, true, "After diff");
+    
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
-    #endif
     
     #ifdef VERIFY_DEBUG
     if (tree.dump_file != nullptr) {

@@ -1,11 +1,25 @@
 digraph T{
   node [fontname="Fira Mono",shape=record,style="filled,rounded",fontsize=12];
   graph [splines=true, nodesep=0.6, ranksep=0.6];
-  node_0x5c7c0a196710[shape=record,label="{ {ptr: 0x5c7c0a196710} | {val: 0} | { prev: (nil) | next: 0x5c7c0a196920 } }",color="#6b8fd6",fillcolor="#e9f2ff"];
-  node_0x5c7c0a196920[shape=record,label="{ {ptr: 0x5c7c0a196920} | {val: +} | { prev: 0x5c7c0a196a70 | next: 0x5c7c0a196950 } }",color="#5aa99b",fillcolor="#e9fbf5"];
-  node_0x5c7c0a196a70[shape=record,label="{ {ptr: 0x5c7c0a196a70} | {val: 10} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
-  node_0x5c7c0a196950[shape=record,label="{ {ptr: 0x5c7c0a196950} | {val: y} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
-  node_0x5c7c0a196710 -> node_0x5c7c0a196920 [color="#999999"];
-  node_0x5c7c0a196920 -> node_0x5c7c0a196a70 [color="#999999"];
-  node_0x5c7c0a196920 -> node_0x5c7c0a196950 [color="#999999"];
+  node_0x58059bc45080[shape=record,label="{ {ptr: 0x58059bc45080} | {val: +} | { prev: 0x58059bc45050 | next: 0x58059bc44f60 } }",color="#6b8fd6",fillcolor="#e9f2ff"];
+  node_0x58059bc45050[shape=record,label="{ {ptr: 0x58059bc45050} | {val: *} | { prev: 0x58059bc45020 | next: 0x58059bc44f00 } }",color="#8e6bd6",fillcolor="#f1eafd"];
+  node_0x58059bc45020[shape=record,label="{ {ptr: 0x58059bc45020} | {val: *} | { prev: 0x58059bc44ff0 | next: 0x58059bc44fc0 } }",color="#8e6bd6",fillcolor="#f1eafd"];
+  node_0x58059bc44ff0[shape=record,label="{ {ptr: 0x58059bc44ff0} | {val: cos} | { prev: 0x58059bc44f90 | next: (nil) } }",color="#8e6bd6",fillcolor="#f1eafd"];
+  node_0x58059bc44f90[shape=record,label="{ {ptr: 0x58059bc44f90} | {val: x} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
+  node_0x58059bc44fc0[shape=record,label="{ {ptr: 0x58059bc44fc0} | {val: 1} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
+  node_0x58059bc44f00[shape=record,label="{ {ptr: 0x58059bc44f00} | {val: 1} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
+  node_0x58059bc44f60[shape=record,label="{ {ptr: 0x58059bc44f60} | {val: *} | { prev: 0x58059bc44ed0 | next: 0x58059bc44f30 } }",color="#8e6bd6",fillcolor="#f1eafd"];
+  node_0x58059bc44ed0[shape=record,label="{ {ptr: 0x58059bc44ed0} | {val: sin} | { prev: 0x58059bc44b80 | next: (nil) } }",color="#8e6bd6",fillcolor="#f1eafd"];
+  node_0x58059bc44b80[shape=record,label="{ {ptr: 0x58059bc44b80} | {val: x} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
+  node_0x58059bc44f30[shape=record,label="{ {ptr: 0x58059bc44f30} | {val: 0} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
+  node_0x58059bc45080 -> node_0x58059bc45050 [color="#999999"];
+  node_0x58059bc45080 -> node_0x58059bc44f60 [color="#999999"];
+  node_0x58059bc45050 -> node_0x58059bc45020 [color="#999999"];
+  node_0x58059bc45050 -> node_0x58059bc44f00 [color="#999999"];
+  node_0x58059bc45020 -> node_0x58059bc44ff0 [color="#999999"];
+  node_0x58059bc45020 -> node_0x58059bc44fc0 [color="#999999"];
+  node_0x58059bc44ff0 -> node_0x58059bc44f90 [color="#999999"];
+  node_0x58059bc44f60 -> node_0x58059bc44ed0 [color="#999999"];
+  node_0x58059bc44f60 -> node_0x58059bc44f30 [color="#999999"];
+  node_0x58059bc44ed0 -> node_0x58059bc44b80 [color="#999999"];
 }

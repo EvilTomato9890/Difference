@@ -1,0 +1,13 @@
+digraph T{
+  node [fontname="Fira Mono",shape=record,style="filled,rounded",fontsize=12];
+  graph [splines=true, nodesep=0.6, ranksep=0.6];
+  node_0x58059bc479a0[shape=record,label="{ {ptr: 0x58059bc479a0} | {val: 0} | { prev: 0x58059bc44920 | next: (nil) } }",color="#6b8fd6",fillcolor="#e9f2ff"];
+  node_0x58059bc44920[shape=record,label="{ {ptr: 0x58059bc44920} | {val: +} | { prev: 0x58059bc44b60 | next: 0x58059bc44a50 } }",color="#5aa99b",fillcolor="#e9fbf5"];
+  node_0x58059bc44b60[shape=record,label="{ {ptr: 0x58059bc44b60} | {val: sin} | { prev: 0x58059bc44710 | next: (nil) } }",color="#8e6bd6",fillcolor="#f1eafd"];
+  node_0x58059bc44710[shape=record,label="{ {ptr: 0x58059bc44710} | {val: 1} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
+  node_0x58059bc44a50[shape=record,label="{ {ptr: 0x58059bc44a50} | {val: 2} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
+  node_0x58059bc479a0 -> node_0x58059bc44920 [color="#999999"];
+  node_0x58059bc44920 -> node_0x58059bc44b60 [color="#999999"];
+  node_0x58059bc44920 -> node_0x58059bc44a50 [color="#999999"];
+  node_0x58059bc44b60 -> node_0x58059bc44710 [color="#999999"];
+}

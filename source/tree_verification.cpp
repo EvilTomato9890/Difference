@@ -162,7 +162,7 @@ static void print_node_label(const tree_node_t* node, FILE* file,
     HARD_ASSERT(node != nullptr, "node pointer is nullptr");
 
 
-    const void* self  = node;
+    const tree_node_t* self  = node;
     const void* left  = (node ? node->left  : nullptr);
     const void* right = (node ? node->right : nullptr);
 
@@ -170,7 +170,7 @@ static void print_node_label(const tree_node_t* node, FILE* file,
     #define NODE_PRINT(node_color, node_fill)                                           \
         do {                                                                            \
             char val_buf[MAX_STRLEN_VALUE];                                                           \
-            const char* val_str = node_val_to_str((tree_node_t*)self, val_buf, sizeof val_buf);       \
+            const char* val_str = node_val_to_str(self, val_buf, sizeof val_buf);       \
             fprintf(file,                                                               \
                     "  node_%p[shape=record,"                                           \
                     "label=\"{ {ptr: %p} | {val: %s} | { prev: %p | next: %p } }\","    \
@@ -178,7 +178,7 @@ static void print_node_label(const tree_node_t* node, FILE* file,
                     self, self, val_str,                                                \
                     left, right);                                                       \
         } while (0)
-
+    clone_node(node);
     switch(graph_node_type) {
         case NODE_BASIC:
             NODE_PRINT(NODE_COLOR, NODE_FILL);
@@ -372,6 +372,7 @@ error_code tree_dump(const tree_t* tree,
     } else {
         LOGGER_DEBUG("tree_dump: SVG not generated: is_visual=%d, root=%p", is_visual, tree->root);
     }
+
     error_code error = write_html(tree, ver_info, dump_idx, comment, svg_path, is_visual);
     LOGGER_INFO("Dump #%d written%s%s", dump_idx,
                 svg_path[0] ? " with SVG: " : "",
