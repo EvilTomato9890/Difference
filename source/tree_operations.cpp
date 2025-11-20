@@ -11,6 +11,8 @@
 #include "tree_info.h"
 #include "error_handler.h"
 
+//================================================================================
+
 static inline value_t make_union(node_type_t type, ...) {
     value_t val = {};
 
@@ -54,7 +56,6 @@ tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, 
     node->right  = right;
     return node;
 }
-
 
 error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out) {
     error_code error = ERROR_NO;
@@ -144,6 +145,8 @@ bool tree_is_empty(const tree_t* tree) {
     return tree->root == nullptr;
 }
 
+//================================================================================
+
 tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) {
     HARD_ASSERT(tree   != nullptr,    "tree pointer is nullptr");
 
@@ -206,8 +209,6 @@ tree_node_t* tree_insert_right(tree_t* tree, node_type_t node_type, value_t valu
 
     return node;
 }
-
-
 
 error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t value) {
     HARD_ASSERT(node     != nullptr,  "node pointer is nullptr");

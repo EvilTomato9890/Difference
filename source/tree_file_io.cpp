@@ -12,6 +12,38 @@
 #include "error_handler.h"
 #include "tree_info.h"
 
+//================================================================================
+
+struct func_struct {
+    func_type_t func_type;
+    const char* func_name;
+};
+
+#define HANDLE_COMMAND(op_code, str_name) \
+    {op_code, str_name},
+
+static func_struct op_codes[] = {
+    #include "copy_past_file"
+};
+
+#undef HANDLE_COMMAND
+
+const int op_codes_num = sizeof(op_codes) / sizeof(func_struct);
+
+//================================================================================
+
+static func_type_t get_op_code(const char* func_name, error_code* error) {
+    HARD_ASSERT(func_name != nullptr, "func_name nullptr");
+
+    for(size_t i = 0; i < op_codes_num; i++) {
+        if(strcmp(func_name, op_codes[i].func_name) == 0) return op_codes[i].func_type;
+    }
+
+    LOGGER_ERROR("Func doesn`t found");
+    *error |= ERROR_UNKNOWN_FUNC;
+    return ADD;
+}
+
 static char* skip_whitespace(char* curr) {
     HARD_ASSERT(curr != nullptr, "curr is nullptr");
     while (*curr != '\0' && isspace((unsigned char)*curr)) {
@@ -89,9 +121,7 @@ static void debug_print_buffer_remainder(tree_t* tree, const char* value_start, 
     })
 }
 
-
-
-
+//================================================================================
 
 static int is_integer_token(const char* text_ptr) {
     if (text_ptr == NULL || *text_ptr == '\0') {
@@ -169,7 +199,11 @@ static int try_parse_node_value(char** current_ptr_ref, node_type_t* node_type_p
             node_value_ptr->constant = (const_val_type)numeric_val;
         } else {
             *node_type_ptr = FUNCTION;
-            node_value_ptr->func = get_op_code(value_start_ptr);
+            node_value_ptr->func = get_op_code(value_start_ptr, error_code_ptr);
+            if(errno != 0) {
+                LOGGER_ERROR("AAA");
+                return 0;
+            }
         }
 
         if (delimiter_char == '\0') {
@@ -185,12 +219,9 @@ static int try_parse_node_value(char** current_ptr_ref, node_type_t* node_type_p
     return 1;
 }
 
-static tree_node_t* read_node(tree_t* tree_ptr,
-                              char** current_ptr_ref,
-                              tree_node_t* parent_node_ptr,
+static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_node_t* parent_node_ptr,
                               error_code* error_code_ptr,
-                              char* buffer_start_ptr,
-                              size_t buffer_size_val)
+                              char* buffer_start_ptr, size_t buffer_size_val)
 {
     HARD_ASSERT(tree_ptr        != nullptr, "tree_ptr is nullptr");
     HARD_ASSERT(current_ptr_ref != nullptr, "current_ptr_ref is nullptr");
@@ -284,6 +315,7 @@ static tree_node_t* read_node(tree_t* tree_ptr,
     return nullptr;
 }
 
+//================================================================================
 
 static size_t count_nodes(tree_node_t* node) {
     if (node == nullptr) return 0;
@@ -313,6 +345,7 @@ static long get_file_size(FILE* file) {
     fseek(file, 0, SEEK_SET);
     return file_size;
 }
+
 static error_code read_file_to_buffer(const char* filename, char** buffer_out, size_t* buffer_size_out) {
     HARD_ASSERT(filename != nullptr, "filename is nullptr");
     HARD_ASSERT(buffer_out != nullptr, "buffer_out is nullptr");

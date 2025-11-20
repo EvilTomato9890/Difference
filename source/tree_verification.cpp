@@ -28,11 +28,14 @@ error_code tree_dump(const tree_t* tree,
 
 #else
 
+//================================================================================
+
 #define BUFFER_SIZE_TIME  64
 #define BUFFER_SIZE_PATH  256
 #define BUFFER_SIZE_CMD   512
 #define MAX_NODES_COLLECT 4096
 
+//================================================================================
 
 #define LIGHT1_BLUE   "#6b8fd6"
 #define LIGHT2_BLUE   "#e9f2ff"
@@ -65,6 +68,8 @@ error_code tree_dump(const tree_t* tree,
 #define HEAD_FILL
 #define LEAF_COLOR      LIGHT1_GREEN
 #define LEAF_FILL       LIGHT2_GREEN
+
+//================================================================================
 
 static const int MAX_STRLEN_VALUE = 128;
 

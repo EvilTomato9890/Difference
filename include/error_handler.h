@@ -15,7 +15,8 @@ enum error_type {
 	ERROR_NON_ZERO_ELEM      = 1 << 10,
 	ERROR_MISSED_ELEM		 = 1 << 11,
 	ERROR_OPEN_FILE          = 1 << 12,
-	ERROR_READ_FILE 		 = 1 << 13
+	ERROR_READ_FILE 		 = 1 << 13,
+	ERROR_UNKNOWN_FUNC		 = 1 << 14
 };
 
 typedef long error_code;
