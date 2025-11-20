@@ -10,7 +10,7 @@
 #include "tree_info.h"
 #include "error_handler.h"
 #include "logger.h"
-
+#include "DSL.h"
 //================================================================================
 
 static void test_read_empty_tree() {
@@ -87,6 +87,35 @@ static void test_read_single_variable() {
     LOGGER_INFO("Тест пройден: чтение дерева с одной переменной\n");
 }
 
+static void test_DSL() {
+    LOGGER_INFO("AAAAAAAAAAAAAAAAAAAA");
+
+    tree_t tree = {};
+    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "INIT failed");
+
+    #ifdef VERIFY_DEBUG
+    tree.dump_file = fopen("test_dump_DSL.html", "w");
+    HARD_ASSERT(tree.dump_file != nullptr, "failed to create file");
+    #endif
+    tree.root = ADD_(SIN_(CONST_(1)), CONST_(2));
+    tree.head->left = tree.root;
+
+    tree_dump(&tree, VER_INIT, true, "FF");
+
+    #ifdef VERIFY_DEBUG
+    if (tree.dump_file != nullptr) {
+        fclose(tree.dump_file);
+        tree.dump_file = nullptr;
+    }
+    #endif
+
+
+    tree_destroy(&tree);
+    LOGGER_INFO("AAAAAAAAAAA");
+
+}
+
 static void test_read_complex_tree() {
     LOGGER_INFO("=== Тест: чтение сложного дерева ===");
     
@@ -101,6 +130,7 @@ static void test_read_complex_tree() {
     HARD_ASSERT(tree.dump_file != nullptr, "failed to create dump file");
     #endif
     error = tree_read_from_file(&tree, filename);
+    LOGGER_DEBUG("AAAA1: %p", tree.root);
     error = tree_dump(&tree, VER_INIT, true, "Test dump tree with nodes");
 
     #ifdef VERIFY_DEBUG
@@ -116,7 +146,7 @@ static void test_read_complex_tree() {
 
 
     tree_destroy(&tree);
-    remove(filename);
+    //remove(filename);
     LOGGER_INFO("Тест пройден: чтение сложного дерева\n");
 }
 
@@ -341,7 +371,7 @@ int run_tests() {
     test_write_complex_tree();
     
     test_dump_empty_tree();
-    
+    test_DSL();
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
     LOGGER_INFO("========================================\n");

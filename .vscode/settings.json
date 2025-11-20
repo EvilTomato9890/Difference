@@ -2,6 +2,13 @@
     "files.associations": {
         "random": "cpp",
         "unordered_map": "cpp",
-        "cerrno": "cpp"
+        "cerrno": "cpp",
+        "array": "cpp",
+        "compare": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "copy_past_file": "cpp"
     }
 }

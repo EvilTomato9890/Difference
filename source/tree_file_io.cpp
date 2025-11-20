@@ -35,9 +35,7 @@ const int op_codes_num = sizeof(op_codes) / sizeof(func_struct);
 static func_type_t get_op_code(const char* func_name, error_code* error) {
     HARD_ASSERT(func_name != nullptr, "func_name nullptr");
 
-    LOGGER_DEBUG("A: %d", op_codes_num);
     for(size_t i = 0; i < op_codes_num; i++) {
-        LOGGER_DEBUG("AA: %d и %s", op_codes[i].func_type, op_codes[i].func_name);
         if(strcmp(func_name, op_codes[i].func_name) == 0) return op_codes[i].func_type;
     }
 
@@ -254,7 +252,7 @@ static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_nod
             return nullptr;
         }
 
-        tree_node_t* new_node_ptr = init_node(node_type, node_value, parent_node_ptr, nullptr, nullptr);
+        tree_node_t* new_node_ptr = init_node(node_type, node_value, nullptr, nullptr);
         if (new_node_ptr == nullptr) {
             *error_code_ptr |= ERROR_READ_FILE;
             return nullptr;
@@ -391,20 +389,6 @@ static error_code read_file_to_buffer(const char* filename, char** buffer_out, s
     return ERROR_NO;
 }
 
-static error_code cleanup_existing_tree(tree_t* tree) {
-    HARD_ASSERT(tree != nullptr, "tree is nullptr");
-    
-    if (tree->root != nullptr) {
-        error_code cleanup_error = tree_remove_subtree(tree, tree->root);
-        if (cleanup_error != ERROR_NO) {
-            LOGGER_WARNING("cleanup_existing_tree: failed to cleanup existing tree");
-        }
-        tree->root = nullptr;
-        tree->size = 0;
-    }
-    return ERROR_NO;
-}
-
 static error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(buffer != nullptr, "buffer is nullptr");
@@ -450,6 +434,7 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
         return error;
     }
     
+
     char* buffer = nullptr;
     size_t buffer_size = 0;
     error = read_file_to_buffer(filename, &buffer, &buffer_size);
@@ -462,10 +447,6 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
     }
     tree->file_buffer = buffer;
     
-    error = cleanup_existing_tree(tree);
-    if (error != ERROR_NO) {
-        return error;
-    }
 
     error = parse_tree_from_buffer(tree, buffer, buffer_size);
     if (error != ERROR_NO) {
