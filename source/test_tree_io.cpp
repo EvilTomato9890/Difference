@@ -86,27 +86,27 @@ static void test_read_single_variable() {
     HARD_ASSERT(tree.root != nullptr, "root should not be nullptr");
     HARD_ASSERT(tree.root->type == VARIABLE, "node type should be VARIABLE");
     LOGGER_WARNING("A");
+
     LOGGER_DEBUG("AA %p", tree.var_stack->data[tree.root->value.var_idx].str.ptr);
+
     HARD_ASSERT(strcmp(tree.var_stack->data[tree.root->value.var_idx].str.ptr, "x") == 0, "variable name should be 'x'");
     HARD_ASSERT(tree.size == 1, "size should be 1");
     LOGGER_WARNING("AA");
-    #ifdef VERIFY_DEBUG
+
+    ON_DEBUG(
     tree.dump_file = fopen("aaaa.html", "w");
     HARD_ASSERT(tree.dump_file != nullptr, "failed to create dump file");
-    #endif
+    )
     
     error = tree_dump(&tree, VER_INIT, true, "Tesas");
 
-    #ifdef VERIFY_DEBUG
+    ON_DEBUG(
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
-    #endif
-    
-    #ifdef VERIFY_DEBUG
     if (tree.dump_file != nullptr) {
         fclose(tree.dump_file);
         tree.dump_file = nullptr;
     }
-    #endif
+    )
     tree_destroy(&tree);
     remove(filename);
     LOGGER_INFO("Тест пройден: чтение дерева с одной переменной\n");
