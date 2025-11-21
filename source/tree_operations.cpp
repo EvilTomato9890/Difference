@@ -10,6 +10,8 @@
 #include "tree_verification.h"
 #include "tree_info.h"
 #include "error_handler.h"
+#include "../StackDead-main/stack.h" //КАК
+
 //================================================================================
 
 value_t make_union(node_type_t type, ...) {
@@ -25,8 +27,8 @@ value_t make_union(node_type_t type, ...) {
             break;
         }
         case VARIABLE: {
-            const char* var = va_arg(ap, const char*);
-            val.var_name = var;
+            int var = va_arg(ap, int);
+            val.var_idx = var;
             break;
         }
         case FUNCTION: {
@@ -75,17 +77,24 @@ error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out) {
 }
 
 
-error_code tree_init(tree_t* tree ON_DEBUG(, ver_info_t ver_info)) {
+error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info)) {
     HARD_ASSERT(tree != nullptr, "tree pointer is nullptr");
 
     LOGGER_DEBUG("tree_init: started");
 
+    error_code error = 0;
     tree->root = nullptr;
     tree->size = 0;
-    tree->file_buffer = nullptr;
+    tree->buff = nullptr;
     tree->head = init_node(CONSTANT, make_union(CONSTANT, 0), nullptr, nullptr);
     if(!tree->head) {
         LOGGER_ERROR("Tree_init: failed calloc head");
+        return ERROR_MEM_ALLOC;
+    }
+    error = stack_init(stack, 10 ON_DEBUG(, VAR_INIT));
+    tree->var_stack = stack;
+    if(error != ERROR_NO) {
+        LOGGER_ERROR("Tree_init: stack_init failed");
         return ERROR_MEM_ALLOC;
     }
     ON_DEBUG({
@@ -110,11 +119,10 @@ error_code tree_destroy(tree_t* tree) {
         free(tree->head);
         tree->head = nullptr;
     }
-    
-    if (tree->file_buffer != nullptr) {
-        free(tree->file_buffer);
-        tree->file_buffer = nullptr;
-    }
+    tree->buff = nullptr;
+
+    error |= stack_destroy(tree->var_stack);
+    tree->var_stack = nullptr;
     return error;
 }
 
@@ -196,4 +204,22 @@ error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t 
     node->type  = node_type;
     node->value = value;
     return ERROR_NO;
+}
+
+ssize_t get_var_idx(const char* var_name, const stack_t* var_stack) {
+    HARD_ASSERT(var_stack != nullptr, "var_stack is nullptr");
+
+    for(size_t i = 0; i < var_stack->size; i++) {
+        if(strcmp(var_stack->data[i].str.ptr, var_name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+size_t add_var(string_t str, var_val_type val, stack_t* var_stack, error_code* error) {
+    HARD_ASSERT(var_stack != nullptr, "var_stack is nulltpr");
+
+    *error = stack_push(var_stack, {str, val});
+    return var_stack->size;
 }

@@ -2,12 +2,11 @@
 #define STACK_H_INCLUDED
 
 #include "error_handlers.h"
-#include "limits.h"
+#include <limits.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-// Включаем определение tree_node_t для использования указателей на узлы
-#include "../include/tree_info.h"
+#include "../include/my_string.h"
 
 
 #ifdef HASH_DEBUG
@@ -32,11 +31,15 @@
 
 #define VAR_INIT ver_data{__LINE__, 0, "tree_node_t*", "stack", __FILE__, __func__, "Init"}
 
+struct variable_t {
+    string_t    str;
+    double      val;
+};
 
-typedef tree_node_t* st_type;
+typedef variable_t st_type;
 
 const int CANARY_NUM = INT_MAX;
-inline const tree_node_t* CANARY_PTR = (tree_node_t*)(intptr_t)INT_MAX;
+inline const variable_t CANARY_PTR = {{nullptr, INT_MAX}, INT_MAX};
 
 struct ver_data {
 	//-------------------Creation info

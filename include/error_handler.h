@@ -1,5 +1,5 @@
-#ifndef ERROR_HANDLERS_H_INCLUDED
-#define ERROR_HANDLERS_H_INCLUDED
+#ifndef ERROR_HANDLER_H_INCLUDED
+#define ERROR_HANDLER_H_INCLUDED
 
 enum error_type {
 	ERROR_NO 			     = 0,
@@ -16,18 +16,11 @@ enum error_type {
 	ERROR_MISSED_ELEM		 = 1 << 11,
 	ERROR_OPEN_FILE          = 1 << 12,
 	ERROR_READ_FILE 		 = 1 << 13,
-	ERROR_UNKNOWN_FUNC		 = 1 << 14
+	ERROR_UNKNOWN_FUNC		 = 1 << 14,
+	ERROR_NO_INIT			 = 1 << 15
 };
 
 typedef long error_code;
 
-#define RETURN_IF_ERROR(error_, ...) 					\
-	do {											 	\
-		if((error_) != 0) { 							\
-			LOGGER_ERROR("Error code: %lu", (error_));  \
-			__VA_ARGS__									\
-			return (error_); 							\
-		}												\
-	} while(0)
 
 #endif

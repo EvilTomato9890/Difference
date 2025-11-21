@@ -1,12 +1,13 @@
 #ifndef TREE_INFO_H_INCLUDED
 #define TREE_INFO_H_INCLUDED
 
-#include <stddef.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
+
 #include "debug_meta.h"
 #include "node_info.h"
+#include "../StackDead-main/stack.h"
+#include "my_string.h"
 
 struct tree_node_t {
     node_type_t  type;
@@ -19,7 +20,8 @@ struct tree_t {
     tree_node_t* root;
     tree_node_t* head;
     size_t       size;
-    char*        file_buffer;
+    stack_t*     var_stack;
+    const char*  buff;
     ON_DEBUG(
         ver_info_t ver_info;
         FILE* dump_file;

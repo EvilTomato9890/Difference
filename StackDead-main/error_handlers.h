@@ -1,7 +1,7 @@
 #ifndef ERROR_HANDLERS_H_INCLUDED
 #define ERROR_HANDLERS_H_INCLUDED
 
-enum error_type {
+enum err {
 	NO_ERROR = 0,
 	NULL_ARG_ERROR 	    = 1 << 0, //TODO: 1 << 0
 	BIG_SIZE_ERROR 	    = 1 << 1,

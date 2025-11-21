@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "asserts.h"
 #include "tree_operations.h"
+#include "tree_file_io.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -134,7 +135,7 @@ static error_code collect_nodes_dynamic(const tree_node_t* root, const tree_node
     return error;
 }
 
-static const char* node_val_to_str(const tree_node_t* node,
+static const char* node_val_to_str(const tree_t* tree, const tree_node_t* node,
                                    char* buf, size_t buf_size)
 {
     HARD_ASSERT(node != nullptr, "node_val_to_str: node is nullptr");
@@ -147,8 +148,13 @@ static const char* node_val_to_str(const tree_node_t* node,
             snprintf(buf, buf_size, "%lld",
                      (long long)node->value.constant);
             return buf;
-        case VARIABLE:
-            return node->value.var_name ? node->value.var_name : "<null>";
+        case VARIABLE: {
+            string_t curr_string = tree->var_stack->data[node->value.var_idx].str;
+            if(buf_size < curr_string.len) LOGGER_WARNING("string len is bigger than buf_size. Printed %ld symbols", buf_size);
+            snprintf(buf, buf_size, "%.*s", 
+                     (int)curr_string.len, curr_string.ptr);
+            return buf;
+            }
         case FUNCTION:
             return get_func_name_by_type(node->value.func);
         default:
@@ -156,7 +162,7 @@ static const char* node_val_to_str(const tree_node_t* node,
     }
 }
 
-static void print_node_label(const tree_node_t* node, FILE* file, 
+static void print_node_label(const tree_t* tree, const tree_node_t* node, FILE* file, 
                              graph_node_type_t graph_node_type) {
     HARD_ASSERT(file != nullptr, "file pointer is nullptr");
     HARD_ASSERT(node != nullptr, "node pointer is nullptr");
@@ -170,7 +176,7 @@ static void print_node_label(const tree_node_t* node, FILE* file,
     #define NODE_PRINT(node_color, node_fill)                                           \
         do {                                                                            \
             char val_buf[MAX_STRLEN_VALUE];                                                           \
-            const char* val_str = node_val_to_str(self, val_buf, sizeof val_buf);       \
+            const char* val_str = node_val_to_str(tree, self, val_buf, sizeof val_buf);       \
             fprintf(file,                                                               \
                     "  node_%p[shape=record,"                                           \
                     "label=\"{ {ptr: %p} | {val: %s} | { prev: %p | next: %p } }\","    \
@@ -227,10 +233,10 @@ static int dump_make_graphviz_svg(const tree_t* tree, const char* base) {
     size_t i = 0;
     for (i = 0; i < n; ++i) {
         const tree_node_t* node = nodes[i];
-        if(node == tree->head)               print_node_label(node, file, NODE_HEAD);
-        else if(node == tree->root)          print_node_label(node, file, NODE_ROOT);
-        else if(!node->left && !node->right) print_node_label(node, file, NODE_LEAF);
-        else                                 print_node_label(node, file, NODE_BASIC);
+        if(node == tree->head)               print_node_label(tree, node, file, NODE_HEAD);
+        else if(node == tree->root)          print_node_label(tree, node, file, NODE_ROOT);
+        else if(!node->left && !node->right) print_node_label(tree, node, file, NODE_LEAF);
+        else                                 print_node_label(tree, node, file, NODE_BASIC);
     }
     for (i = 0; i < n; ++i) {
         const tree_node_t* node = nodes[i];
@@ -322,7 +328,7 @@ static error_code write_html(const tree_t* tree,
     for (i = 0; i < n; ++i) {
         const tree_node_t* node = nodes[i];
         char  str_buf[MAX_STRLEN_VALUE] = {};
-        const char* value = node_val_to_str(node, str_buf, MAX_STRLEN_VALUE);
+        const char* value = node_val_to_str(tree, node, str_buf, MAX_STRLEN_VALUE);
         const char* type_str = node ? node_type_to_string(node->type) : "NULL";
         fprintf(html, "%-4zu  %-14p  %-14s  %-14p  %-14p  %s\n",
                 i, node,
@@ -382,7 +388,7 @@ error_code tree_dump(const tree_t* tree,
 }
 
 #endif 
-//Добавить массив переменных
+//Добавить массив переменных -- что делать с variable в стэке и указателем в дереве
 //Оптимизации
 //Тейлор
 //LaTec

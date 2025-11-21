@@ -12,13 +12,16 @@
 #include "logger.h"
 #include "DSL.h"
 #include "differentiator.h"
+#include "tree_file_io.h"
+#include "../StackDead-main/stack.h"
 //================================================================================
 
 static void test_read_empty_tree() {
     LOGGER_INFO("=== Тест: чтение пустого дерева ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
 
     const char* filename = "test_empty.tree";
@@ -42,7 +45,8 @@ static void test_read_single_constant() {
     LOGGER_INFO("=== Тест: чтение дерева с одной константой ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     const char* filename = "test_constant.tree";
@@ -67,7 +71,8 @@ static void test_read_single_variable() {
     LOGGER_INFO("=== Тест: чтение дерева с одной переменной ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     const char* filename = "test_variable.tree";
@@ -80,9 +85,28 @@ static void test_read_single_variable() {
     HARD_ASSERT(error == ERROR_NO, "tree_read_from_file failed");
     HARD_ASSERT(tree.root != nullptr, "root should not be nullptr");
     HARD_ASSERT(tree.root->type == VARIABLE, "node type should be VARIABLE");
-    HARD_ASSERT(strcmp(tree.root->value.var_name, "x") == 0, "variable name should be 'x'");
+    LOGGER_WARNING("A");
+    LOGGER_DEBUG("AA %p", tree.var_stack->data[tree.root->value.var_idx].str.ptr);
+    HARD_ASSERT(strcmp(tree.var_stack->data[tree.root->value.var_idx].str.ptr, "x") == 0, "variable name should be 'x'");
     HARD_ASSERT(tree.size == 1, "size should be 1");
+    LOGGER_WARNING("AA");
+    #ifdef VERIFY_DEBUG
+    tree.dump_file = fopen("aaaa.html", "w");
+    HARD_ASSERT(tree.dump_file != nullptr, "failed to create dump file");
+    #endif
     
+    error = tree_dump(&tree, VER_INIT, true, "Tesas");
+
+    #ifdef VERIFY_DEBUG
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    #endif
+    
+    #ifdef VERIFY_DEBUG
+    if (tree.dump_file != nullptr) {
+        fclose(tree.dump_file);
+        tree.dump_file = nullptr;
+    }
+    #endif
     tree_destroy(&tree);
     remove(filename);
     LOGGER_INFO("Тест пройден: чтение дерева с одной переменной\n");
@@ -92,7 +116,8 @@ static void test_DSL() {
     LOGGER_INFO("AAAAAAAAAAAAAAAAAAAA");
 
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "INIT failed");
 
     #ifdef VERIFY_DEBUG
@@ -121,7 +146,8 @@ static void test_read_complex_tree() {
     LOGGER_INFO("=== Тест: чтение сложного дерева ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     const char* filename = "test_complex.tree";
@@ -137,7 +163,8 @@ static void test_read_complex_tree() {
 
 
     tree_t tree_diff = {};
-    error = tree_init(&tree_diff ON_DEBUG(, VER_INIT));
+    stack_t stack_diff = {};
+    error = tree_init(&tree_diff, &stack_diff ON_DEBUG(, VER_INIT));
     ON_DEBUG({
     tree_diff.dump_file = fopen("test_dump_nodes.html", "a");
     })
@@ -166,7 +193,8 @@ static void test_read_nonexistent_file() {
     LOGGER_INFO("=== Тест: чтение несуществующего файла ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     error = tree_read_from_file(&tree, "nonexistent_file.tree");
@@ -182,7 +210,8 @@ static void test_write_empty_tree() {
     LOGGER_INFO("=== Тест: запись пустого дерева ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     const char* filename = "test_write_empty.tree";
@@ -204,7 +233,8 @@ static void test_write_constant_tree() {
     LOGGER_INFO("=== Тест: запись дерева с константой ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     value_t value = make_union(CONSTANT, (const_val_type)100);
@@ -216,7 +246,8 @@ static void test_write_constant_tree() {
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     
     tree_t read_tree = {};
-    error = tree_init(&read_tree ON_DEBUG(, VER_INIT));
+    stack_t read_stack = {};
+    error = tree_init(&read_tree, &read_stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     error = tree_read_from_file(&read_tree, filename);
@@ -235,7 +266,8 @@ static void test_write_variable_tree() {
     LOGGER_INFO("=== Тест: запись дерева с переменной ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     value_t value = make_union(VARIABLE, "test_var");
@@ -247,14 +279,15 @@ static void test_write_variable_tree() {
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     
     tree_t read_tree = {};
-    error = tree_init(&read_tree ON_DEBUG(, VER_INIT));
+    stack_t read_stack = {};
+    error = tree_init(&read_tree, &read_stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     error = tree_read_from_file(&read_tree, filename);
     HARD_ASSERT(error == ERROR_NO, "tree_read_from_file failed");
     HARD_ASSERT(read_tree.root != nullptr, "root should not be nullptr");
     HARD_ASSERT(read_tree.root->type == VARIABLE, "type should be VARIABLE");
-    HARD_ASSERT(strcmp(read_tree.root->value.var_name, "test_var") == 0, "variable name should match");
+    HARD_ASSERT(strcmp(tree.var_stack->data[tree.root->value.var_idx].str.ptr, "test_var") == 0, "variable name should match");
     
     tree_destroy(&tree);
     tree_destroy(&read_tree);
@@ -266,7 +299,8 @@ static void test_write_complex_tree() {
     LOGGER_INFO("=== Тест: запись сложного дерева ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     value_t root_value = make_union(FUNCTION, ADD);
@@ -286,7 +320,8 @@ static void test_write_complex_tree() {
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     tree_dump(&tree, VER_INIT, true, "Aaa");
     tree_t read_tree = {};
-    error = tree_init(&read_tree ON_DEBUG(, VER_INIT));
+    stack_t read_stack = {};
+    error = tree_init(&read_tree, &read_stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     error = tree_read_from_file(&read_tree, filename);
@@ -306,7 +341,8 @@ static void test_dump_empty_tree() {
     LOGGER_INFO("=== Тест: дамп пустого дерева ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     #ifdef VERIFY_DEBUG
@@ -335,7 +371,8 @@ static void test_dump_tree_with_nodes() {
     LOGGER_INFO("=== Тест: дамп дерева с узлами ===");
     
     tree_t tree = {};
-    error_code error = tree_init(&tree ON_DEBUG(, VER_INIT));
+    stack_t stack = {};
+    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
     
     value_t root_value = make_union(CONSTANT, (const_val_type)42);

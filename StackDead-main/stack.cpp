@@ -7,13 +7,12 @@
 #include <string.h>
 
 static const int MIN_STACK_SIZE = 128;
-static tree_node_t* const POISON_VALUE = (tree_node_t*)0xEBA1DEDA;
+static variable_t const POISON_VALUE = {{(char*)0xEBA1DEDA, 0xEBA1DEDA}, 0xEBA1DEDA};
 static const float REDUCTION_FACTOR = 4; // float
 static const float GROWTH_FACTOR = 2; // float
 
 static error_code normalize_size(stack_t* stack);
 static error_code stack_recalloc(stack_t* stack, size_t new_capacity);
-static unsigned long stack_get_hash(const stack_t* stack, error_code* error);
 
 
 error_code stack_init(stack_t* stack_return, size_t capacity ON_DEBUG(, ver_data ver_info)) {
@@ -219,12 +218,12 @@ st_type stack_pop(stack_t* stack, error_code* error_return) { //Лучше во�
 		if(error != 0) {
 			LOGGER_ERROR("Error code: %lu", error);
 			*error_return = error;
-			return nullptr; 
+			return {{nullptr, 0}, 0}; 
 		} else if(stack->size == 0) {
 			error |= SMALL_SIZE_ERROR;
 			LOGGER_ERROR("Error code: %lu", error);
 			*error_return = error;
-			return nullptr;
+			return {{nullptr, 0}, 0};
 		}
 	)
  	st_type popped_elem = stack->data[stack->size - 1];
@@ -240,7 +239,7 @@ st_type stack_pop(stack_t* stack, error_code* error_return) { //Лучше во�
 	if(error != 0) {
 		LOGGER_ERROR("Error code: %lu", error);
 		*error_return = error;
-		return nullptr;
+		return {{nullptr, 0}, 0};
 	}
 
 	ON_DEBUG(
@@ -278,18 +277,5 @@ error_code stack_verify(const stack_t* stack) {
 	return error;	
 }
 
-static unsigned long stack_get_hash(const stack_t* stack, error_code* error) {
-	if(stack == nullptr) {
-		*error |= NULL_ARG_ERROR;
-		LOGGER_ERROR("Error code: %lu", *error);
-		return -1;
-	}
 
-	unsigned long hash = 0;
-	for(size_t i = 0; i < stack->size; i++) {
-		// Хэш для указателей: используем адрес узла
-		hash += (unsigned long)stack->data[i] + i;
-	}
-	return hash;
-}
 

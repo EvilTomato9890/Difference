@@ -11,6 +11,8 @@
 #include "tree_verification.h"
 #include "error_handler.h"
 #include "tree_info.h"
+#include "tree_file_io.h"
+#include "../StackDead-main/stack.h"
 
 //================================================================================
 
@@ -35,7 +37,9 @@ const int op_codes_num = sizeof(op_codes) / sizeof(func_struct);
 static func_type_t get_op_code(const char* func_name, error_code* error) {
     HARD_ASSERT(func_name != nullptr, "func_name nullptr");
 
+    LOGGER_DEBUG("A: %d", op_codes_num);
     for(size_t i = 0; i < op_codes_num; i++) {
+        LOGGER_DEBUG("AA: %d и %s", op_codes[i].func_type, op_codes[i].func_name);
         if(strcmp(func_name, op_codes[i].func_name) == 0) return op_codes[i].func_type;
     }
 
@@ -138,16 +142,16 @@ static int is_integer_token(const char* text_ptr) {
     return 1;
 }
 
-static int try_parse_node_value(char** current_ptr_ref, node_type_t* node_type_ptr, value_t* node_value_ptr,
-                            char** value_start_ptr_ref, char** value_end_ptr_ref,
-                            error_code* error_code_ptr)
+static int try_parse_node_value(tree_t* tree_ptr, node_type_t* node_type_ptr, value_t* node_value_ptr,
+                                char** value_start_ptr_ref, char** value_end_ptr_ref, char** current_ptr_ref,
+                                error_code* error)
 {
     HARD_ASSERT(current_ptr_ref      != nullptr, "current_ptr_ref is nullptr");
     HARD_ASSERT(node_type_ptr        != nullptr, "node_type_ptr is nullptr");
     HARD_ASSERT(node_value_ptr       != nullptr, "node_value_ptr is nullptr");
     HARD_ASSERT(value_start_ptr_ref  != nullptr, "value_start_ptr_ref is nullptr");
     HARD_ASSERT(value_end_ptr_ref    != nullptr, "value_end_ptr_ref is nullptr");
-    HARD_ASSERT(error_code_ptr       != nullptr, "error_code_ptr is nullptr");
+    HARD_ASSERT(error       != nullptr, "error is nullptr");
 
     char* current_ptr     = *current_ptr_ref;
     char* value_start_ptr = nullptr;
@@ -162,14 +166,23 @@ static int try_parse_node_value(char** current_ptr_ref, node_type_t* node_type_p
         }
         if (*scan_pointer != '\"') {
             LOGGER_ERROR("read_node: missing closing '\"' for variable");
-            *error_code_ptr |= ERROR_READ_FILE;
+            *error |= ERROR_READ_FILE;
             return 0;
         }
-        *scan_pointer = '\0';
         value_end_ptr = scan_pointer;
 
         *node_type_ptr = VARIABLE;
-        node_value_ptr->var_name = value_start_ptr;
+        ssize_t idx = get_var_idx(value_start_ptr, tree_ptr->var_stack);
+        if(idx == -1) {
+            node_value_ptr->var_idx = add_var({value_start_ptr, (unsigned long)(value_end_ptr - value_start_ptr)}, 0, tree_ptr->var_stack, error);
+        } else {
+            node_value_ptr->var_idx = idx;
+        }
+        
+        if(*error != ERROR_NO) {
+            LOGGER_ERROR("Add_var error");
+            return 0;
+        }
 
         current_ptr = scan_pointer + 1;
     } else {
@@ -192,17 +205,17 @@ static int try_parse_node_value(char** current_ptr_ref, node_type_t* node_type_p
             unsigned long long numeric_val = strtoull(value_start_ptr, &number_end_ptr, 10);
             if (errno != 0 || number_end_ptr == value_start_ptr || *number_end_ptr != '\0') {
                 LOGGER_ERROR("read_node: invalid constant '%s'", value_start_ptr);
-                *error_code_ptr |= ERROR_READ_FILE;
+                *error |= ERROR_READ_FILE;
                 return 0;
             }
             *node_type_ptr = CONSTANT;
             node_value_ptr->constant = (const_val_type)numeric_val;
         } else {
             *node_type_ptr = FUNCTION;
-            node_value_ptr->func = get_op_code(value_start_ptr, error_code_ptr);
+            node_value_ptr->func = get_op_code(value_start_ptr, error);
             if(errno != 0) {
                 LOGGER_ERROR("try_parse_node_value: invalid function '%s'", value_start_ptr);
-                *error_code_ptr |= ERROR_READ_FILE;
+                *error |= ERROR_READ_FILE;
                 return 0;
             }
         }
@@ -221,12 +234,12 @@ static int try_parse_node_value(char** current_ptr_ref, node_type_t* node_type_p
 }
 
 static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_node_t* parent_node_ptr,
-                              error_code* error_code_ptr,
+                              error_code* error,
                               char* buffer_start_ptr, size_t buffer_size_val)
 {
     HARD_ASSERT(tree_ptr        != nullptr, "tree_ptr is nullptr");
     HARD_ASSERT(current_ptr_ref != nullptr, "current_ptr_ref is nullptr");
-    HARD_ASSERT(error_code_ptr  != nullptr, "error_code_ptr is nullptr");
+    HARD_ASSERT(error  != nullptr, "error is nullptr");
     
     char* current_ptr = skip_whitespace(*current_ptr_ref);
 
@@ -236,7 +249,7 @@ static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_nod
 
         if (*current_ptr == '(' || *current_ptr == ')' || *current_ptr == '\0') {
             LOGGER_ERROR("read_node: expected token after '('");
-            *error_code_ptr |= ERROR_READ_FILE;
+            *error |= ERROR_READ_FILE;
             return nullptr;
         }
 
@@ -246,15 +259,15 @@ static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_nod
         char* value_start_ptr = nullptr;
         char* value_end_ptr   = nullptr;
 
-        if (!try_parse_node_value(&current_ptr, &node_type, &node_value,
-                              &value_start_ptr, &value_end_ptr,
-                              error_code_ptr)) {
+        if (!try_parse_node_value(tree_ptr, &node_type, &node_value,
+                                  &value_start_ptr, &value_end_ptr, &current_ptr,
+                                  error)) {
             return nullptr;
         }
 
         tree_node_t* new_node_ptr = init_node(node_type, node_value, nullptr, nullptr);
         if (new_node_ptr == nullptr) {
-            *error_code_ptr |= ERROR_READ_FILE;
+            *error |= ERROR_READ_FILE;
             return nullptr;
         }
 
@@ -269,15 +282,15 @@ static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_nod
         }
 
         current_ptr = skip_whitespace(current_ptr);
-        new_node_ptr->left = read_node(tree_ptr, &current_ptr, new_node_ptr, error_code_ptr, buffer_start_ptr, buffer_size_val);
-        if (*error_code_ptr) {
+        new_node_ptr->left = read_node(tree_ptr, &current_ptr, new_node_ptr, error, buffer_start_ptr, buffer_size_val);
+        if (*error) {
             cleanup_failed_node(tree_ptr, new_node_ptr, parent_node_ptr);
             return nullptr;
         }
 
         current_ptr = skip_whitespace(current_ptr);
-        new_node_ptr->right = read_node(tree_ptr, &current_ptr, new_node_ptr, error_code_ptr, buffer_start_ptr, buffer_size_val);
-        if (*error_code_ptr) {
+        new_node_ptr->right = read_node(tree_ptr, &current_ptr, new_node_ptr, error, buffer_start_ptr, buffer_size_val);
+        if (*error) {
             cleanup_failed_node(tree_ptr, new_node_ptr, parent_node_ptr);
             return nullptr;
         }
@@ -286,7 +299,7 @@ static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_nod
         if (*current_ptr != ')') {
             LOGGER_ERROR("read_node: expected ')' after children");
             cleanup_failed_node(tree_ptr, new_node_ptr, parent_node_ptr);
-            *error_code_ptr |= ERROR_READ_FILE;
+            *error |= ERROR_READ_FILE;
             return nullptr;
         }
 
@@ -307,12 +320,12 @@ static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_nod
             return nullptr;
         }
         LOGGER_ERROR("read_node: expected 'nil'");
-        *error_code_ptr |= ERROR_READ_FILE;
+        *error |= ERROR_READ_FILE;
         return nullptr;
     }
 
     LOGGER_ERROR("read_node: unexpected character '%c'", *current_ptr);
-    *error_code_ptr |= ERROR_READ_FILE;
+    *error |= ERROR_READ_FILE;
     return nullptr;
 }
 
@@ -327,11 +340,8 @@ static error_code ensure_tree_initialized(tree_t* tree) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     
     if (tree->head == nullptr) {
-        error_code init_error = tree_init(tree ON_DEBUG(, VER_INIT));
-        if (init_error != ERROR_NO) {
-            LOGGER_ERROR("ensure_tree_initialized: tree_init failed");
-            return init_error;
-        }
+        LOGGER_ERROR("ensure_tree_initialized: tree_init failed");
+        return ERROR_NO_INIT;
     }
     return ERROR_NO;
 }
@@ -389,7 +399,8 @@ static error_code read_file_to_buffer(const char* filename, char** buffer_out, s
     return ERROR_NO;
 }
 
-static error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size) {
+
+error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(buffer != nullptr, "buffer is nullptr");
     
@@ -434,19 +445,15 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
         return error;
     }
     
-
     char* buffer = nullptr;
     size_t buffer_size = 0;
     error = read_file_to_buffer(filename, &buffer, &buffer_size);
     if (error != ERROR_NO) {
         return error;
     }
-    
-    if (tree->file_buffer != nullptr) {
-        free(tree->file_buffer);
-    }
-    tree->file_buffer = buffer;
-    
+
+    tree->buff = buffer;
+
 
     error = parse_tree_from_buffer(tree, buffer, buffer_size);
     if (error != ERROR_NO) {
@@ -468,7 +475,7 @@ const char* get_func_name_by_type(func_type_t func_type_value) {
     return "";
 }
 
-static error_code write_node(FILE* file_ptr, tree_node_t* node_ptr) {
+static error_code write_node(const tree_t* tree_ptr, FILE* file_ptr, tree_node_t* node_ptr) {
     HARD_ASSERT(file_ptr != nullptr, "file is nullptr");
     
     if (node_ptr == nullptr) {
@@ -484,8 +491,9 @@ static error_code write_node(FILE* file_ptr, tree_node_t* node_ptr) {
         return ERROR_OPEN_FILE;
     }
     
-    if (node_ptr->type == VARIABLE && node_ptr->value.var_name != nullptr) {
-        if (fprintf(file_ptr, "\"%s\"", node_ptr->value.var_name) < 0) {
+    if (node_ptr->type == VARIABLE) {
+        string_t curr_str = tree_ptr->var_stack->data[node_ptr->value.var_idx].str;
+        if (fprintf(file_ptr, "\"%.*s\"", (int)curr_str.len, curr_str.ptr) < 0) {
             LOGGER_ERROR("write_node: fprintf failed for variable");
             return ERROR_OPEN_FILE;
         }
@@ -507,7 +515,7 @@ static error_code write_node(FILE* file_ptr, tree_node_t* node_ptr) {
         return ERROR_OPEN_FILE;
     }
 
-    error_code error_value = write_node(file_ptr, node_ptr->left);
+    error_code error_value = write_node(tree_ptr, file_ptr, node_ptr->left);
     if (error_value != ERROR_NO) return error_value;
     
     if (fprintf(file_ptr, " ") < 0) {
@@ -515,7 +523,7 @@ static error_code write_node(FILE* file_ptr, tree_node_t* node_ptr) {
         return ERROR_OPEN_FILE;
     }
     
-    error_value = write_node(file_ptr, node_ptr->right);
+    error_value = write_node(tree_ptr, file_ptr, node_ptr->right);
     if (error_value != ERROR_NO) return error_value;
     
     if (fprintf(file_ptr, ")") < 0) {
@@ -540,7 +548,7 @@ error_code tree_write_to_file(const tree_t* tree, const char* filename) {
     
     error_code error = ERROR_NO;
     if (tree->root != nullptr) {
-        error = write_node(file, tree->root);
+        error = write_node(tree, file, tree->root);
     }
     
     if (fclose(file) != 0) {
