@@ -75,4 +75,6 @@ error_code stack_push(stack_t* stack, st_type elem);
 
 st_type stack_pop(stack_t* stack, error_code* error_return); //Лучше возвращать ошибку или значение?
 
+error_code stack_clone(const stack_t* source, stack_t* dest ON_DEBUG(, ver_data ver_info));
+
 #endif

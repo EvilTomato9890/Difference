@@ -56,13 +56,23 @@ tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, 
     node->right  = right;
     return node;
 }
+
 tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_t* tree) {
     HARD_ASSERT(tree  != nullptr, "tree is nullptr");
 
     tree_node_t* node = init_node(node_type, value, left, right);
-    tree_t tree_clone = *tree;
+    tree_t tree_clone = {};
+    stack_t cloned_stack = {};
+    error_code error = stack_clone(tree->var_stack, &cloned_stack ON_DEBUG(, VAR_INIT));
+    if (error != 0) {
+        LOGGER_ERROR("init_node_with_dump: stack_clone failed");
+        return node;
+    }
+    tree_clone = *tree;
+    tree_clone.var_stack = &cloned_stack;
     tree_make_root(&tree_clone, node);
     tree_dump(&tree_clone, VER_INIT, true, "Diff dumps");
+    tree_destroy(&tree_clone);
     return node;
 }
 
@@ -113,7 +123,7 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
     return ERROR_NO;
 }
 
-error_code tree_destroy(tree_t* tree) {
+error_code tree_destroy(tree_t* tree, bool clear_buff) {
     HARD_ASSERT(tree != nullptr, "tree pointer is nullptr");
 
     LOGGER_DEBUG("tree_dest: started");
@@ -127,6 +137,9 @@ error_code tree_destroy(tree_t* tree) {
     if (tree->head != nullptr) {
         free(tree->head);
         tree->head = nullptr;
+    }
+    if(clear_buff && tree->buff != nullptr) {
+        free(tree->buff);
     }
     tree->buff = nullptr;
 
