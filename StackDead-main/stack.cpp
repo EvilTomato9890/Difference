@@ -79,7 +79,8 @@ error_code stack_destroy(stack_t* stack) {
 	free(stack->original_ptr);
 	return 0;
 }
-//-Dmacros_name
+
+
 error_code stack_push(stack_t* stack, st_type elem) {
 	LOGGER_DEBUG("Push started, elem = %p", (void*)elem);
 

@@ -24,13 +24,13 @@
 <!-- node_0x59653cbd2380 -->
 <g id="node2" class="node">
 <title>node_0x59653cbd2380</title>
-<path fill="#e9fbf5" stroke="#5aa99b" d="M497.5,-428.5C497.5,-428.5 781.5,-428.5 781.5,-428.5 787.5,-428.5 793.5,-434.5 793.5,-440.5 793.5,-440.5 793.5,-479.5 793.5,-479.5 793.5,-485.5 787.5,-491.5 781.5,-491.5 781.5,-491.5 497.5,-491.5 497.5,-491.5 491.5,-491.5 485.5,-485.5 485.5,-479.5 485.5,-479.5 485.5,-440.5 485.5,-440.5 485.5,-434.5 491.5,-428.5 497.5,-428.5"/>
+<path fill="#f1eafd" stroke="#8e6bd6" d="M497.5,-428.5C497.5,-428.5 781.5,-428.5 781.5,-428.5 787.5,-428.5 793.5,-434.5 793.5,-440.5 793.5,-440.5 793.5,-479.5 793.5,-479.5 793.5,-485.5 787.5,-491.5 781.5,-491.5 781.5,-491.5 497.5,-491.5 497.5,-491.5 491.5,-491.5 485.5,-485.5 485.5,-479.5 485.5,-479.5 485.5,-440.5 485.5,-440.5 485.5,-434.5 491.5,-428.5 497.5,-428.5"/>
 <text text-anchor="middle" x="639.5" y="-477.9" font-family="Fira Mono" font-size="12.00">ptr: 0x59653cbd2380</text>
-<polyline fill="none" stroke="#5aa99b" points="485.5,-470.5 793.5,-470.5 "/>
+<polyline fill="none" stroke="#8e6bd6" points="485.5,-470.5 793.5,-470.5 "/>
 <text text-anchor="middle" x="639.5" y="-456.9" font-family="Fira Mono" font-size="12.00">val: +</text>
-<polyline fill="none" stroke="#5aa99b" points="485.5,-449.5 793.5,-449.5 "/>
+<polyline fill="none" stroke="#8e6bd6" points="485.5,-449.5 793.5,-449.5 "/>
 <text text-anchor="middle" x="562.5" y="-435.9" font-family="Fira Mono" font-size="12.00">prev: 0x59653cbd2090</text>
-<polyline fill="none" stroke="#5aa99b" points="639.5,-428.5 639.5,-449.5 "/>
+<polyline fill="none" stroke="#8e6bd6" points="639.5,-428.5 639.5,-449.5 "/>
 <text text-anchor="middle" x="716.5" y="-435.9" font-family="Fira Mono" font-size="12.00">next: 0x59653cbd1da0</text>
 </g>
 <!-- node_0x59653cbcf3c0&#45;&gt;node_0x59653cbd2380 -->

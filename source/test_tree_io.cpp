@@ -162,12 +162,13 @@ static void test_read_complex_tree() {
     ON_DEBUG({
     tree_diff.dump_file = fopen("test_dump_nodes.html", "a");
     })
-    tree_diff.root = get_diff(&tree, tree.root);
-    tree_diff.head = tree_diff.root;
-    
+
+    tree_node_t* new_root = get_diff(&tree, tree.root);
+    tree_make_root(&tree_diff, new_root);
+
     LOGGER_DEBUG("Diff ended");
 
-    error = tree_dump(&tree_diff, VER_INIT, true, "After diff");
+    error = tree_dump(&tree, VER_INIT, true, "After diff");
     
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
     
@@ -180,6 +181,7 @@ static void test_read_complex_tree() {
 
 
     tree_destroy(&tree);
+    tree_destroy(&tree_diff);
     //remove(filename);
     LOGGER_INFO("Тест пройден: чтение сложного дерева\n");
 }

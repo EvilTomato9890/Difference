@@ -12,8 +12,6 @@
 #include "error_handler.h"
 #include "../StackDead-main/stack.h" //КАК
 
-static tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node);
-
 //================================================================================
 
 value_t make_union(node_type_t type, ...) {
@@ -176,7 +174,7 @@ tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) 
     return node;
 }
 
-static tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node) {
+tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(tree != nullptr, "Tree is nullptr");
     if(!node) LOGGER_WARNING("New root is nullptr");
 
