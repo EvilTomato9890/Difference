@@ -1,6 +1,8 @@
 #ifndef NODE_INFO_H_INCLUDED
 #define NODE_INFO_H_INCLUDED
 
+#include "my_string.h"
+
 #define HANDLE_FUNC(name, ...) name,
 
 enum func_type_t {
@@ -12,11 +14,18 @@ enum func_type_t {
 
 typedef u_int64_t const_val_type;
 typedef double    var_val_type;
+
+struct variable_t {
+    string_t    str;
+    double      val;
+};
+
 enum node_type_t {
     FUNCTION,
     CONSTANT,
     VARIABLE
 };
+
 
 union value_t {
     const_val_type constant;
@@ -25,4 +34,10 @@ union value_t {
 
 };
 
+struct tree_node_t {
+    node_type_t  type;
+    value_t      value;
+    tree_node_t* left;
+    tree_node_t* right;
+};
 #endif

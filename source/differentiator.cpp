@@ -5,7 +5,7 @@
 #include "DSL.h"
 #include "differentiator.h"
 
-tree_node_t* get_diff(tree_node_t* node) {
+tree_node_t* get_diff(tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(node != nullptr, "Node is nullptr");
 
     
@@ -21,7 +21,6 @@ tree_node_t* get_diff(tree_node_t* node) {
     tree_node_t* r = node->right ? clone_node(node->right) : nullptr;
 
     switch(node->value.func) {
-
         case ADD:  return    ADD_(d(l), d(r));
         case MUL:  return    ADD_(MUL_(d(l), r), MUL_(l, d(r)));
         case SUB:  return    SUB_(d(l), d(r));

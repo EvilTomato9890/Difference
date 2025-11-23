@@ -85,13 +85,10 @@ static void test_read_single_variable() {
     HARD_ASSERT(error == ERROR_NO, "tree_read_from_file failed");
     HARD_ASSERT(tree.root != nullptr, "root should not be nullptr");
     HARD_ASSERT(tree.root->type == VARIABLE, "node type should be VARIABLE");
-    LOGGER_WARNING("A");
 
-    LOGGER_DEBUG("AA %p", tree.var_stack->data[tree.root->value.var_idx].str.ptr);
 
-    HARD_ASSERT(strcmp(tree.var_stack->data[tree.root->value.var_idx].str.ptr, "x") == 0, "variable name should be 'x'");
+    HARD_ASSERT(my_ssstrcmp(tree.var_stack->data[tree.root->value.var_idx].str, {"x", 1}) == 0, "variable name should be 'x'");
     HARD_ASSERT(tree.size == 1, "size should be 1");
-    LOGGER_WARNING("AA");
 
     ON_DEBUG(
     tree.dump_file = fopen("aaaa.html", "w");
@@ -157,7 +154,6 @@ static void test_read_complex_tree() {
     HARD_ASSERT(tree.dump_file != nullptr, "failed to create dump file");
     #endif
     error = tree_read_from_file(&tree, filename);
-    LOGGER_DEBUG("AAAA1: %p", tree.root);
     error = tree_dump(&tree, VER_INIT, true, "Test dump tree with nodes");
 
 
@@ -168,10 +164,11 @@ static void test_read_complex_tree() {
     ON_DEBUG({
     tree_diff.dump_file = fopen("test_dump_nodes.html", "a");
     })
-    ON_DEBUG(LOGGER_ERROR("ERRORaaa: %p", tree_diff.dump_file);)
-    tree_diff.root = get_diff(tree.root);
+    tree_diff.root = get_diff(&tree, tree.root);
     tree_diff.head = tree_diff.root;
     
+    LOGGER_DEBUG("Diff ended");
+
     error = tree_dump(&tree_diff, VER_INIT, true, "After diff");
     
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");

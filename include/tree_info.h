@@ -9,12 +9,6 @@
 #include "../StackDead-main/stack.h"
 #include "my_string.h"
 
-struct tree_node_t {
-    node_type_t  type;
-    value_t      value;
-    tree_node_t* left;
-    tree_node_t* right;
-};
 
 struct tree_t {
     tree_node_t* root;

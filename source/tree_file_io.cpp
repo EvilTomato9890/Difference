@@ -172,12 +172,8 @@ static int try_parse_node_value(tree_t* tree_ptr, node_type_t* node_type_ptr, va
         value_end_ptr = scan_pointer;
 
         *node_type_ptr = VARIABLE;
-        ssize_t idx = get_var_idx(value_start_ptr, tree_ptr->var_stack);
-        if(idx == -1) {
-            node_value_ptr->var_idx = add_var({value_start_ptr, (unsigned long)(value_end_ptr - value_start_ptr)}, 0, tree_ptr->var_stack, error);
-        } else {
-            node_value_ptr->var_idx = idx;
-        }
+        node_value_ptr->var_idx = get_or_add_var_idx({value_start_ptr, (unsigned long)(value_end_ptr - value_start_ptr)}, 0, 
+                                                      tree_ptr->var_stack, error);
         
         if(*error != ERROR_NO) {
             LOGGER_ERROR("Add_var error");
@@ -336,16 +332,6 @@ static size_t count_nodes(tree_node_t* node) {
     return 1 + count_nodes(node->left) + count_nodes(node->right);
 }
 
-static error_code ensure_tree_initialized(tree_t* tree) {
-    HARD_ASSERT(tree != nullptr, "tree is nullptr");
-    
-    if (tree->head == nullptr) {
-        LOGGER_ERROR("ensure_tree_initialized: tree_init failed");
-        return ERROR_NO_INIT;
-    }
-    return ERROR_NO;
-}
-
 static long get_file_size(FILE* file) {
     if(file == nullptr) {
         return -1;
@@ -404,6 +390,8 @@ error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(buffer != nullptr, "buffer is nullptr");
     
+    LOGGER_DEBUG("parse_tree_from_buffer: started");
+
     char* curr = skip_whitespace(buffer);
     
     if (*curr == '\0') {
@@ -426,8 +414,7 @@ error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size
         tree->head->right = nullptr;
         tree->size = 0;
         return ERROR_NO;
-    }
-    
+    }    
     tree->size = count_nodes(root);
     
     LOGGER_DEBUG("parse_tree_from_buffer: successfully parsed tree with %zu nodes", tree->size);
@@ -440,11 +427,13 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
     
     LOGGER_DEBUG("tree_read_from_file: started, filename=%s", filename);
     
-    error_code error = ensure_tree_initialized(tree);
-    if (error != ERROR_NO) {
-        return error;
-    }
-    
+    if (tree->head == nullptr) {
+        LOGGER_ERROR("ensure_tree_initialized: tree_init failed");
+        return ERROR_NO_INIT;
+    }    
+
+    error_code error = ERROR_NO;
+
     char* buffer = nullptr;
     size_t buffer_size = 0;
     error = read_file_to_buffer(filename, &buffer, &buffer_size);

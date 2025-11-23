@@ -150,7 +150,9 @@ static const char* node_val_to_str(const tree_t* tree, const tree_node_t* node,
             return buf;
         case VARIABLE: {
             string_t curr_string = tree->var_stack->data[node->value.var_idx].str;
-            if(buf_size < curr_string.len) LOGGER_WARNING("string len is bigger than buf_size. Printed %ld symbols", buf_size);
+            if(buf_size < curr_string.len) LOGGER_WARNING("string len is bigger than buf_size. Printed %ld symbols, srt_len: %ld", buf_size, curr_string.len);
+            
+            
             snprintf(buf, buf_size, "%.*s", 
                      (int)curr_string.len, curr_string.ptr);
             return buf;
@@ -313,6 +315,8 @@ static error_code write_html(const tree_t* tree,
     fprintf(html, "func: %s\n", ver_info_called.func);
     fprintf(html, "line: %d\n", ver_info_called.line);
 
+    fflush(html);
+
     fprintf(html, "\nIDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE\n");
     fprintf(html, "----  --------------  --------------  --------------  --------------  --------------------\n");
 
@@ -347,6 +351,7 @@ static error_code write_html(const tree_t* tree,
                 svg_path ? svg_path : "(null)", is_visual);
     }
     fprintf(html, "\n<hr>\n");
+    fflush(html);
     return ERROR_NO;
 }
 
@@ -388,7 +393,7 @@ error_code tree_dump(const tree_t* tree,
 }
 
 #endif 
-//Добавить массив переменных -- что делать с variable в стэке и указателем в дереве
+//Добавить массив переменных -- что делать с variable в стэке и указателем в дереве что делать с DSL, что делать с канарейкой, 
 //Оптимизации
 //Тейлор
 //LaTec

@@ -1,13 +1,13 @@
 #ifndef DSL_H_INCLUDED
 #define DSL_H_INCLUDED
 
-#define d(node) get_diff(node)
+#define d(node) get_diff(tree, node)
 
 #define c(val) \
     init_node(CONSTANT, make_union(CONSTANT, val), nullptr, nullptr)
 
 #define v(var_name) \
-    init_node(VARIABLE, make_union(VARIABLE, var_name), nullptr, nullptr)
+    init_node(VARIABLE, make_union(VARIABLE, get_or_add_var_idx({var_name, strlen(var_name)}, 0, tree)), nullptr, nullptr)
 
 #define FUNC_TEMPLATE(op_code, left, right) \
     init_node(FUNCTION, make_union(FUNCTION, op_code), left, right)

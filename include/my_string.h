@@ -9,6 +9,6 @@ struct string_t {
     size_t      len;
 };
 
-int my_strcmp(string_t str1, string_t str2);
-
+int my_ssstrcmp(string_t str1, string_t str2);
+int my_scstrcmp(string_t str1, const char* str2);
 #endif

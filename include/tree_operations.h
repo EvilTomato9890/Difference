@@ -30,8 +30,9 @@ struct tree_path_stack_t {
 };
 value_t make_union(node_type_t type, ...);
 
-ssize_t get_var_idx(const char* var_name, const stack_t* var_stack);
-size_t add_var(string_t str, var_val_type val, stack_t* var_stack, error_code* error);
+ssize_t get_var_idx(const string_t var, const stack_t* var_stack);
+size_t add_var(const string_t str, const var_val_type val, stack_t* var_stack, error_code* error);
+size_t get_or_add_var_idx(const string_t str, const var_val_type val, stack_t* var_stack, error_code* error);
 
 inline tree_node_t* clone_node(const tree_node_t* node) {
     HARD_ASSERT(node != nullptr, "node is nullptr");

@@ -206,20 +206,31 @@ error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t 
     return ERROR_NO;
 }
 
-ssize_t get_var_idx(const char* var_name, const stack_t* var_stack) {
+ssize_t get_var_idx(const string_t var, const stack_t* var_stack) {
     HARD_ASSERT(var_stack != nullptr, "var_stack is nullptr");
 
     for(size_t i = 0; i < var_stack->size; i++) {
-        if(strcmp(var_stack->data[i].str.ptr, var_name) == 0) {
+        if(my_ssstrcmp(var_stack->data[i].str, var) == 0) {
             return i;
         }
     }
     return -1;
 }
 
-size_t add_var(string_t str, var_val_type val, stack_t* var_stack, error_code* error) {
+size_t add_var(const string_t str, const var_val_type val, stack_t* var_stack, error_code* error) {
     HARD_ASSERT(var_stack != nullptr, "var_stack is nulltpr");
 
-    *error = stack_push(var_stack, {str, val});
-    return var_stack->size;
+    if(error == nullptr) stack_push(var_stack, {str, val});
+    else        *error = stack_push(var_stack, {str, val});
+    return var_stack->size - 1;
+}
+
+size_t get_or_add_var_idx(const string_t str, const var_val_type val, stack_t* var_stack, error_code* error) {
+    HARD_ASSERT(var_stack != nullptr, "var_stack is nullptr");
+
+    ssize_t idx = get_var_idx(str, var_stack);
+    if(idx == -1) {
+        return add_var(str, 0, var_stack, error);
+    } 
+    return (size_t)idx;
 }

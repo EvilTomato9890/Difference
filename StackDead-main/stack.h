@@ -1,13 +1,12 @@
 #ifndef STACK_H_INCLUDED
 #define STACK_H_INCLUDED
 
-#include "error_handlers.h"
 #include <limits.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "../include/my_string.h"
-
+#include "error_handlers.h"
+#include "node_info.h"
 
 #ifdef HASH_DEBUG
 	#define VERIFY_DEBUG
@@ -30,11 +29,6 @@
 #endif
 
 #define VAR_INIT ver_data{__LINE__, 0, "tree_node_t*", "stack", __FILE__, __func__, "Init"}
-
-struct variable_t {
-    string_t    str;
-    double      val;
-};
 
 typedef variable_t st_type;
 
