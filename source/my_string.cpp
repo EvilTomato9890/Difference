@@ -6,5 +6,5 @@ int my_ssstrcmp(string_t str1, string_t str2) {
 }
 
 int my_scstrcmp(string_t str1, const char* str2) {
-    my_ssstrcmp(str1, {str2, strlen(str2)});
+    return my_ssstrcmp(str1, {str2, strlen(str2)});
 }

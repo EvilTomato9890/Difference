@@ -14,6 +14,7 @@
 #include "differentiator.h"
 #include "tree_file_io.h"
 #include "../StackDead-main/stack.h"
+
 //================================================================================
 
 static void test_read_empty_tree() {
@@ -110,33 +111,30 @@ static void test_read_single_variable() {
 }
 
 static void test_DSL() {
-    LOGGER_INFO("AAAAAAAAAAAAAAAAAAAA");
-
-    tree_t tree = {};
+    tree_t tree_origin = {};
     stack_t stack = {};
-    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
+    error_code error = tree_init(&tree_origin, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "INIT failed");
 
     #ifdef VERIFY_DEBUG
-    tree.dump_file = fopen("test_dump_DSL.html", "w");
-    HARD_ASSERT(tree.dump_file != nullptr, "failed to create file");
+    tree_origin.dump_file = fopen("test_dump_DSL.html", "w");
+    HARD_ASSERT(tree_origin.dump_file != nullptr, "failed to create file");
     #endif
-    tree.root = ADD_(SIN_(c(1)), c(2));
-    tree.head->left = tree.root;
+    tree_t* tree = &tree_origin;
+    tree_origin.root = ADD_(SIN_(c(1)), c(2));
+    tree_origin.head->left = tree_origin.root;
 
-    tree_dump(&tree, VER_INIT, true, "FF");
+    tree_dump(tree, VER_INIT, true, "FF");
 
     #ifdef VERIFY_DEBUG
-    if (tree.dump_file != nullptr) {
-        fclose(tree.dump_file);
-        tree.dump_file = nullptr;
+    if (tree_origin.dump_file != nullptr) {
+        fclose(tree_origin.dump_file);
+        tree_origin.dump_file = nullptr;
     }
     #endif
 
 
-    tree_destroy(&tree);
-    LOGGER_INFO("AAAAAAAAAAA");
-
+    tree_destroy(tree);
 }
 
 static void test_read_complex_tree() {
@@ -266,8 +264,8 @@ static void test_write_variable_tree() {
     stack_t stack = {};
     error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "tree_init failed");
-    
-    value_t value = make_union(VARIABLE, "test_var");
+    size_t idx = add_var({"test_var", strlen("test_var")}, 0, &stack, &error);
+    value_t value = make_union(VARIABLE, idx);
     tree_node_t* root = tree_init_root(&tree, VARIABLE, value);
     HARD_ASSERT(root != nullptr, "tree_init_root failed");
     
@@ -308,7 +306,8 @@ static void test_write_complex_tree() {
     tree_node_t* left = tree_insert_left(&tree, CONSTANT, left_value, root);
     HARD_ASSERT(left != nullptr, "tree_insert_left failed");
     
-    value_t right_value = make_union(VARIABLE, "y");
+    size_t idx = add_var({"y", 1}, 0, &stack, nullptr);
+    value_t right_value = make_union(VARIABLE, idx);
     tree_node_t* right = tree_insert_right(&tree, VARIABLE, right_value, root);
     HARD_ASSERT(right != nullptr, "tree_insert_right failed");
     

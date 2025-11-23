@@ -12,6 +12,8 @@
 #include "error_handler.h"
 #include "../StackDead-main/stack.h" //КАК
 
+static tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node);
+
 //================================================================================
 
 value_t make_union(node_type_t type, ...) {
@@ -54,6 +56,15 @@ tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, 
     node->value  = value;
     node->left   = left;
     node->right  = right;
+    return node;
+}
+tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_t* tree) {
+    HARD_ASSERT(tree  != nullptr, "tree is nullptr");
+
+    tree_node_t* node = init_node(node_type, value, left, right);
+    tree_t tree_clone = *tree;
+    tree_make_root(&tree_clone, node);
+    tree_dump(&tree_clone, VER_INIT, true, "Diff dumps");
     return node;
 }
 
@@ -151,9 +162,9 @@ tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) 
     }
     tree_node_t* node = init_node(node_type, value, nullptr, nullptr);
     if (node == nullptr) return nullptr;
-    tree->root = node;
-    tree->size = 1;
-    tree->head->right = node;
+
+    tree_make_root(tree, node);
+
     ON_DEBUG({
         error_code verify_error = ERROR_NO;
         verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "After set_root");
@@ -165,6 +176,16 @@ tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) 
     return node;
 }
 
+static tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node) {
+    HARD_ASSERT(tree != nullptr, "Tree is nullptr");
+    if(!node) LOGGER_WARNING("New root is nullptr");
+
+    tree->root = node;
+    tree->head->right = node;
+    tree->size = count_nodes_recursive(node);
+
+    return node;
+}
 tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent) {
     HARD_ASSERT(tree   != nullptr,    "tree pointer is nullptr");
     HARD_ASSERT(parent != nullptr,    "parent pointer is nullptr");

@@ -1,17 +1,17 @@
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #1 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-23 23:21:17</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
 <span style="color:#ff4d4f;font-weight:700;">After reading node: * 
 Buffer remainder: "(sin ("x" nil nil) nil) (1 nil nil))</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x7fff71ad76b0
-root ptr : 0x5e58c979c420
+tree ptr : 0x7ffc8caa6810
+root ptr : 0x5f660d70c420
 size     : 0
 
 -- Created at (tree ver_info) --
 file: source/test_tree_io.cpp
 func: test_read_complex_tree
-line: 147
+line: 145
 
 -- Called at (passed ver_info) --
 file: source/tree_file_io.cpp
@@ -20,7 +20,7 @@ line: 114
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5e58c979c420  FUNCTION        (nil)           (nil)           *
+0     0x5f660d70c420  FUNCTION        (nil)           (nil)           *
 
 SVG: dumps/tree_dump_001.svg
 </pre>
@@ -29,18 +29,18 @@ SVG: dumps/tree_dump_001.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #2 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-23 23:21:17</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
 <span style="color:#ff4d4f;font-weight:700;">After reading node: sin 
 Buffer remainder: "("x" nil nil) nil) (1 nil nil))</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x7fff71ad76b0
-root ptr : 0x5e58c979c420
+tree ptr : 0x7ffc8caa6810
+root ptr : 0x5f660d70c420
 size     : 0
 
 -- Created at (tree ver_info) --
 file: source/test_tree_io.cpp
 func: test_read_complex_tree
-line: 147
+line: 145
 
 -- Called at (passed ver_info) --
 file: source/tree_file_io.cpp
@@ -49,8 +49,8 @@ line: 114
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5e58c979c420  FUNCTION        0x5e58c979daa0  (nil)           *
-1     0x5e58c979daa0  FUNCTION        (nil)           (nil)           sin
+0     0x5f660d70c420  FUNCTION        0x5f660d70daa0  (nil)           *
+1     0x5f660d70daa0  FUNCTION        (nil)           (nil)           sin
 
 SVG: dumps/tree_dump_002.svg
 </pre>
@@ -59,18 +59,18 @@ SVG: dumps/tree_dump_002.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #3 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-23 23:21:17</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
 <span style="color:#ff4d4f;font-weight:700;">After reading node: x" nil nil) nil) (1 nil nil)) 
 Buffer remainder: " nil nil) nil) (1 nil nil))</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x7fff71ad76b0
-root ptr : 0x5e58c979c420
+tree ptr : 0x7ffc8caa6810
+root ptr : 0x5f660d70c420
 size     : 0
 
 -- Created at (tree ver_info) --
 file: source/test_tree_io.cpp
 func: test_read_complex_tree
-line: 147
+line: 145
 
 -- Called at (passed ver_info) --
 file: source/tree_file_io.cpp
@@ -79,9 +79,9 @@ line: 114
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5e58c979c420  FUNCTION        0x5e58c979daa0  (nil)           *
-1     0x5e58c979daa0  FUNCTION        0x5e58c979dad0  (nil)           sin
-2     0x5e58c979dad0  VARIABLE        (nil)           (nil)           x
+0     0x5f660d70c420  FUNCTION        0x5f660d70daa0  (nil)           *
+1     0x5f660d70daa0  FUNCTION        0x5f660d70dad0  (nil)           sin
+2     0x5f660d70dad0  VARIABLE        (nil)           (nil)           x
 
 SVG: dumps/tree_dump_003.svg
 </pre>
@@ -90,18 +90,18 @@ SVG: dumps/tree_dump_003.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #4 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-23 23:21:17</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
 <span style="color:#ff4d4f;font-weight:700;">After reading node: 1 
 Buffer remainder: "nil nil))</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x7fff71ad76b0
-root ptr : 0x5e58c979c420
+tree ptr : 0x7ffc8caa6810
+root ptr : 0x5f660d70c420
 size     : 0
 
 -- Created at (tree ver_info) --
 file: source/test_tree_io.cpp
 func: test_read_complex_tree
-line: 147
+line: 145
 
 -- Called at (passed ver_info) --
 file: source/tree_file_io.cpp
@@ -110,10 +110,10 @@ line: 114
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5e58c979c420  FUNCTION        0x5e58c979daa0  0x5e58c979db20  *
-1     0x5e58c979daa0  FUNCTION        0x5e58c979dad0  (nil)           sin
-2     0x5e58c979dad0  VARIABLE        (nil)           (nil)           x
-3     0x5e58c979db20  CONSTANT        (nil)           (nil)           1
+0     0x5f660d70c420  FUNCTION        0x5f660d70daa0  0x5f660d70db20  *
+1     0x5f660d70daa0  FUNCTION        0x5f660d70dad0  (nil)           sin
+2     0x5f660d70dad0  VARIABLE        (nil)           (nil)           x
+3     0x5f660d70db20  CONSTANT        (nil)           (nil)           1
 
 SVG: dumps/tree_dump_004.svg
 </pre>
@@ -122,32 +122,250 @@ SVG: dumps/tree_dump_004.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #5 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-23 23:21:17</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
 <span style="color:#ff4d4f;font-weight:700;">Test dump tree with nodes</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x7fff71ad76b0
-root ptr : 0x5e58c979c420
+tree ptr : 0x7ffc8caa6810
+root ptr : 0x5f660d70c420
 size     : 4
 
 -- Created at (tree ver_info) --
 file: source/test_tree_io.cpp
 func: test_read_complex_tree
-line: 147
+line: 145
 
 -- Called at (passed ver_info) --
 file: source/test_tree_io.cpp
 func: test_read_complex_tree
-line: 157
+line: 155
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5e58c979c420  FUNCTION        0x5e58c979daa0  0x5e58c979db20  *
-1     0x5e58c979daa0  FUNCTION        0x5e58c979dad0  (nil)           sin
-2     0x5e58c979dad0  VARIABLE        (nil)           (nil)           x
-3     0x5e58c979db20  CONSTANT        (nil)           (nil)           1
+0     0x5f660d70c420  FUNCTION        0x5f660d70daa0  0x5f660d70db20  *
+1     0x5f660d70daa0  FUNCTION        0x5f660d70dad0  (nil)           sin
+2     0x5f660d70dad0  VARIABLE        (nil)           (nil)           x
+3     0x5f660d70db20  CONSTANT        (nil)           (nil)           1
 
 SVG: dumps/tree_dump_005.svg
 </pre>
 <img src="dumps/tree_dump_005.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #6 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7ffc8caa6650
+root ptr : 0x5f660d70ead0
+size     : 1
+
+-- Created at (tree ver_info) --
+file: source/test_tree_io.cpp
+func: test_read_complex_tree
+line: 145
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 67
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x5f660d70ead0  CONSTANT        (nil)           (nil)           0
+
+SVG: dumps/tree_dump_006.svg
+</pre>
+<img src="dumps/tree_dump_006.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #7 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7ffc8caa66b0
+root ptr : 0x5f660d70eda0
+size     : 4
+
+-- Created at (tree ver_info) --
+file: source/test_tree_io.cpp
+func: test_read_complex_tree
+line: 145
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 67
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x5f660d70eda0  FUNCTION        0x5f660d70ea70  0x5f660d70ead0  *
+1     0x5f660d70ea70  FUNCTION        0x5f660d70dad0  (nil)           sin
+2     0x5f660d70dad0  VARIABLE        (nil)           (nil)           x
+3     0x5f660d70ead0  CONSTANT        (nil)           (nil)           0
+
+SVG: dumps/tree_dump_007.svg
+</pre>
+<img src="dumps/tree_dump_007.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #8 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7ffc8caa65f0
+root ptr : 0x5f660d70eef0
+size     : 1
+
+-- Created at (tree ver_info) --
+file: source/test_tree_io.cpp
+func: test_read_complex_tree
+line: 145
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 67
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x5f660d70eef0  CONSTANT        (nil)           (nil)           1
+
+SVG: dumps/tree_dump_008.svg
+</pre>
+<img src="dumps/tree_dump_008.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #9 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7ffc8caa6650
+root ptr : 0x5f660d70ef80
+size     : 2
+
+-- Created at (tree ver_info) --
+file: source/test_tree_io.cpp
+func: test_read_complex_tree
+line: 145
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 67
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x5f660d70ef80  FUNCTION        0x5f660d70edd0  (nil)           cos
+1     0x5f660d70edd0  VARIABLE        (nil)           (nil)           x
+
+SVG: dumps/tree_dump_009.svg
+</pre>
+<img src="dumps/tree_dump_009.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #10 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7ffc8caa6650
+root ptr : 0x5f660d70f060
+size     : 4
+
+-- Created at (tree ver_info) --
+file: source/test_tree_io.cpp
+func: test_read_complex_tree
+line: 145
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 67
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x5f660d70f060  FUNCTION        0x5f660d70ef80  0x5f660d70eef0  *
+1     0x5f660d70ef80  FUNCTION        0x5f660d70edd0  (nil)           cos
+2     0x5f660d70edd0  VARIABLE        (nil)           (nil)           x
+3     0x5f660d70eef0  CONSTANT        (nil)           (nil)           1
+
+SVG: dumps/tree_dump_010.svg
+</pre>
+<img src="dumps/tree_dump_010.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #11 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7ffc8caa66b0
+root ptr : 0x5f660d70f090
+size     : 6
+
+-- Created at (tree ver_info) --
+file: source/test_tree_io.cpp
+func: test_read_complex_tree
+line: 145
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 67
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x5f660d70f090  FUNCTION        0x5f660d70f060  0x5f660d70eaa0  *
+1     0x5f660d70f060  FUNCTION        0x5f660d70ef80  0x5f660d70eef0  *
+2     0x5f660d70ef80  FUNCTION        0x5f660d70edd0  (nil)           cos
+3     0x5f660d70edd0  VARIABLE        (nil)           (nil)           x
+4     0x5f660d70eef0  CONSTANT        (nil)           (nil)           1
+5     0x5f660d70eaa0  CONSTANT        (nil)           (nil)           1
+
+SVG: dumps/tree_dump_011.svg
+</pre>
+<img src="dumps/tree_dump_011.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #12 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-24 00:13:23</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7ffc8caa66b0
+root ptr : 0x5f660d70f380
+size     : 11
+
+-- Created at (tree ver_info) --
+file: source/test_tree_io.cpp
+func: test_read_complex_tree
+line: 145
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 67
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x5f660d70f380  FUNCTION        0x5f660d70f090  0x5f660d70eda0  +
+1     0x5f660d70f090  FUNCTION        0x5f660d70f060  0x5f660d70eaa0  *
+2     0x5f660d70f060  FUNCTION        0x5f660d70ef80  0x5f660d70eef0  *
+3     0x5f660d70ef80  FUNCTION        0x5f660d70edd0  (nil)           cos
+4     0x5f660d70edd0  VARIABLE        (nil)           (nil)           x
+5     0x5f660d70eef0  CONSTANT        (nil)           (nil)           1
+6     0x5f660d70eaa0  CONSTANT        (nil)           (nil)           1
+7     0x5f660d70eda0  FUNCTION        0x5f660d70ea70  0x5f660d70ead0  *
+8     0x5f660d70ea70  FUNCTION        0x5f660d70dad0  (nil)           sin
+9     0x5f660d70dad0  VARIABLE        (nil)           (nil)           x
+10    0x5f660d70ead0  CONSTANT        (nil)           (nil)           0
+
+SVG: dumps/tree_dump_012.svg
+</pre>
+<img src="dumps/tree_dump_012.svg" style="max-width:2250px;"/>
 
 <hr>

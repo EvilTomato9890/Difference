@@ -481,7 +481,10 @@ static error_code write_node(const tree_t* tree_ptr, FILE* file_ptr, tree_node_t
     }
     
     if (node_ptr->type == VARIABLE) {
+                LOGGER_WARNING("AAAAAA, %ld", node_ptr->value.var_idx);
+
         string_t curr_str = tree_ptr->var_stack->data[node_ptr->value.var_idx].str;
+        LOGGER_WARNING("AAAAAA");
         if (fprintf(file_ptr, "\"%.*s\"", (int)curr_str.len, curr_str.ptr) < 0) {
             LOGGER_ERROR("write_node: fprintf failed for variable");
             return ERROR_OPEN_FILE;

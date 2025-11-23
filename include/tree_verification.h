@@ -22,5 +22,6 @@ error_code tree_dump(const tree_t* tree,
                      bool is_visual,
                      const char* fmt, ...);
 
+size_t count_nodes_recursive(const tree_node_t* node);
 #endif
 

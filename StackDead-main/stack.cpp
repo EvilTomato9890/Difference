@@ -145,9 +145,6 @@ static error_code normalize_size(stack_t* stack) {
 		
 		LOGGER_DEBUG("Reallocation complete");
 		LOGGER_DEBUG("NEW CAPACITY = %lu", stack->capacity);
-		ON_DEBUG(
-		)
-
 	}
 
 	ON_DEBUG(

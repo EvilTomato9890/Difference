@@ -10,11 +10,13 @@
 error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info));
 
 tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right);
+tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_t* tree);
 
 error_code tree_destroy(tree_t* tree);
 
 bool tree_is_empty(const tree_t* tree);
 
+tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node); 
 tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value);
 tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent);
 tree_node_t* tree_insert_right(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent);
