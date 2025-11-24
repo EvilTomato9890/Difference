@@ -28,23 +28,17 @@
 	#define ON_DEBUG(...)
 #endif
 
-#define VAR_INIT ver_data{__LINE__, 0, "tree_node_t*", "stack", __FILE__, __func__, "Init"}
 
 typedef variable_t st_type;
 
-const int CANARY_NUM = INT_MAX;
-inline const variable_t CANARY_PTR = {{nullptr, INT_MAX}, INT_MAX};
-
-struct ver_data {
-	//-------------------Creation info
-	int creation_line;
-	unsigned long hash;
-	const char* var_type;
-	const char* var_name;
-	const char* creation_file;
-	const char* creation_func;
-	const char* call_reason;
+struct ver_info_t {
+    const char* file;
+    const char* func;
+    int         line;
 };
+
+#define VER_INIT ver_info_t{__FILE__, __func__, __LINE__}
+
 
 struct stack_t {
 	ON_CANARY_DEBUG(
@@ -54,7 +48,7 @@ struct stack_t {
 	st_type* data;
 	st_type* original_ptr;
 	ON_DEBUG(
-		ver_data ver_info;
+		ver_info_t ver_info;
 		bool is_constructed = true;
 	)
 	size_t size;
@@ -65,7 +59,7 @@ struct stack_t {
 	)
 };
 
-error_code stack_init(stack_t* stack_return, size_t capacity ON_DEBUG(, ver_data ver_info));
+error_code stack_init(stack_t* stack_return, size_t capacity ON_DEBUG(, ver_info_t ver_info));
 
 error_code stack_destroy(stack_t* stack);
 
@@ -75,6 +69,6 @@ error_code stack_push(stack_t* stack, st_type elem);
 
 st_type stack_pop(stack_t* stack, error_code* error_return); //Лучше возвращать ошибку или значение?
 
-error_code stack_clone(const stack_t* source, stack_t* dest ON_DEBUG(, ver_data ver_info));
+error_code stack_clone(const stack_t* source, stack_t* dest ON_DEBUG(, ver_info_t ver_info));
 
 #endif

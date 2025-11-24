@@ -18,10 +18,11 @@ enum err {
 
 typedef long error_code;
 
-#define RETURN_IF_ERROR(error_) 						\
+#define RETURN_IF_ERROR(error_, ...) 						\
 	do {											 	\
 		if((error_) != 0) { 							\
 			LOGGER_ERROR("Error code: %lu", (error_));  \
+			 __VA_ARGS__\
 			return (error_); 							\
 		}												\
 	} while(0)

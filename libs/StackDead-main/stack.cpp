@@ -11,11 +11,14 @@ static variable_t const POISON_VALUE = {{(char*)0xEBA1DEDA, 0xEBA1DEDA}, 0xEBA1D
 static const float REDUCTION_FACTOR = 4; // float
 static const float GROWTH_FACTOR = 2; // float
 
+static const int CANARY_NUM = INT_MAX;
+static inline const variable_t CANARY_PTR = {{nullptr, INT_MAX}, INT_MAX};
+
 static error_code normalize_size(stack_t* stack);
 static error_code stack_recalloc(stack_t* stack, size_t new_capacity);
 
 
-error_code stack_init(stack_t* stack_return, size_t capacity ON_DEBUG(, ver_data ver_info)) {
+error_code stack_init(stack_t* stack_return, size_t capacity ON_DEBUG(, ver_info_t ver_info)) {
 	LOGGER_DEBUG("Stack initialize started");	
 
 	HARD_ASSERT(stack_return != nullptr, "Stack_return is nullptr");

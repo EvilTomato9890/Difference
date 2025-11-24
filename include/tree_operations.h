@@ -4,7 +4,7 @@
 #include "tree_info.h"
 #include "error_handler.h"
 #include "asserts.h"
-#include "../StackDead-main/stack.h"
+#include "../libs/StackDead-main/stack.h"
 
 
 error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info));
