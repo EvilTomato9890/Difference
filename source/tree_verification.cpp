@@ -93,11 +93,6 @@ static int run_dot_to_svg(const char *dot_path, const char *svg_path) {
     return system(cmd) == 0;
 }
 
-size_t count_nodes_recursive(const tree_node_t* node) {
-    if (node == nullptr) return 0;
-    return 1 + count_nodes_recursive(node->left) + count_nodes_recursive(node->right);
-}
-
 static error_code collect_recursive(const tree_node_t* node, const tree_node_t** arr, size_t* n) {
     if (node == nullptr) return ERROR_NO;
     

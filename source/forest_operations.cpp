@@ -23,7 +23,7 @@ error_code forest_init(forest_t* forest ON_DEBUG(, ver_info_t ver_info)) {
         LOGGER_ERROR("forest_init: calloc for stack failed");
         return ERROR_MEM_ALLOC;
     }
-    error |= stack_init(stack, 1, VER_INIT);
+    error |= stack_init(stack, 1 ON_DEBUG(, VER_INIT));
     RETURN_IF_ERROR(error, free(stack););
 
 
@@ -33,7 +33,7 @@ error_code forest_init(forest_t* forest ON_DEBUG(, ver_info_t ver_info)) {
         free(stack);
         return ERROR_MEM_ALLOC;
     }
-    error |= list_init(list, 1, VER_INIT);
+    error |= list_init(list, 1 ON_DEBUG(, VER_INIT));
     RETURN_IF_ERROR(error, free(stack); free(list););
 
 
@@ -62,7 +62,7 @@ error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name) {
     forest->dump_file            = dump_file;
     forest->tree_list->dump_file = dump_file;
     return ERROR_NO;
-})
+}
 
 error_code forest_close_dump_file(forest_t* forest) {
     HARD_ASSERT(forest != nullptr, "Forest is nullptr");
@@ -76,6 +76,7 @@ error_code forest_close_dump_file(forest_t* forest) {
     }
     return ERROR_NO;
 }
+)
 
 tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr) {
     HARD_ASSERT(forest != nullptr, "Forest is nullptr");
@@ -93,7 +94,7 @@ tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr) {
         return nullptr;
     }
 
-    error |= tree_init(tree, forest->var_stack, VER_INIT);
+    error |= tree_init(tree, forest->var_stack ON_DEBUG(, VER_INIT));
     if(error != ERROR_NO) {
         LOGGER_ERROR("forest_add_tree: tree_init failed");
         return nullptr;

@@ -142,6 +142,10 @@ bool tree_is_empty(const tree_t* tree) {
     return tree->root == nullptr;
 }
 
+size_t count_nodes_recursive(const tree_node_t* node) {
+    if (node == nullptr) return 0;
+    return 1 + count_nodes_recursive(node->left) + count_nodes_recursive(node->right);
+}
 //================================================================================
 
 tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) {

@@ -269,7 +269,7 @@ error_code list_remove(list_t* list, ssize_t remove_index) {
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
     LOGGER_DEBUG("Removing node at physical index %d", remove_index);
 
-    error_code error = 0;
+    error_code error = ERROR_NO;
     ON_DEBUG(
         error |= list_verify(list, VER_INIT, DUMP_IMG, "Before removal at index %d", remove_index);
         if (error != ERROR_NO) {
@@ -306,7 +306,7 @@ error_code list_remove(list_t* list, ssize_t remove_index) {
             return error;
         }
     )
-    return ERROR_NO;
+    return error;
 }
 
 error_code list_remove_auto(list_t* list, ssize_t remove_index) {
