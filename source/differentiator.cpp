@@ -8,7 +8,6 @@
 tree_node_t* get_diff(tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(node != nullptr, "Node is nullptr");
 
-    error_code error = 0;
     if (node->type == CONSTANT) {
         return c(0);
     }

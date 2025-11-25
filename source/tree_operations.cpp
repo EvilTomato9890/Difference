@@ -237,7 +237,7 @@ size_t get_or_add_var_idx(const string_t str, const var_val_type val, stack_t* v
 
     ssize_t idx = get_var_idx(str, var_stack);
     if(idx == -1) {
-        return add_var(str, 0, var_stack, error);
+        return add_var(str, val, var_stack, error);
     } 
     return (size_t)idx;
 }

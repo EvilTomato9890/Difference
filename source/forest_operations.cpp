@@ -44,13 +44,14 @@ error_code forest_init(forest_t* forest ON_DEBUG(, ver_info_t ver_info)) {
 
     forest->buff = nullptr;
 
+    return error;
 }
 
 ON_DEBUG(
 error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name) {
-    HARD_ASSERT(forest     != nullptr, "Forest_ptr is nullptr");
-    HARD_ASSERT(dump_file_name != nullptr, "Dump_file_name is nullptr");
-
+    HARD_ASSERT(forest            != nullptr, "Forest_ptr is nullptr");
+    HARD_ASSERT(dump_file_name    != nullptr, "Dump_file_name is nullptr");
+    HARD_ASSERT(forest->tree_list != nullptr, "List is nullptr");
     LOGGER_DEBUG("Forest_open_dump_file: started");
 
     FILE* dump_file = fopen(dump_file_name, "w");
@@ -58,7 +59,8 @@ error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name) {
         LOGGER_ERROR("File open error");
         return ERROR_OPEN_FILE;
     }
-    forest->dump_file = dump_file;
+    forest->dump_file            = dump_file;
+    forest->tree_list->dump_file = dump_file;
     return ERROR_NO;
 })
 
@@ -186,5 +188,6 @@ error_code forest_dest(forest_t* forest) {
     })
     free(forest);
 
+    return error;
 }
 

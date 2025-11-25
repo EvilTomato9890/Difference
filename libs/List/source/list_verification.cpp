@@ -231,12 +231,12 @@ error_code list_verify(list_t* list,
 
     if (list->arr && capacity > 0) {
         if (list->arr[0].val != CANARY_NUM) {
-            LOGGER_ERROR("Left canary corrupted: expected %g, got %g", CANARY_NUM, list->arr[0].val);
+            LOGGER_ERROR("Left canary corrupted: expected %p, got %p", CANARY_NUM, list->arr[0].val);
             error_description = "left canary corrupted";
             error |= ERROR_CANARY;
         }
         if (list->arr[capacity].val != CANARY_NUM) {
-            LOGGER_ERROR("Right canary corrupted: expected %g, got %g", CANARY_NUM, list->arr[capacity].val);
+            LOGGER_ERROR("Right canary corrupted: expected %p, got %p", CANARY_NUM, list->arr[capacity].val);
             error_description = "right canary corrupted";
             error |= ERROR_CANARY;
         }
@@ -315,7 +315,7 @@ int dump_make_graphviz_svg(const list_t* list, const char* base_name) {
 
     fprintf(file,
         "  node_0[shape=record,"
-        "label=\"ind: 0 | val: %g | { prev: %ld | next: %ld }\"," 
+        "label=\"ind: 0 | val: %p | { prev: %ld | next: %ld }\"," 
         "color=\"" ELEM_0_BORDER "\",style=\"filled,bold,rounded\",fillcolor=\"" ELEM_0_BACK "\"];\n",
         list->arr[0].val, list->arr[0].prev, list->arr[0].next);
 
@@ -356,34 +356,34 @@ static void emit_nodes(const list_t *list, FILE *file) {
     for (size_t i = 1; i < capacity; ++i) {
         const ssize_t next_index  = list->arr[i].next;
         const ssize_t prev_index  = list->arr[i].prev;
-        const double val      = list->arr[i].val;
+        const tree_t* val         = list->arr[i].val;
 
-        const ssize_t is_free = (prev_index == -1 || val == POISON);
+        const ssize_t is_free = (prev_index == POISON_IDX || val == POISON_VAL);
         const ssize_t is_head = (i == (size_t)list->head);
         const ssize_t is_tail = (i == (size_t)list->tail);
 
         if (is_free) {
             fprintf(file,
                 "  node_%zu[shape=record,"
-                "label=\" ind: %zu | val: %g | { prev: %ld | next: %ld } \","
+                "label=\" ind: %zu | val: %p | { prev: %ld | next: %ld } \","
                 "style=\"filled,rounded\",color=\"" FREE_NODE_BORDER "\",fillcolor=\"" FREE_NODE_BACK "\"];\n",
                 i, i, val, prev_index, next_index);
         } else if (is_head) {
             fprintf(file,
                 "  node_%zu[shape=record,"
-                "label=\" ind: %zu (HEAD) | val: %g | { prev: %ld | next: %ld } \","
+                "label=\" ind: %zu (HEAD) | val: %p | { prev: %ld | next: %ld } \","
                 "color=\"" HEAD_BORDER "\",fillcolor=\"" HEAD_BACK "\"];\n",
                 i, i, val, prev_index, next_index);
         } else if (is_tail) {
             fprintf(file,
                 "  node_%zu[shape=record,"
-                "label=\" ind: %zu (TAIL) | val: %g | { prev: %ld | next: %ld } \","
+                "label=\" ind: %zu (TAIL) | val: %p | { prev: %ld | next: %ld } \","
                 "color=\"" TAIL_BORDER "\",fillcolor=\"" TAIL_BACK "\"];\n",
                 i, i, val, prev_index, next_index);
         } else {
             fprintf(file,
                 "  node_%zu[shape=record,"
-                "label=\" ind: %zu | val: %g | { prev: %ld | next: %ld } \","
+                "label=\" ind: %zu | val: %p | { prev: %ld | next: %ld } \","
                 "color=\"" BASIC_BORDER "\",fillcolor=\"" BASIC_BACK "\"];\n",
                 i, i, val, prev_index, next_index);
         }
@@ -559,9 +559,9 @@ static void dump_write_html(const list_t* list, ver_info_t ver_info_called, int 
 
     if (list && list->arr && list->capacity > 0) {
         fprintf(html, "\n-- Canaries --\n");
-        fprintf(html, "Expected canary value: %g\n", CANARY_NUM);
-        fprintf(html, "left : %g\n", list->arr[0].val); 
-        fprintf(html, "right: %g\n", list->arr[list->capacity].val);
+        fprintf(html, "Expected canary value: %p\n", CANARY_NUM);
+        fprintf(html, "left : %p\n", list->arr[0].val); 
+        fprintf(html, "right: %p\n", list->arr[list->capacity].val);
     }
 
     if (list && list->arr && list->capacity > 0) {
@@ -572,8 +572,7 @@ static void dump_write_html(const list_t* list, ver_info_t ver_info_called, int 
         for (size_t i = 0; i < list->capacity; ++i) {
             ssize_t next =  list->arr[i].next;
             ssize_t  prv =  list->arr[i].prev;
-            double   val =  list->arr[i].val;
-            if(val == POISON) val = POISON;
+            tree_t*  val =  list->arr[i].val;
 
             char marks[32]; marks[0] = '\0';
             ssize_t first = 1;
@@ -583,9 +582,9 @@ static void dump_write_html(const list_t* list, ver_info_t ver_info_called, int 
             if ((ssize_t)i == list->tail)     {strcat(marks, first ? "TAIL" : ",TAIL"); first = 0;}
             if ((ssize_t)i == list->free_head){strcat(marks, first ? "FREE" : ",FREE"); first = 0;}
 
-            fprintf(html, "%-4zu  %-6ld %-6ld  %-12.6g  %-5s",
+            fprintf(html, "%-4zu  %-6ld %-6ld  %-12p  %-5s",
                     i, next, prv, val, marks);
-            if(val == POISON) {
+            if(val == POISON_VAL) {
                 fprintf(html, "(POISON)");
             }
             fprintf(html, "\n");
