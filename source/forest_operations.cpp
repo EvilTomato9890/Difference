@@ -1,3 +1,5 @@
+#include <errno.h>
+
 #include "forest_operations.h"
 #include "error_handler.h"
 #include "../libs/StackDead-main/stack.h"
@@ -67,9 +69,6 @@ error_code forest_dest(forest_t* forest) {
     forest->tree_list = nullptr;
 
     free(forest->buff.ptr);
-    ON_DEBUG({
-    forest_close_dump_file(forest);
-    })
 
     return error;
 }
@@ -186,6 +185,7 @@ error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name) {
     FILE* dump_file = fopen(dump_file_name, "w");
     if(!dump_file) {
         LOGGER_ERROR("File open error");
+        errno = 0;
         return ERROR_OPEN_FILE;
     }
     forest->dump_file = dump_file;
@@ -202,7 +202,7 @@ error_code forest_close_dump_file(forest_t* forest) {
     }
 
     int error = fclose(forest->dump_file);
-    if(!error) {
+    if(error != 0) {
         LOGGER_ERROR("forest_close_dump_file: Failed to close dump_file");
         return ERROR_CLOSE_FILE;
     }
@@ -217,12 +217,21 @@ error_code forest_read_file(forest_t* forest, const char* filename) {
     FILE* read_file = fopen(filename, "r");
     if(!read_file) {
         LOGGER_ERROR("forest_read_file: Opening file failed");
+        errno = 0;
         return ERROR_OPEN_FILE;
     }
 
     error_code error = read_file_to_buffer(read_file, &forest->buff);
     if(error != ERROR_NO) {
         LOGGER_ERROR("forest_read_file: read_file_to_buffer failed");
+        return error;
     }
+
+    int err = fclose(read_file);
+    if(err != 0) {
+        LOGGER_ERROR("forest_read_File: failed to close file");
+        return ERROR_CLOSE_FILE;
+    }
+
     return error;
 }

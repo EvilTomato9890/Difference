@@ -69,12 +69,11 @@ static void cleanup_failed_node(tree_t* tree, tree_node_t* failed_node, tree_nod
     size_t removed = 0;
     destroy_node_recursive(failed_node, &removed);
     
-    if (parent == tree->head) {
+    if (parent == nullptr) {
         tree->root = nullptr;
-        tree->head->right = nullptr;
-    } else if (parent != nullptr && parent->left == failed_node) {
+    } else if (parent->left == failed_node) {
         parent->left = nullptr;
-    } else if (parent != nullptr && parent->right == failed_node) {
+    } else if (parent->right == failed_node) {
         parent->right = nullptr;
     }
 }
@@ -82,11 +81,9 @@ static void cleanup_failed_node(tree_t* tree, tree_node_t* failed_node, tree_nod
 static void attach_node_to_parent(tree_t* tree, tree_node_t* new_node, tree_node_t* parent) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(new_node != nullptr, "new_node is nullptr");
-    HARD_ASSERT(parent != nullptr, "parent is nullptr");
     
-    if (parent == tree->head) {
+    if (parent == nullptr) {
         tree->root = new_node;
-        tree->head->right = new_node;
     } else if (parent->left == nullptr) {
         parent->left = new_node;
     } else {
@@ -307,7 +304,7 @@ static tree_node_t* read_node(tree_t* tree_ptr, tree_node_t* parent_node_ptr,
 //================================================================================
 
 error_code tree_parse_from_buffer(tree_t* tree) {
-    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(tree           != nullptr, "tree is nullptr");
     HARD_ASSERT(tree->buff.ptr != nullptr, "buffer is nullptr");
     LOGGER_DEBUG("tree_parse_from_buffer: started");
 
@@ -319,7 +316,7 @@ error_code tree_parse_from_buffer(tree_t* tree) {
     }
     
     error_code parse_error = 0;
-    tree_node_t* root = read_node(tree, tree->head, &parse_error, &curr, tree->buff);
+    tree_node_t* root = read_node(tree, nullptr, &parse_error, &curr, tree->buff);
 
     if (parse_error) {
         LOGGER_ERROR("parse_tree_from_buffer: failed to parse tree");
@@ -328,10 +325,11 @@ error_code tree_parse_from_buffer(tree_t* tree) {
     
     if (root == nullptr) {
         tree->root = nullptr;
-        tree->head->right = nullptr;
         tree->size = 0;
         return ERROR_NO;
-    }    
+    }
+    
+    tree->root = root;
     tree->size = count_nodes_recursive(root);
     ON_DEBUG(fflush(*tree->dump_file);)
     LOGGER_DEBUG("parse_tree_from_buffer: successfully parsed tree with %zu nodes", tree->size);
@@ -343,18 +341,13 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
     HARD_ASSERT(filename != nullptr, "filename is nullptr");
     
     LOGGER_DEBUG("tree_read_from_file: started");
-    
-
-    if (tree->head == nullptr) {
-        LOGGER_ERROR("ensure_tree_initialized: tree_init failed");
-        return ERROR_NO_INIT;
-    }    
 
     error_code error = ERROR_NO;
 
     FILE* file = fopen(filename, "r");
     if(!file) {
         LOGGER_ERROR("error opening file");
+        errno = 0;
         return ERROR_OPEN_FILE;
     }
 
@@ -454,6 +447,7 @@ error_code tree_write_to_file(const tree_t* tree, const char* filename) {
     FILE* file = fopen(filename, "w");
     if (file == nullptr) {
         LOGGER_ERROR("tree_write_to_file: failed to open file '%s'", filename);
+        errno = 0;
         return ERROR_OPEN_FILE;
     }
     

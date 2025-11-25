@@ -221,7 +221,7 @@ static int dump_make_graphviz_svg(const tree_t* tree, const char* base) {
 
     const tree_node_t** nodes = nullptr;
     size_t n = 0;
-    error_code error = collect_nodes_dynamic(tree->head, &nodes, &n);
+    error_code error = collect_nodes_dynamic(tree->root, &nodes, &n);
     if (error != ERROR_NO || nodes == nullptr) {
         fclose(file);
         return 0;
@@ -230,8 +230,7 @@ static int dump_make_graphviz_svg(const tree_t* tree, const char* base) {
     size_t i = 0;
     for (i = 0; i < n; ++i) {
         const tree_node_t* node = nodes[i];
-        if(node == tree->head)               print_node_label(tree, node, file, NODE_HEAD);
-        else if(node == tree->root)          print_node_label(tree, node, file, NODE_ROOT);
+        if(node == tree->root)               print_node_label(tree, node, file, NODE_ROOT);
         else if(!node->left && !node->right) print_node_label(tree, node, file, NODE_LEAF);
         else                                 print_node_label(tree, node, file, NODE_BASIC);
     }
@@ -273,10 +272,13 @@ static error_code write_html(const tree_t* tree,
                              ver_info_t ver_info_called,
                              int idx, const char* comment,
                              const char* svg_path, int is_visual) {
-    if (!tree || !tree->dump_file) return ERROR_NULL_ARG;
+    if (!tree || !tree->dump_file || !*tree->dump_file) {
+        LOGGER_ERROR("write_html: null args");
+        return ERROR_NULL_ARG;
+    }
+    
     FILE* html = *tree->dump_file;
     
-
     time_t t = time(nullptr);
     char ts[BUFFER_SIZE_TIME] = {};
     strftime(ts, sizeof ts, "%Y-%m-%d %H:%M:%S", localtime(&t));
@@ -295,7 +297,6 @@ static error_code write_html(const tree_t* tree,
     fprintf(html,
         "<span style=\"color:%s;font-weight:700;\">===================================================</span>\n",
         HTML_BORDER);
-
     fprintf(html, "tree ptr : %p\n", tree);
     fprintf(html, "root ptr : %p\n", tree->root);
     fprintf(html, "size     : %zu\n", tree->size);
@@ -336,6 +337,7 @@ static error_code write_html(const tree_t* tree,
                 (node ? node->right  : nullptr),
                 value);
     }
+
     free(nodes);
     fprintf(html, "\nSVG: %s\n", svg_path ? svg_path : "");
     fprintf(html, "</pre>\n");
@@ -347,6 +349,7 @@ static error_code write_html(const tree_t* tree,
     }
     fprintf(html, "\n<hr>\n");
     fflush(html);
+
     return ERROR_NO;
 }
 

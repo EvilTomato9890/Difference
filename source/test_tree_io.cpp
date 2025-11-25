@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <errno.h>
 
 #include "asserts.h"
 #include "tree_operations.h"
@@ -139,7 +140,6 @@ static void test_DSL() {
 
     tree_t* tree = &tree_origin;
     tree_origin.root = ADD_(SIN_(c(1)), c(2));
-    tree_origin.head->left = tree_origin.root;
 
     tree = forest_include_tree(&forest, &tree_origin, &error);
     HARD_ASSERT(error == ERROR_NO, "forest_include_tree failed");
@@ -212,7 +212,7 @@ static void test_read_complex_tree() {
 
     LOGGER_DEBUG("Diff ended");
 
-    error = tree_dump(test_tree, VER_INIT, true, "After diff");
+    error = tree_dump(tree_diff, VER_INIT, true, "After diff");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
     
     #ifdef VERIFY_DEBUG
@@ -231,13 +231,10 @@ static void test_read_nonexistent_file() {
     forest_t forest = {};
     error |= forest_init(&forest, VER_INIT);
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
-
     tree_t* test_tree = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == ERROR_NO, "add_tree failed");
-    
     error = forest_read_file(&forest, "nonexistent_file.tree");
     HARD_ASSERT(error & ERROR_OPEN_FILE, "should return ERROR_OPEN_FILE");
-    
     forest_dest(&forest);
     LOGGER_INFO("Тест пройден: чтение несуществующего файла\n");
 }
@@ -301,12 +298,12 @@ static void test_write_constant_tree() {
     error |= forest_init(&read_forest, VER_INIT);
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
-    tree_t* read_tree = forest_add_tree(&read_forest, &error);
-    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
-    
     error = forest_read_file(&read_forest, filename);
     HARD_ASSERT(error == ERROR_NO, "forest_read_file failed");
 
+    tree_t* read_tree = forest_add_tree(&read_forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+    
     error = tree_parse_from_buffer(read_tree);
     HARD_ASSERT(error == ERROR_NO, "tree_parse_from_buffer failed");
     HARD_ASSERT(read_tree->root != nullptr, "root should not be nullptr");
@@ -332,6 +329,7 @@ static void test_write_variable_tree() {
     
     size_t idx = add_var({"test_var", strlen("test_var")}, 0, forest.var_stack, &error);
     HARD_ASSERT(error == ERROR_NO, "add_var failed");
+    
     value_t value = make_union(VARIABLE, idx);
     tree_node_t* root = tree_init_root(test_tree, VARIABLE, value);
     HARD_ASSERT(root != nullptr, "tree_init_root failed");
@@ -344,17 +342,17 @@ static void test_write_variable_tree() {
     error |= forest_init(&read_forest, VER_INIT);
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
-    tree_t* read_tree = forest_add_tree(&read_forest, &error);
-    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
-    
     error = forest_read_file(&read_forest, filename);
     HARD_ASSERT(error == ERROR_NO, "forest_read_file failed");
+
+    tree_t* read_tree = forest_add_tree(&read_forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
 
     error = tree_parse_from_buffer(read_tree);
     HARD_ASSERT(error == ERROR_NO, "tree_parse_from_buffer failed");
     HARD_ASSERT(read_tree->root != nullptr, "root should not be nullptr");
     HARD_ASSERT(read_tree->root->type == VARIABLE, "type should be VARIABLE");
-    HARD_ASSERT(strcmp(read_tree->var_stack->data[read_tree->root->value.var_idx].str.ptr, "test_var") == 0, "variable name should match");
+    HARD_ASSERT(my_scstrcmp(read_tree->var_stack->data[read_tree->root->value.var_idx].str, "test_var") == 0, "variable name should match");
     
     forest_dest(&forest);
     forest_dest(&read_forest);
@@ -395,11 +393,11 @@ static void test_write_complex_tree() {
     error |= forest_init(&read_forest, VER_INIT);
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
-    tree_t* read_tree = forest_add_tree(&read_forest, &error);
-    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
-    
     error = forest_read_file(&read_forest, filename);
     HARD_ASSERT(error == ERROR_NO, "forest_read_file failed");
+
+    tree_t* read_tree = forest_add_tree(&read_forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
 
     error = tree_parse_from_buffer(read_tree);
     HARD_ASSERT(error == ERROR_NO, "tree_parse_from_buffer failed");

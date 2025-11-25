@@ -68,7 +68,7 @@ tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node
     tree_clone = *tree;
     tree_change_root(&tree_clone, node);
     tree_dump(&tree_clone, VER_INIT, true, "Diff dumps");
-    tree_destroy(&tree_clone);
+    
     return node;
 }
 
@@ -100,11 +100,6 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
     tree->root = nullptr;
     tree->size = 0;
     tree->buff = {nullptr, 0};
-    tree->head = init_node(CONSTANT, make_union(CONSTANT, 0), nullptr, nullptr);
-    if(!tree->head) {
-        LOGGER_ERROR("Tree_init: failed calloc head");
-        return ERROR_MEM_ALLOC;
-    }
 
     error = stack_init(stack, 10 ON_DEBUG(, VER_INIT));
     tree->var_stack = stack;
@@ -129,9 +124,6 @@ error_code tree_destroy(tree_t* tree) {
     error |= destroy_node_recursive(tree->root, &removed);
     tree->root = nullptr;
     tree->size = 0;
-    
-    free(tree->head);
-    tree->head = nullptr;
 
     return error;
 }
@@ -169,7 +161,6 @@ tree_node_t* tree_change_root(tree_t* tree, tree_node_t* node) {
     if(!node) LOGGER_WARNING("New root is nullptr");
 
     tree->root = node;
-    tree->head->right = node;
     tree->size = count_nodes_recursive(node);
 
     return node;
