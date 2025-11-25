@@ -17,7 +17,7 @@ error_code tree_destroy(tree_t* tree);
 bool tree_is_empty(const tree_t* tree);
 size_t count_nodes_recursive(const tree_node_t* node);
 
-tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node); 
+tree_node_t* tree_change_root(tree_t* tree, tree_node_t* node); 
 tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value);
 tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent);
 tree_node_t* tree_insert_right(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent);

@@ -155,7 +155,7 @@ static const char* node_val_to_str(const tree_t* tree, const tree_node_t* node,
         case FUNCTION:
             return get_func_name_by_type(node->value.func);
         default:
-            return "<??>";
+            return "???";
     }
 }
 

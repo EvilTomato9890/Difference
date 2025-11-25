@@ -17,6 +17,7 @@
 #include "forest_info.h"
 #include "forest_operations.h"
 #include "file_operations.h"
+#include "debug_meta.h"
 
 //================================================================================
 
@@ -174,9 +175,8 @@ static void test_read_complex_tree() {
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     ON_DEBUG(
-    forest_open_dump_file(&forest, "test_dump_nodes.html");
-    fprintf(forest.dump_file, "AAAAAAABBBBBAAAAAA");
-    fflush(forest.dump_file);
+    error_code dump_error = forest_open_dump_file(&forest, "test_dump_nodes.html");
+    HARD_ASSERT(dump_error == ERROR_NO, "forest_open_dump_file failed");
     HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
     )
     
@@ -205,14 +205,10 @@ static void test_read_complex_tree() {
     tree_t* tree_diff = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == ERROR_NO, "add_tree for diff failed");
 
-    ON_DEBUG({
-    forest_open_dump_file(&forest, "test_dump_nodes.html");
-    })
-
     LOGGER_DEBUG("Diff started");
 
     tree_node_t* new_root = get_diff(test_tree, test_tree->root);
-    tree_make_root(tree_diff, new_root);
+    tree_change_root(tree_diff, new_root);
 
     LOGGER_DEBUG("Diff ended");
 

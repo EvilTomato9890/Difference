@@ -13,6 +13,7 @@
 #define FUNC_TEMPLATE(op_code, left, right) \
     init_node_with_dump(FUNCTION, make_union(FUNCTION, op_code), left, right, tree)
 #else 
+
 #define c(val) \
     init_node(CONSTANT, make_union(CONSTANT, val), nullptr, nullptr)
 

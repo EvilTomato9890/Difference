@@ -66,7 +66,7 @@ tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node
     tree_node_t* node = init_node(node_type, value, left, right);
     tree_t tree_clone = {};
     tree_clone = *tree;
-    tree_make_root(&tree_clone, node);
+    tree_change_root(&tree_clone, node);
     tree_dump(&tree_clone, VER_INIT, true, "Diff dumps");
     tree_destroy(&tree_clone);
     return node;
@@ -159,12 +159,12 @@ tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) 
     tree_node_t* node = init_node(node_type, value, nullptr, nullptr);
     if (node == nullptr) return nullptr;
 
-    tree_make_root(tree, node);
+    tree_change_root(tree, node);
 
     return node;
 }
 
-tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node) {
+tree_node_t* tree_change_root(tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(tree != nullptr, "Tree is nullptr");
     if(!node) LOGGER_WARNING("New root is nullptr");
 

@@ -15,27 +15,27 @@
 <path fill="#e9f2ff" stroke="#6b8fd6" d="M12,-107.5C12,-107.5 214,-107.5 214,-107.5 220,-107.5 226,-113.5 226,-119.5 226,-119.5 226,-158.5 226,-158.5 226,-164.5 220,-170.5 214,-170.5 214,-170.5 12,-170.5 12,-170.5 6,-170.5 0,-164.5 0,-158.5 0,-158.5 0,-119.5 0,-119.5 0,-113.5 6,-107.5 12,-107.5"/>
 <text text-anchor="middle" x="113" y="-156.9" font-family="Fira Mono" font-size="12.00">ptr: 0x61c3c57013b0</text>
 <polyline fill="none" stroke="#6b8fd6" points="0,-149.5 226,-149.5 "/>
-<text text-anchor="middle" x="113" y="-135.9" font-family="Fira Mono" font-size="12.00">val: 0</text>
+<text text-anchor="middle" x="113" y="-135.9" font-family="Fira Mono" font-size="12.00">val: ???</text>
 <polyline fill="none" stroke="#6b8fd6" points="0,-128.5 226,-128.5 "/>
 <text text-anchor="middle" x="36.5" y="-114.9" font-family="Fira Mono" font-size="12.00">prev: (nil)</text>
 <polyline fill="none" stroke="#6b8fd6" points="73,-107.5 73,-128.5 "/>
-<text text-anchor="middle" x="149.5" y="-114.9" font-family="Fira Mono" font-size="12.00">next: 0x61c3c57013e0</text>
+<text text-anchor="middle" x="149.5" y="-114.9" font-family="Fira Mono" font-size="12.00">next: 0x61c3c5709b30</text>
 </g>
-<!-- node_0x61c3c57013e0 -->
+<!-- node_0x61c3c5709b30 -->
 <g id="node2" class="node">
-<title>node_0x61c3c57013e0</title>
+<title>node_0x61c3c5709b30</title>
 <path fill="#e9fbf5" stroke="#5aa99b" d="M52,-0.5C52,-0.5 174,-0.5 174,-0.5 180,-0.5 186,-6.5 186,-12.5 186,-12.5 186,-51.5 186,-51.5 186,-57.5 180,-63.5 174,-63.5 174,-63.5 52,-63.5 52,-63.5 46,-63.5 40,-57.5 40,-51.5 40,-51.5 40,-12.5 40,-12.5 40,-6.5 46,-0.5 52,-0.5"/>
-<text text-anchor="middle" x="113" y="-49.9" font-family="Fira Mono" font-size="12.00">ptr: 0x61c3c57013e0</text>
+<text text-anchor="middle" x="113" y="-49.9" font-family="Fira Mono" font-size="12.00">ptr: 0x61c3c5709b30</text>
 <polyline fill="none" stroke="#5aa99b" points="40,-42.5 186,-42.5 "/>
-<text text-anchor="middle" x="113" y="-28.9" font-family="Fira Mono" font-size="12.00">val: +</text>
+<text text-anchor="middle" x="113" y="-28.9" font-family="Fira Mono" font-size="12.00">val: 0</text>
 <polyline fill="none" stroke="#5aa99b" points="40,-21.5 186,-21.5 "/>
 <text text-anchor="middle" x="76.5" y="-7.9" font-family="Fira Mono" font-size="12.00">prev: (nil)</text>
 <polyline fill="none" stroke="#5aa99b" points="113,-0.5 113,-21.5 "/>
 <text text-anchor="middle" x="149.5" y="-7.9" font-family="Fira Mono" font-size="12.00">next: (nil)</text>
 </g>
-<!-- node_0x61c3c57013b0&#45;&gt;node_0x61c3c57013e0 -->
+<!-- node_0x61c3c57013b0&#45;&gt;node_0x61c3c5709b30 -->
 <g id="edge1" class="edge">
-<title>node_0x61c3c57013b0&#45;&gt;node_0x61c3c57013e0</title>
+<title>node_0x61c3c57013b0&#45;&gt;node_0x61c3c5709b30</title>
 <path fill="none" stroke="#999999" d="M113,-107.35C113,-96.78 113,-84.78 113,-73.54"/>
 <polygon fill="#999999" stroke="#999999" points="116.5,-73.51 113,-63.51 109.5,-73.51 116.5,-73.51"/>
 </g>

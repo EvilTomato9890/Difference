@@ -189,8 +189,6 @@ error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name) {
         return ERROR_OPEN_FILE;
     }
     forest->dump_file = dump_file;
-    fprintf(forest->dump_file, "AAAAAAAAAAAAAAAAAAAB");
-    fflush(forest->dump_file);
     return ERROR_NO;
 }
 

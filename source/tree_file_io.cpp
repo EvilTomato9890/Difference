@@ -333,7 +333,6 @@ error_code tree_parse_from_buffer(tree_t* tree) {
         return ERROR_NO;
     }    
     tree->size = count_nodes_recursive(root);
-    LOGGER_WARNING("A: %p", *tree->dump_file);
     ON_DEBUG(fflush(*tree->dump_file);)
     LOGGER_DEBUG("parse_tree_from_buffer: successfully parsed tree with %zu nodes", tree->size);
     return ERROR_NO;
