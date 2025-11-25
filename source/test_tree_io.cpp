@@ -13,7 +13,7 @@
 #include "DSL.h"
 #include "differentiator.h"
 #include "tree_file_io.h"
-#include "../StackDead-main/stack.h"
+#include "../libs/StackDead-main/stack.h"
 
 //================================================================================
 

@@ -9,12 +9,13 @@ CXXFLAGS := -Iinclude -IStackDead-main -Wshadow -Winit-self -Wredundant-decls -W
 LDFLAGS :=
 
 SRC_DIR := source
-STACK_DIR := StackDead-main
+STACK_DIR := libs/StackDead-main
+LIST_DIR := libs/List
 BUILD_DIR := build
 BIN_DIR := bin
 TARGET := $(BIN_DIR)/tree_demo
 
-SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(STACK_DIR)/stack.cpp
+SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(STACK_DIR)/stack.cpp $(LIST_DIR)/list_operations.cpp $(LIST_DIR)/list_verification.cpp
 OBJECTS := $(SOURCES:%.cpp=$(BUILD_DIR)/%.o)
 
 $(TARGET): $(OBJECTS) | $(BIN_DIR)

@@ -12,7 +12,7 @@
 #include "error_handler.h"
 #include "tree_info.h"
 #include "tree_file_io.h"
-#include "../StackDead-main/stack.h"
+#include "../libs/StackDead-main/stack.h"
 
 //================================================================================
 

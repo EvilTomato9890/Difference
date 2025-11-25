@@ -25,11 +25,6 @@ error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t 
 
 error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out);
 
-struct tree_path_stack_t {
-    tree_node_t** nodes;
-    size_t size;
-    size_t capacity;
-};
 value_t make_union(node_type_t type, ...);
 
 ssize_t get_var_idx(const string_t var, const stack_t* var_stack);
@@ -40,4 +35,5 @@ inline tree_node_t* clone_node(const tree_node_t* node) {
     HARD_ASSERT(node != nullptr, "node is nullptr");
     return init_node(node->type, node->value, node->left, node->right);
 }
+
 #endif

@@ -22,12 +22,12 @@ static void init_free_list(list_t* list, size_t start_index, size_t end_index) {
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
     for (size_t i = start_index; i + 1 < end_index; ++i) {
         list->arr[i].next = i + 1;
-        list->arr[i].prev = -1;
-        list->arr[i].val  = POISON;
+        list->arr[i].prev = POISON_IDX;
+        list->arr[i].val  = POISON_VAL;
     }
-    list->arr[end_index - 1].next = -1;
-    list->arr[end_index - 1].prev = -1;
-    list->arr[end_index - 1].val  = POISON;
+    list->arr[end_index - 1].next = POISON_IDX;
+    list->arr[end_index - 1].prev = POISON_IDX;
+    list->arr[end_index - 1].val  = POISON_VAL;
 }
 
 static error_code list_recalloc(list_t* list, size_t new_capacity) {
@@ -117,16 +117,16 @@ error_code list_init(list_t* list_return, size_t capacity ON_DEBUG(, ver_info_t 
 
     for (size_t i = 0; i + 1 < capacity; ++i) {
         arr[i].next = i + 1;
-        arr[i].prev = -1;
-        arr[i].val  = POISON;
+        arr[i].prev = POISON_IDX;
+        arr[i].val  = POISON_VAL;
     }
-    arr[capacity - 1].next = -1;
-    arr[capacity - 1].prev = -1;
-    arr[capacity - 1].val  = POISON;
+    arr[capacity - 1].next = POISON_IDX;
+    arr[capacity - 1].prev = POISON_IDX;
+    arr[capacity - 1].val  = POISON_VAL;
 
     arr[0].next = 0;
     arr[0].prev = 0;
-    arr[0].val = CANARY_NUM;
+    arr[0].val  = CANARY_NUM;
 
     ON_DEBUG(
         arr[capacity].val = CANARY_NUM;
@@ -164,7 +164,7 @@ error_code list_dest(list_t* list) {
     return error;
 }
 
-ssize_t list_insert_after(list_t* list, ssize_t insert_index, double val) {
+ssize_t list_insert_after(list_t* list, ssize_t insert_index, tree_t* val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
     LOGGER_DEBUG("Inserting value %lf after index %d", val, insert_index);
@@ -222,7 +222,7 @@ ssize_t list_insert_after(list_t* list, ssize_t insert_index, double val) {
     return free_index;
 }
 
-ssize_t list_insert_auto(list_t* list, ssize_t insert_index, double val) {
+ssize_t list_insert_auto(list_t* list, ssize_t insert_index, tree_t* val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
 
@@ -237,7 +237,7 @@ ssize_t list_insert_auto(list_t* list, ssize_t insert_index, double val) {
     return list_insert_after(list, physical, val);
 }
 
-ssize_t list_insert_before(list_t* list, ssize_t insert_index, double val) {
+ssize_t list_insert_before(list_t* list, ssize_t insert_index, tree_t* val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
     LOGGER_DEBUG("Inserting before physical index %d", insert_index);
@@ -250,14 +250,14 @@ ssize_t list_insert_before(list_t* list, ssize_t insert_index, double val) {
     return list_insert_after(list, prev_index, val);
 }
 
-ssize_t list_push_back(list_t* list, double val) {
+ssize_t list_push_back(list_t* list, tree_t* val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
     LOGGER_DEBUG("Pushing back value %lf", val);
     return list_insert_before(list, 0, val);
 }
 
-ssize_t list_push_front(list_t* list, double val) {
+ssize_t list_push_front(list_t* list, tree_t* val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
     LOGGER_DEBUG("Pushing front value %lf", val);
@@ -295,8 +295,8 @@ error_code list_remove(list_t* list, ssize_t remove_index) {
     list->tail = list->arr[0].prev;
 
     list->arr[remove_index].next = list->free_head;
-    list->arr[remove_index].prev = -1;
-    list->arr[remove_index].val  = POISON;
+    list->arr[remove_index].prev = POISON_IDX;
+    list->arr[remove_index].val  = POISON_VAL;
     list->free_head = remove_index;
 
     list->size--;
@@ -369,26 +369,26 @@ error_code list_swap(list_t* list, ssize_t first_idx, ssize_t second_idx) {
         list->arr[second_elem->next].prev = first_idx;
         list->arr[second_elem->prev].next = first_idx;
         *first_elem = *second_elem;
-        second_elem->val  = POISON;
-        second_elem->prev = -1;
-        second_elem->next = -1;
+        second_elem->val  = POISON_VAL;
+        second_elem->prev = POISON_IDX;
+        second_elem->next = POISON_IDX;
 
     } else if(!list_node_is_free(first_elem)) {
         list->arr[first_elem->next].prev = second_idx;
         list->arr[first_elem->prev].next = second_idx;
         *second_elem = *first_elem;
-        first_elem->val  = POISON;
-        first_elem->prev = -1;
-        first_elem->next = -1;
+        first_elem->val  = POISON_VAL;
+        first_elem->prev = POISON_IDX;
+        first_elem->next = POISON_IDX;
 
     } else {
-        first_elem->val  = POISON;
-        first_elem->prev = -1;
+        first_elem->val  = POISON_VAL;
+        first_elem->prev = POISON_IDX;
         first_elem->next = -1;
 
-        second_elem->val  = POISON;
-        second_elem->prev = -1;
-        second_elem->next = -1;
+        second_elem->val  = POISON_VAL;
+        second_elem->prev = POISON_IDX;
+        second_elem->next = POISON_IDX;
     }
     return error;
 }
@@ -419,13 +419,13 @@ static error_code list_reorganize_free(list_t* list) {
 
     list->free_head = first_free;
     for (size_t i = (size_t)first_free; i + 1 < list->capacity; ++i) {
-        list->arr[i].prev = -1;
-        list->arr[i].val  = POISON;
+        list->arr[i].prev = POISON_IDX;
+        list->arr[i].val  = POISON_VAL;
         list->arr[i].next = i + 1;
     }
-    list->arr[list->capacity - 1].prev = -1;
-    list->arr[list->capacity - 1].val  = POISON;
-    list->arr[list->capacity - 1].next = -1;
+    list->arr[list->capacity - 1].prev = POISON_IDX;
+    list->arr[list->capacity - 1].val  = POISON_VAL;
+    list->arr[list->capacity - 1].next = POISON_IDX;
 
     ON_DEBUG(
         error |= list_verify(list, VER_INIT, DUMP_IMG, "After reorganize_free");

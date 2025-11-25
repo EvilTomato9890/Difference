@@ -10,7 +10,10 @@
 #include "tree_verification.h"
 #include "tree_info.h"
 #include "error_handler.h"
-#include "../StackDead-main/stack.h" //КАК
+#include "../libs/StackDead-main/stack.h" //КАК
+#include "forest_operations.h"
+#include "forest_info.h"
+#include "debug_meta.h"
 
 //================================================================================
 
@@ -62,14 +65,7 @@ tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node
 
     tree_node_t* node = init_node(node_type, value, left, right);
     tree_t tree_clone = {};
-    stack_t cloned_stack = {};
-    error_code error = stack_clone(tree->var_stack, &cloned_stack ON_DEBUG(, VAR_INIT));
-    if (error != 0) {
-        LOGGER_ERROR("init_node_with_dump: stack_clone failed");
-        return node;
-    }
     tree_clone = *tree;
-    tree_clone.var_stack = &cloned_stack;
     tree_make_root(&tree_clone, node);
     tree_dump(&tree_clone, VER_INIT, true, "Diff dumps");
     tree_destroy(&tree_clone);
@@ -110,7 +106,8 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
         LOGGER_ERROR("Tree_init: failed calloc head");
         return ERROR_MEM_ALLOC;
     }
-    error = stack_init(stack, 10 ON_DEBUG(, VAR_INIT));
+
+    error = stack_init(stack, 10 ON_DEBUG(, VER_INIT));
     tree->var_stack = stack;
     if(error != ERROR_NO) {
         LOGGER_ERROR("Tree_init: stack_init failed");
@@ -123,7 +120,7 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
     return ERROR_NO;
 }
 
-error_code tree_destroy(tree_t* tree, bool clear_buff) {
+error_code tree_destroy(tree_t* tree) {
     HARD_ASSERT(tree != nullptr, "tree pointer is nullptr");
 
     LOGGER_DEBUG("tree_dest: started");
@@ -134,17 +131,9 @@ error_code tree_destroy(tree_t* tree, bool clear_buff) {
     tree->root = nullptr;
     tree->size = 0;
     
-    if (tree->head != nullptr) {
-        free(tree->head);
-        tree->head = nullptr;
-    }
-    if(clear_buff && tree->buff != nullptr) {
-        free(tree->buff);
-    }
-    tree->buff = nullptr;
+    free(tree->head);
+    tree->head = nullptr;
 
-    error |= stack_destroy(tree->var_stack);
-    tree->var_stack = nullptr;
     return error;
 }
 
@@ -159,14 +148,7 @@ tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) 
     HARD_ASSERT(tree   != nullptr,    "tree pointer is nullptr");
 
     LOGGER_DEBUG("tree_init_roo: started");
-    ON_DEBUG({
-        error_code verify_error = ERROR_NO;
-        verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "Before set_root(\"%s\")", value);
-        if (verify_error != ERROR_NO) {
-            LOGGER_ERROR("tree_init_root: verify before failed");
-            return nullptr;
-        }
-    })
+
     if (tree->root != nullptr) {
         LOGGER_ERROR("tree_init_root: root already exists");
         return nullptr;
@@ -176,14 +158,6 @@ tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) 
 
     tree_make_root(tree, node);
 
-    ON_DEBUG({
-        error_code verify_error = ERROR_NO;
-        verify_error = tree_verify(tree, VER_INIT, TREE_DUMP_IMG, "After set_root");
-        if (verify_error != ERROR_NO) {
-            LOGGER_ERROR("tree_init_root: verify after failed");
-            return nullptr;
-        }
-    })
     return node;
 }
 
@@ -197,6 +171,7 @@ tree_node_t* tree_make_root(tree_t* tree, tree_node_t* node) {
 
     return node;
 }
+
 tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent) {
     HARD_ASSERT(tree   != nullptr,    "tree pointer is nullptr");
     HARD_ASSERT(parent != nullptr,    "parent pointer is nullptr");

@@ -3,20 +3,23 @@
 
 #include "error_handler.h"
 #include "debug_meta.h"
+#include "tree_info.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
-static const size_t MIN_LIST_SIZE    = 10;
-static const int    POISON           = -100;
-static const float  REDUCTION_FACTOR = 4.0f;
-static const float  GROWTH_FACTOR    = 2.0f;
-static const float  CANARY_NUM       = 0xDEADBEEF;
+static const size_t  MIN_LIST_SIZE    = 10;
+static tree_t* const POISON_VAL       = (tree_t*)1111;
+static const int     POISON_IDX       = -100;
+static const float   REDUCTION_FACTOR = 4.0f;
+static const float   GROWTH_FACTOR    = 2.0f;
+static tree_t* const CANARY_NUM       = (tree_t*)0xEBA1DEDA;
 
 
 struct node_t {
     ssize_t next;
     ssize_t prev;
-    double val;
+    tree_t* val;
 };
 
 struct list_t {
@@ -32,10 +35,9 @@ struct list_t {
         FILE* dump_file;
     )
 };
- //На будущее новые фугкции дял поулчения и вставки элементов
- //Полная задача структуры node
+
 static inline bool list_node_is_free(const node_t* node) {
-    return node->prev == POISON || node->val == POISON;
+    return node->prev == POISON_IDX || node->val == POISON_VAL;
 }
 
 

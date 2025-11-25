@@ -7,6 +7,7 @@
 
 #include "error_handlers.h"
 #include "node_info.h"
+#include "debug_meta.h"
 
 #ifdef HASH_DEBUG
 	#define VERIFY_DEBUG
@@ -28,17 +29,7 @@
 	#define ON_DEBUG(...)
 #endif
 
-
 typedef variable_t st_type;
-
-struct ver_info_t {
-    const char* file;
-    const char* func;
-    int         line;
-};
-
-#define VER_INIT ver_info_t{__FILE__, __func__, __LINE__}
-
 
 struct stack_t {
 	ON_CANARY_DEBUG(
