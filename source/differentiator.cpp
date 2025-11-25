@@ -32,3 +32,11 @@ tree_node_t* get_diff(tree_t* tree, tree_node_t* node) {
     return out_node;
 }
 
+double calculate_tree(tree_t* tree) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    
+}
+
+static double calculate_nodes_recursive(tree_t* tree, tree_node_t* curr_node) {
+
+}

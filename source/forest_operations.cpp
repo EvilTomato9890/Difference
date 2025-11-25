@@ -65,7 +65,7 @@ error_code forest_dest(forest_t* forest) {
     error |= stack_destroy(forest->var_stack);
     forest->var_stack = nullptr;
 
-    error |= list_dest(forest->tree_list);
+    error |= list_dest(forest->tree_list, &tree_destroy);
     forest->tree_list = nullptr;
 
     free(forest->buff.ptr);

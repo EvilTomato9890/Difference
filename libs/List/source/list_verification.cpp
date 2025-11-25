@@ -356,7 +356,7 @@ static void emit_nodes(const list_t *list, FILE *file) {
     for (size_t i = 1; i < capacity; ++i) {
         const ssize_t next_index  = list->arr[i].next;
         const ssize_t prev_index  = list->arr[i].prev;
-        const tree_t* val         = list->arr[i].val;
+        const list_type val         = list->arr[i].val;
 
         const ssize_t is_free = (prev_index == POISON_IDX || val == POISON_VAL);
         const ssize_t is_head = (i == (size_t)list->head);
@@ -572,7 +572,7 @@ static void dump_write_html(const list_t* list, ver_info_t ver_info_called, int 
         for (size_t i = 0; i < list->capacity; ++i) {
             ssize_t next =  list->arr[i].next;
             ssize_t  prv =  list->arr[i].prev;
-            tree_t*  val =  list->arr[i].val;
+            list_type  val =  list->arr[i].val;
 
             char marks[32]; marks[0] = '\0';
             ssize_t first = 1;

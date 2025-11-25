@@ -148,11 +148,17 @@ error_code list_init(list_t* list_return, size_t capacity ON_DEBUG(, ver_info_t 
     return error;
 }
 
-error_code list_dest(list_t* list) {
+error_code list_dest(list_t* list, elem_dest_func_t elem_dest_func) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "list->arr is nullptr");
     LOGGER_DEBUG("Destroying list");
     error_code error = ERROR_NO;
+
+    for(size_t i = 0; i < list->capacity; i++) {
+        if(!list_node_is_free(&list->arr[i])) {
+            error |= elem_dest_func(list->arr[i].val);
+        }
+    }
 
     free(list->arr);
     list->arr = nullptr;
@@ -162,7 +168,7 @@ error_code list_dest(list_t* list) {
     return error;
 }
 
-ssize_t list_insert_after(list_t* list, ssize_t insert_index, tree_t* val) {
+ssize_t list_insert_after(list_t* list, ssize_t insert_index, list_type val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
 
@@ -219,7 +225,7 @@ ssize_t list_insert_after(list_t* list, ssize_t insert_index, tree_t* val) {
     return free_index;
 }
 
-ssize_t list_insert_auto(list_t* list, ssize_t insert_index, tree_t* val) {
+ssize_t list_insert_auto(list_t* list, ssize_t insert_index, list_type val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
 
@@ -234,7 +240,7 @@ ssize_t list_insert_auto(list_t* list, ssize_t insert_index, tree_t* val) {
     return list_insert_after(list, physical, val);
 }
 
-ssize_t list_insert_before(list_t* list, ssize_t insert_index, tree_t* val) {
+ssize_t list_insert_before(list_t* list, ssize_t insert_index, list_type val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
 
@@ -246,14 +252,14 @@ ssize_t list_insert_before(list_t* list, ssize_t insert_index, tree_t* val) {
     return list_insert_after(list, prev_index, val);
 }
 
-ssize_t list_push_back(list_t* list, tree_t* val) {
+ssize_t list_push_back(list_t* list, list_type val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
     LOGGER_DEBUG("Pushing back value %p", val);
     return list_insert_before(list, 0, val);
 }
 
-ssize_t list_push_front(list_t* list, tree_t* val) {
+ssize_t list_push_front(list_t* list, list_type val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
     LOGGER_DEBUG("Pushing front value %lf", val);

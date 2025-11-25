@@ -51,7 +51,7 @@ static void test_read_empty_tree() {
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
 
     forest_dest(&forest);
-
+    remove(filename);
     LOGGER_INFO("Тест пройден: чтение пустого дерева\n");
 }
 
@@ -87,7 +87,7 @@ static void test_read_single_constant() {
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
 
     forest_dest(&forest);
-
+    remove(filename);
     LOGGER_INFO("Тест пройден: чтение дерева с одной константой\n");
 }
 
@@ -124,10 +124,13 @@ static void test_read_single_variable() {
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
 
     forest_dest(&forest);
+    remove(filename);
+    remove("test_variable_write.tree");
     LOGGER_INFO("Тест пройден: чтение дерева с одной переменной\n");
 }
 
 static void test_DSL() {
+    LOGGER_INFO("=== Тест: DSL ===");
     error_code error = ERROR_NO;
 
     forest_t forest = {};
@@ -144,19 +147,20 @@ static void test_DSL() {
     tree = forest_include_tree(&forest, &tree_origin, &error);
     HARD_ASSERT(error == ERROR_NO, "forest_include_tree failed");
 
-    #ifdef VERIFY_DEBUG
+    ON_DEBUG(
     forest_open_dump_file(&forest, "test_dump_DSL.html");
     HARD_ASSERT(forest.dump_file != nullptr, "failed to create file");
-    #endif
+    )
 
     error = tree_dump(tree, VER_INIT, true, "FF");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    #ifdef VERIFY_DEBUG
+    ON_DEBUG(
     forest_close_dump_file(&forest);
-    #endif
+    )
 
     forest_dest(&forest);
+    LOGGER_INFO("=== Тест пройден: DSL ===\n");
 }
 
 static void test_read_complex_tree() {
@@ -215,14 +219,55 @@ static void test_read_complex_tree() {
     error = tree_dump(tree_diff, VER_INIT, true, "After diff");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
     
-    #ifdef VERIFY_DEBUG
+    ON_DEBUG(
     forest_close_dump_file(&forest);
-    #endif
+    )
 
     forest_dest(&forest);
+    remove(filename);
     LOGGER_INFO("Тест пройден: чтение сложного дерева\n");
 }
 
+static void test_diff_big_tree() {
+    LOGGER_INFO("=== Тест: чтение и дифферицирование большого дерева");
+
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == 0, "Forest init failed");
+
+    ON_DEBUG(
+    error |= forest_open_dump_file(&forest, "test_dump_diff.html");
+    HARD_ASSERT(error == 0, "Open failed");
+    )
+
+    const char* filename = "big_diff_test.tree";
+    error |= forest_read_file(&forest, filename);
+    HARD_ASSERT(error == 0, "Reading failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == 0 && tree != nullptr, "Adding failed");
+
+    error |= tree_parse_from_buffer(tree);
+    HARD_ASSERT(error == 0 && tree->root != nullptr, "Parsing failed");
+
+    tree_dump(tree, VER_INIT, true, "After reading");
+
+    LOGGER_DEBUG("Diff started");
+    tree_node_t* new_root = get_diff(tree, tree->root);
+    HARD_ASSERT(new_root != nullptr, "Get diff failed");
+    LOGGER_DEBUG("Diff ended");
+
+    tree_t* diff_tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == 0 && diff_tree != nullptr, "Adding failed");
+
+    tree_change_root(diff_tree, new_root);
+    tree_dump(diff_tree, VER_INIT, true, "Differ tree");
+
+    forest_dest(&forest);
+    LOGGER_INFO("=== Тест пройден: чтение и дифферицирование большого дерева\n");
+}
 static void test_read_nonexistent_file() {
     LOGGER_INFO("=== Тест: чтение несуществующего файла ===");
     
@@ -271,6 +316,7 @@ static void test_write_empty_tree() {
     HARD_ASSERT(*ptr == '\0', "file should be empty or contain only whitespace");
     
     forest_dest(&forest);
+    remove(filename);
     LOGGER_INFO("Тест пройден: запись пустого дерева\n");
 }
 
@@ -312,6 +358,7 @@ static void test_write_constant_tree() {
     
     forest_dest(&forest);
     forest_dest(&read_forest);
+    remove(filename);
     LOGGER_INFO("Тест пройден: запись дерева с константой\n");
 }
 
@@ -356,6 +403,7 @@ static void test_write_variable_tree() {
     
     forest_dest(&forest);
     forest_dest(&read_forest);
+    remove(filename);
     LOGGER_INFO("Тест пройден: запись дерева с переменной\n");
 }
 
@@ -407,6 +455,7 @@ static void test_write_complex_tree() {
     
     forest_dest(&forest);
     forest_dest(&read_forest);
+    remove(filename);
     LOGGER_INFO("Тест пройден: запись сложного дерева\n");
 }
 
@@ -424,17 +473,17 @@ static void test_dump_empty_tree() {
     tree_t* test_tree = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == ERROR_NO, "add_tree failed");
     
-    #ifdef VERIFY_DEBUG
+    ON_DEBUG(
     forest_open_dump_file(&forest, "test_dump_empty.html");
     HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
-    #endif
+    )
     
     error = tree_dump(test_tree, VER_INIT, false, "Test dump empty tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    #ifdef VERIFY_DEBUG
+    ON_DEBUG(
     forest_close_dump_file(&forest);
-    #endif
+    )
     
     forest_dest(&forest);
     LOGGER_INFO("Тест пройден: дамп пустого дерева\n");
@@ -455,18 +504,17 @@ static void test_dump_tree_with_nodes() {
     value_t root_value = make_union(CONSTANT, (const_val_type)42);
     tree_node_t* root = tree_init_root(test_tree, CONSTANT, root_value);
     HARD_ASSERT(root != nullptr, "tree_init_root failed");
-    
-    #ifdef VERIFY_DEBUG
+
+    ON_DEBUG(
     forest_open_dump_file(&forest, "test_dump_nodes.html");
     HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
-    #endif
-    
+    )
     error = tree_dump(test_tree, VER_INIT, true, "Test dump tree with nodes");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    #ifdef VERIFY_DEBUG
+    ON_DEBUG(
     forest_close_dump_file(&forest);
-    #endif
+    )
     
     forest_dest(&forest);
     LOGGER_INFO("Тест пройден: дамп дерева с узлами\n");
@@ -492,6 +540,8 @@ int run_tests() {
     
     test_dump_empty_tree();
     test_DSL();
+    test_diff_big_tree();
+
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
     LOGGER_INFO("========================================\n");
