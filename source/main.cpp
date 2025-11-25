@@ -7,7 +7,7 @@ int run_tests();
 int main() {
     logger_initialize_stream(stderr);
     
-    return 0;
+    run_tests();
     
     logger_close();
     return 0;

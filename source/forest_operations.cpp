@@ -1,3 +1,4 @@
+#include "forest_operations.h"
 #include "error_handler.h"
 #include "../libs/StackDead-main/stack.h"
 #include "tree_info.h"
@@ -8,12 +9,12 @@
 #include "../libs/List/include/list_info.h"
 #include "tree_operations.h"
 #include "forest_info.h"
-#include "forest_operations.h"
+#include "file_operations.h"
 
 //================================================================================
 
 error_code forest_init(forest_t* forest ON_DEBUG(, ver_info_t ver_info)) {
-    HARD_ASSERT(forest     != nullptr, "Forest_ptr is nulltpr");
+    HARD_ASSERT(forest != nullptr, "Forest_ptr is nulltpr");
 
     LOGGER_DEBUG("forest_init: started");
 
@@ -43,7 +44,8 @@ error_code forest_init(forest_t* forest ON_DEBUG(, ver_info_t ver_info)) {
     forest->dump_file = nullptr;
     forest->ver_info  = ver_info;
     })
-
+    forest->var_stack = stack;
+    forest->tree_list = list;
     forest->buff = {nullptr, 0};
 
     return error;
@@ -68,7 +70,6 @@ error_code forest_dest(forest_t* forest) {
     ON_DEBUG({
     forest_close_dump_file(forest);
     })
-    free(forest);
 
     return error;
 }
@@ -187,8 +188,9 @@ error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name) {
         LOGGER_ERROR("File open error");
         return ERROR_OPEN_FILE;
     }
-    forest->dump_file            = dump_file;
-    forest->tree_list->dump_file = dump_file;
+    forest->dump_file = dump_file;
+    fprintf(forest->dump_file, "AAAAAAAAAAAAAAAAAAAB");
+    fflush(forest->dump_file);
     return ERROR_NO;
 }
 
@@ -196,6 +198,10 @@ error_code forest_close_dump_file(forest_t* forest) {
     HARD_ASSERT(forest != nullptr, "Forest is nullptr");
 
     LOGGER_DEBUG("Forest_close_dump_file: started");
+    if(!forest->dump_file) {
+        LOGGER_WARNING("dump_file is nullptr");
+        return ERROR_NO;
+    }
 
     int error = fclose(forest->dump_file);
     if(!error) {
@@ -205,3 +211,20 @@ error_code forest_close_dump_file(forest_t* forest) {
     return ERROR_NO;
 }
 )
+
+error_code forest_read_file(forest_t* forest, const char* filename) {
+    HARD_ASSERT(forest   != nullptr, "Forest is nullptr");
+    HARD_ASSERT(filename != nullptr, "Filename is nullptr");
+
+    FILE* read_file = fopen(filename, "r");
+    if(!read_file) {
+        LOGGER_ERROR("forest_read_file: Opening file failed");
+        return ERROR_OPEN_FILE;
+    }
+
+    error_code error = read_file_to_buffer(read_file, &forest->buff);
+    if(error != ERROR_NO) {
+        LOGGER_ERROR("forest_read_file: read_file_to_buffer failed");
+    }
+    return error;
+}

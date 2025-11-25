@@ -12,12 +12,12 @@
 const int MAX_FOREST_CAP = 10;
 
 struct tree_t {
-    tree_node_t* root;
-    tree_node_t* head;
-    size_t       size;
-    stack_t*     var_stack;
-    string_t      buff;
-    size_t       list_idx;
+    tree_node_t*   root;
+    tree_node_t*   head;
+    size_t         size;
+    stack_t*       var_stack;
+    string_t       buff;
+    size_t         list_idx;
     ON_DEBUG(
         ver_info_t ver_info;
         FILE* const * dump_file;

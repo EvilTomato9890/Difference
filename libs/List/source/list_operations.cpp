@@ -84,8 +84,6 @@ static error_code list_recalloc(list_t* list, size_t new_capacity) {
 static error_code normalize_capacity(list_t* list) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr  is nullptr");
-    LOGGER_DEBUG("Normalising capacity (size: %lu, capacity: %lu)",
-                 list->size, list->capacity);
 
     if (list->size + 1 > list->capacity) {
         size_t new_capacity = (size_t)((double)list->capacity * GROWTH_FACTOR);
@@ -167,7 +165,6 @@ error_code list_dest(list_t* list) {
 ssize_t list_insert_after(list_t* list, ssize_t insert_index, tree_t* val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
-    LOGGER_DEBUG("Inserting value %lf after index %d", val, insert_index);
 
     ON_DEBUG(
         error_code error = list_verify(list, VER_INIT, DUMP_IMG, "Before insert of %lf at index %d", val, insert_index);
@@ -240,7 +237,6 @@ ssize_t list_insert_auto(list_t* list, ssize_t insert_index, tree_t* val) {
 ssize_t list_insert_before(list_t* list, ssize_t insert_index, tree_t* val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
-    LOGGER_DEBUG("Inserting before physical index %d", insert_index);
 
     if (insert_index < 0 || (size_t)(insert_index) >= list->capacity) {
         LOGGER_ERROR("list_insert_before: insert_index %d invalid", insert_index);
@@ -253,7 +249,7 @@ ssize_t list_insert_before(list_t* list, ssize_t insert_index, tree_t* val) {
 ssize_t list_push_back(list_t* list, tree_t* val) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
-    LOGGER_DEBUG("Pushing back value %lf", val);
+    LOGGER_DEBUG("Pushing back value %p", val);
     return list_insert_before(list, 0, val);
 }
 

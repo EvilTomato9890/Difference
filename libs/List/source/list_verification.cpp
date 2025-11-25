@@ -130,7 +130,7 @@ static error_code validate_main_chain(const list_t* list, size_t capacity, const
                 *error_description = "mismatch in main chain";
                 error |= ERROR_INVALID_STRUCTURE;
             }
-        } else if (next != -1) {
+        } else if (next != POISON_IDX) {
             LOGGER_ERROR("next node at %ld -> %ld not in chain", curr, next);
             *error_description = "next node not in main chain";
             error |= ERROR_INVALID_STRUCTURE;
@@ -161,7 +161,7 @@ static error_code validate_free_chain(const list_t* list, size_t capacity, const
         seen[curr] = 1;
         ssize_t next = list->arr[curr].next;
 
-        if (next != -1 && !idx_ok(next, capacity)) {
+        if (next != POISON_IDX && !idx_ok(next, capacity)) {
             LOGGER_ERROR("free next not in chain %ld -> %ld", curr, next);
             *error_description = "free next node not in chain";
             error |= ERROR_INVALID_STRUCTURE;
@@ -223,7 +223,7 @@ error_code list_verify(list_t* list,
         error_description = "head out of bounds";
         error |= ERROR_INVALID_STRUCTURE;
     }
-    if (list->free_head != -1 && !idx_ok(list->free_head, capacity)) {
+    if (list->free_head != POISON_IDX && !idx_ok(list->free_head, capacity)) {
         LOGGER_WARNING("free_head out of bounds: %ld", list->free_head);
         error_description = "free_head out of bounds";
         error |= ERROR_INVALID_STRUCTURE;
@@ -426,14 +426,14 @@ static void emit_edges_free(const list_t *list, FILE *file) {
     const size_t capacity = list->capacity;
     for (size_t i = 0; i < capacity; ++i) {
         const ssize_t prev_index = list->arr[i].prev;
-        if (prev_index != -1) continue; 
+        if (prev_index != POISON_IDX) continue; 
 
         const ssize_t next_index = list->arr[i].next;
         if (next_index >= 0 && (size_t)next_index < capacity) {
             fprintf(file,
                 "  node_%zu -> node_%ld [color=\"" EDGE_FREE "\", style=dashed, constraint=false];\n",
                 i, next_index);
-        } else if (next_index != -1) {
+        } else if (next_index != POISON_IDX) {
             emit_bad_box_and_link(file, "f", i, next_index,
                                   "color=\"" EDGE_TO_BAD_BOX "\", style=dashed, constraint=false", 0);
         }
@@ -444,7 +444,7 @@ static void emit_edges_next(const list_t *list, char *bidir_next, char *bidir_pr
     const size_t capacity = list->capacity;
     for (size_t i = 0; i < capacity; ++i) {
         const ssize_t prev_index = list->arr[i].prev;
-        if (prev_index == -1) continue; 
+        if (prev_index == POISON_IDX) continue; 
 
         const ssize_t next_index = list->arr[i].next;
         if (next_index >= 0 && (size_t)next_index < capacity) {
@@ -460,7 +460,7 @@ static void emit_edges_next(const list_t *list, char *bidir_next, char *bidir_pr
                     "  node_%zu -> node_%ld [color=\"" EDGE_WRONG "\", penwidth=2.2, constraint=false];\n",
                     i, next_index);
             }
-        } else if (next_index != -1) {
+        } else if (next_index != POISON_IDX) {
             emit_bad_box_and_link(file, "n", i, next_index,
                                   "style=\"bold\", color=\"" EDGE_TO_BAD_BOX "\", constraint=false", 0);
         }
@@ -471,7 +471,7 @@ static void emit_edges_prev(const list_t *list, char *bidir_next, char *bidir_pr
     const size_t capacity = list->capacity;
     for (size_t i = 0; i < capacity; ++i) {
         const ssize_t prev_index = list->arr[i].prev;
-        if (prev_index == -1) continue; 
+        if (prev_index == POISON_IDX) continue; 
 
         if (prev_index >= 0 && (size_t)prev_index < capacity) {
             if (list->arr[prev_index].next == (ssize_t)i) {
@@ -486,7 +486,7 @@ static void emit_edges_prev(const list_t *list, char *bidir_next, char *bidir_pr
                     "  node_%ld -> node_%zu [color=\"" EDGE_WRONG "\", penwidth=2.2, constraint=false];\n",
                     prev_index, i);
             }
-        } else if (prev_index != -1) {
+        } else if (prev_index != POISON_IDX) {
             emit_bad_box_and_link(file, "p", i, prev_index,
                                   "style=\"bold\", color=\"" EDGE_TO_BAD_BOX "\", constraint=false", 1);
         }

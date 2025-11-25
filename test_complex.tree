@@ -1,1 +1,1 @@
-(* (sin ("x" nil nil) nil) (1 nil nil))
+(+ (10 nil nil) ("x" nil nil))

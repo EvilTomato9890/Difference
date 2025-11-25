@@ -380,9 +380,13 @@ error_code tree_dump(const tree_t* tree,
     }
 
     error_code error = write_html(tree, ver_info, dump_idx, comment, svg_path, is_visual);
-    LOGGER_INFO("Dump #%d written%s%s", dump_idx,
-                svg_path[0] ? " with SVG: " : "",
-                svg_path[0] ? svg_path : "");
+    if(!error) {
+        LOGGER_INFO("Dump #%d written%s%s", dump_idx,
+                    svg_path[0] ? " with SVG: " : "",
+                    svg_path[0] ? svg_path : "");
+    } else {
+        LOGGER_INFO("Dump #%d failed to be written", dump_idx);
+    }
     dump_idx++;
     return error;
 }
@@ -402,3 +406,4 @@ error_code tree_dump(const tree_t* tree,
 //forest_ptr или forest
 //Может стоит переделать логику с файлами дампа в лее деревьев
 //Структура ver_init_t лежала в стэкэ
+//Как дслеать так, чтобы после объявления переменная стала статичной;

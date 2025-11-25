@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "asserts.h"
 #include "my_string.h"
+#include "file_operations.h"
 
 static long get_file_size(FILE* file) {
     if(file == nullptr) {
@@ -19,7 +20,7 @@ static long get_file_size(FILE* file) {
 error_code read_file_to_buffer(FILE* file, string_t* buff_str) {
     HARD_ASSERT(file != nullptr, "file is nullptr");
     HARD_ASSERT(buff_str != nullptr, "buffer_str is nullptr");
-    HARD_ASSERT(buff_str->ptr != nullptr, "buffer_size_out is nullptr");
+    
     
     LOGGER_DEBUG("read_file_to_buffer: started");
 
