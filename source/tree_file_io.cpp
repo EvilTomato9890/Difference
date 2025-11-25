@@ -124,8 +124,9 @@ static error_code debug_print_buffer_remainder(tree_t* tree, const char* value_s
     } else {
         error = tree_dump(tree, VER_INIT, true, "After reading node: %s", value_start);
     }
-    return error;
     })
+    return error;
+
 }
 
 //================================================================================
@@ -224,7 +225,6 @@ static tree_node_t* read_node(tree_t* tree_ptr, tree_node_t* parent_node_ptr,
             *error |= ERROR_READ_FILE;
             return nullptr;
         }
-
         node_type_t node_type  = {};
         value_t     node_value = {};
 
@@ -244,13 +244,14 @@ static tree_node_t* read_node(tree_t* tree_ptr, tree_node_t* parent_node_ptr,
         }
 
         attach_node_to_parent(tree_ptr, new_node_ptr, parent_node_ptr);
-        
+
         if (value_start_ptr != nullptr && value_end_ptr != nullptr) {
             error_code dmp_err = debug_print_buffer_remainder(tree_ptr,
                                          value_start_ptr, value_end_ptr,
                                          buff_str);
             if(dmp_err != ERROR_NO) LOGGER_ERROR("I`am tired");
         }
+
         current_ptr = skip_whitespace(current_ptr);
         new_node_ptr->left = read_node(tree_ptr, new_node_ptr, error, &current_ptr, buff_str);
         if (*error) {
@@ -316,6 +317,7 @@ error_code tree_parse_from_buffer(tree_t* tree) {
     }
     
     error_code parse_error = 0;
+
     tree_node_t* root = read_node(tree, nullptr, &parse_error, &curr, tree->buff);
 
     if (parse_error) {
@@ -328,7 +330,7 @@ error_code tree_parse_from_buffer(tree_t* tree) {
         tree->size = 0;
         return ERROR_NO;
     }
-    
+
     tree->root = root;
     tree->size = count_nodes_recursive(root);
     ON_DEBUG(fflush(*tree->dump_file);)

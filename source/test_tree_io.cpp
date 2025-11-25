@@ -33,7 +33,7 @@ static void test_read_empty_tree() {
     fclose(test_file);
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     error = forest_read_file(&forest, filename);
@@ -67,7 +67,7 @@ static void test_read_single_constant() {
     fclose(test_file);
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     error = forest_read_file(&forest, filename);
@@ -97,7 +97,7 @@ static void test_read_single_variable() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     const char* filename = "test_variable.tree";
@@ -131,7 +131,7 @@ static void test_DSL() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     tree_t tree_origin = {};
@@ -171,7 +171,7 @@ static void test_read_complex_tree() {
     fclose(test_file);
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     ON_DEBUG(
@@ -229,7 +229,7 @@ static void test_read_nonexistent_file() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
     tree_t* test_tree = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == ERROR_NO, "add_tree failed");
@@ -247,7 +247,7 @@ static void test_write_empty_tree() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     tree_t* test_tree = forest_add_tree(&forest, &error);
@@ -280,7 +280,7 @@ static void test_write_constant_tree() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     tree_t* test_tree = forest_add_tree(&forest, &error);
@@ -295,7 +295,7 @@ static void test_write_constant_tree() {
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     
     forest_t read_forest = {};
-    error |= forest_init(&read_forest, VER_INIT);
+    error |= forest_init(&read_forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     error = forest_read_file(&read_forest, filename);
@@ -321,7 +321,7 @@ static void test_write_variable_tree() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     tree_t* test_tree = forest_add_tree(&forest, &error);
@@ -339,7 +339,7 @@ static void test_write_variable_tree() {
     HARD_ASSERT(error == ERROR_NO, "tree_write_to_file failed");
     
     forest_t read_forest = {};
-    error |= forest_init(&read_forest, VER_INIT);
+    error |= forest_init(&read_forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     error = forest_read_file(&read_forest, filename);
@@ -365,7 +365,7 @@ static void test_write_complex_tree() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     tree_t* test_tree = forest_add_tree(&forest, &error);
@@ -390,7 +390,7 @@ static void test_write_complex_tree() {
     tree_dump(test_tree, VER_INIT, true, "Aaa");
     
     forest_t read_forest = {};
-    error |= forest_init(&read_forest, VER_INIT);
+    error |= forest_init(&read_forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     error = forest_read_file(&read_forest, filename);
@@ -418,7 +418,7 @@ static void test_dump_empty_tree() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     tree_t* test_tree = forest_add_tree(&forest, &error);
@@ -446,7 +446,7 @@ static void test_dump_tree_with_nodes() {
     error_code error = ERROR_NO;
 
     forest_t forest = {};
-    error |= forest_init(&forest, VER_INIT);
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
     HARD_ASSERT(error == ERROR_NO, "forest_init failed");
 
     tree_t* test_tree = forest_add_tree(&forest, &error);
@@ -478,7 +478,7 @@ int run_tests() {
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Начало тестирования функций чтения/записи и дампа\n");
     LOGGER_INFO("========================================\n");
-    
+
     test_read_empty_tree();
     test_read_single_constant();
     test_read_single_variable();
