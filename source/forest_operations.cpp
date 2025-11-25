@@ -10,6 +10,8 @@
 #include "forest_info.h"
 #include "forest_operations.h"
 
+//================================================================================
+
 error_code forest_init(forest_t* forest ON_DEBUG(, ver_info_t ver_info)) {
     HARD_ASSERT(forest     != nullptr, "Forest_ptr is nulltpr");
 
@@ -42,41 +44,34 @@ error_code forest_init(forest_t* forest ON_DEBUG(, ver_info_t ver_info)) {
     forest->ver_info  = ver_info;
     })
 
-    forest->buff = nullptr;
+    forest->buff = {nullptr, 0};
 
     return error;
 }
 
-ON_DEBUG(
-error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name) {
-    HARD_ASSERT(forest            != nullptr, "Forest_ptr is nullptr");
-    HARD_ASSERT(dump_file_name    != nullptr, "Dump_file_name is nullptr");
-    HARD_ASSERT(forest->tree_list != nullptr, "List is nullptr");
-    LOGGER_DEBUG("Forest_open_dump_file: started");
-
-    FILE* dump_file = fopen(dump_file_name, "w");
-    if(!dump_file) {
-        LOGGER_ERROR("File open error");
-        return ERROR_OPEN_FILE;
+error_code forest_dest(forest_t* forest) {
+    LOGGER_DEBUG("forest_dest: started");
+    if(!forest) {
+        LOGGER_WARNING("forest_dest: forest is nullptr");
+        return ERROR_NO;
     }
-    forest->dump_file            = dump_file;
-    forest->tree_list->dump_file = dump_file;
-    return ERROR_NO;
+    
+    error_code error = ERROR_NO;
+
+    error |= stack_destroy(forest->var_stack);
+    forest->var_stack = nullptr;
+
+    error |= list_dest(forest->tree_list);
+    forest->tree_list = nullptr;
+
+    free(forest->buff.ptr);
+    ON_DEBUG({
+    forest_close_dump_file(forest);
+    })
+    free(forest);
+
+    return error;
 }
-
-error_code forest_close_dump_file(forest_t* forest) {
-    HARD_ASSERT(forest != nullptr, "Forest is nullptr");
-
-    LOGGER_DEBUG("Forest_close_dump_file: started");
-
-    int error = fclose(forest->dump_file);
-    if(!error) {
-        LOGGER_ERROR("forest_close_dump_file: Failed to close dump_file");
-        return ERROR_CLOSE_FILE;
-    }
-    return ERROR_NO;
-}
-)
 
 tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr) {
     HARD_ASSERT(forest != nullptr, "Forest is nullptr");
@@ -108,6 +103,10 @@ tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr) {
     }
 
     tree->list_idx = idx; 
+    tree->buff     = forest->buff;
+    ON_DEBUG(
+    tree->dump_file = &forest->dump_file;
+    )
     return tree;
 }
 
@@ -147,6 +146,10 @@ tree_t* forest_include_tree(forest_t* forest, tree_t* tree, error_code* error_pt
     }
 
     tree->list_idx = idx; 
+    tree->buff     = forest->buff;
+    ON_DEBUG(
+    tree->dump_file = &forest->dump_file;
+    )
     return tree;
 
 }
@@ -162,33 +165,43 @@ error_code forest_exclude_tree(forest_t* forest, tree_t* tree) {
     error |= list_remove(forest->tree_list, tree->list_idx);
     RETURN_IF_ERROR(error);
 
-    tree->buff      = nullptr;
+    tree->buff      = {nullptr, 0};
     tree->var_stack = nullptr;
-
+    ON_DEBUG(
+    tree->dump_file = nullptr;
+    )
     return ERROR_NO;
 }
 
-error_code forest_dest(forest_t* forest) {
-    LOGGER_DEBUG("forest_dest: started");
-    if(!forest) {
-        LOGGER_WARNING("forest_dest: forest is nullptr");
-        return ERROR_NO;
+//================================================================================
+
+ON_DEBUG(
+error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name) {
+    HARD_ASSERT(forest            != nullptr, "Forest_ptr is nullptr");
+    HARD_ASSERT(dump_file_name    != nullptr, "Dump_file_name is nullptr");
+    HARD_ASSERT(forest->tree_list != nullptr, "List is nullptr");
+    LOGGER_DEBUG("Forest_open_dump_file: started");
+
+    FILE* dump_file = fopen(dump_file_name, "w");
+    if(!dump_file) {
+        LOGGER_ERROR("File open error");
+        return ERROR_OPEN_FILE;
     }
-    
-    error_code error = ERROR_NO;
-
-    error |= stack_destroy(forest->var_stack);
-    forest->var_stack = nullptr;
-
-    error |= list_dest(forest->tree_list);
-    forest->tree_list = nullptr;
-
-    free(forest->buff);
-    ON_DEBUG({
-    forest_close_dump_file(forest);
-    })
-    free(forest);
-
-    return error;
+    forest->dump_file            = dump_file;
+    forest->tree_list->dump_file = dump_file;
+    return ERROR_NO;
 }
 
+error_code forest_close_dump_file(forest_t* forest) {
+    HARD_ASSERT(forest != nullptr, "Forest is nullptr");
+
+    LOGGER_DEBUG("Forest_close_dump_file: started");
+
+    int error = fclose(forest->dump_file);
+    if(!error) {
+        LOGGER_ERROR("forest_close_dump_file: Failed to close dump_file");
+        return ERROR_CLOSE_FILE;
+    }
+    return ERROR_NO;
+}
+)

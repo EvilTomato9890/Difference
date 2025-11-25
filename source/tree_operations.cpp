@@ -91,7 +91,6 @@ error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out) {
     return error;
 }
 
-
 error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info)) {
     HARD_ASSERT(tree != nullptr, "tree pointer is nullptr");
 
@@ -100,7 +99,7 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
     error_code error = 0;
     tree->root = nullptr;
     tree->size = 0;
-    tree->buff = nullptr;
+    tree->buff = {nullptr, 0};
     tree->head = init_node(CONSTANT, make_union(CONSTANT, 0), nullptr, nullptr);
     if(!tree->head) {
         LOGGER_ERROR("Tree_init: failed calloc head");

@@ -16,11 +16,11 @@ struct tree_t {
     tree_node_t* head;
     size_t       size;
     stack_t*     var_stack;
-    const char*  buff;
+    string_t      buff;
     size_t       list_idx;
     ON_DEBUG(
         ver_info_t ver_info;
-        FILE* dump_file;
+        FILE* const * dump_file;
     )
 };
 

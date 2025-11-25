@@ -274,7 +274,7 @@ static error_code write_html(const tree_t* tree,
                              int idx, const char* comment,
                              const char* svg_path, int is_visual) {
     if (!tree || !tree->dump_file) return ERROR_NULL_ARG;
-    FILE* html = tree->dump_file;
+    FILE* html = *tree->dump_file;
     
 
     time_t t = time(nullptr);

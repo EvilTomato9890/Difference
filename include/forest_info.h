@@ -7,7 +7,7 @@
 
 struct forest_t {
     list_t*  tree_list;
-    char*    buff;
+    string_t buff;
     stack_t* var_stack;
     ON_DEBUG(
         ver_info_t ver_info;

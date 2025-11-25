@@ -9,7 +9,7 @@ error_code tree_write_to_file(const tree_t* tree, const char* filename);
 
 const char* get_func_name_by_type(func_type_t func_type_value);
 
-error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size);
+error_code tree_parse_from_buffer(tree_t* tree);
 
 
 

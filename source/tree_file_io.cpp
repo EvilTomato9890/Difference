@@ -13,6 +13,8 @@
 #include "tree_info.h"
 #include "tree_file_io.h"
 #include "../libs/StackDead-main/stack.h"
+#include "my_string.h"
+#include "file_operations.h"
 
 //================================================================================
 
@@ -48,8 +50,10 @@ static func_type_t get_op_code(const char* func_name, error_code* error) {
     return ADD;
 }
 
-static char* skip_whitespace(char* curr) {
-    HARD_ASSERT(curr != nullptr, "curr is nullptr");
+static char* skip_whitespace(char* buff) {
+    HARD_ASSERT(buff != nullptr, "curr is nullptr");
+
+    char* curr = buff;
     while (*curr != '\0' && isspace((unsigned char)*curr)) {
         curr++;
     }
@@ -91,17 +95,17 @@ static void attach_node_to_parent(tree_t* tree, tree_node_t* new_node, tree_node
     }
 }
 
-static void debug_print_buffer_remainder(tree_t* tree, const char* value_start, char* value_end, char* buffer_start, size_t buffer_size) {
+static void debug_print_buffer_remainder(tree_t* tree, const char* value_start, char* value_end, string_t buff_str) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(value_start != nullptr, "value_start is nullptr");
     
     ON_DEBUG({
         if (tree->dump_file != nullptr) {
-            if (value_end != nullptr && buffer_start != nullptr && value_end >= buffer_start && value_end < buffer_start + buffer_size) {
+            if (value_end != nullptr && buff_str.ptr != nullptr && value_end >= buff_str.ptr && value_end < buff_str.ptr + buff_str.len) {
                 char original_char = *value_end;
                 *value_end = '"';
                 
-                size_t remainder_len = buffer_size - (value_end - buffer_start);
+                size_t remainder_len = buff_str.len - (value_end - buff_str.ptr);
                 if (remainder_len > 200) {
                     remainder_len = 200;
                 }
@@ -143,7 +147,7 @@ static int is_integer_token(const char* text_ptr) {
 }
 
 static int try_parse_node_value(tree_t* tree_ptr, node_type_t* node_type_ptr, value_t* node_value_ptr,
-                                char** value_start_ptr_ref, char** value_end_ptr_ref, char** current_ptr_ref,
+                                char** value_start_ptr_ref,  char** value_end_ptr_ref,  char** current_ptr_ref,
                                 error_code* error)
 {
     HARD_ASSERT(current_ptr_ref      != nullptr, "current_ptr_ref is nullptr");
@@ -153,14 +157,14 @@ static int try_parse_node_value(tree_t* tree_ptr, node_type_t* node_type_ptr, va
     HARD_ASSERT(value_end_ptr_ref    != nullptr, "value_end_ptr_ref is nullptr");
     HARD_ASSERT(error       != nullptr, "error is nullptr");
 
-    char* current_ptr     = *current_ptr_ref;
-    char* value_start_ptr = nullptr;
-    char* value_end_ptr   = nullptr;
+     char* current_ptr     = *current_ptr_ref;
+     char* value_start_ptr = nullptr;
+     char* value_end_ptr   = nullptr;
 
     if (*current_ptr == '\"') {
         current_ptr++;
         value_start_ptr = current_ptr;
-        char* scan_pointer = current_ptr;
+         char* scan_pointer = current_ptr;
         while (*scan_pointer != '\0' && *scan_pointer != '\"') {
             scan_pointer++;
         }
@@ -183,7 +187,7 @@ static int try_parse_node_value(tree_t* tree_ptr, node_type_t* node_type_ptr, va
         current_ptr = scan_pointer + 1;
     } else {
         value_start_ptr = current_ptr;
-        char* scan_pointer = current_ptr;
+         char* scan_pointer = current_ptr;
 
         while (*scan_pointer != '\0' &&
                !isspace((unsigned char)*scan_pointer)) {
@@ -192,7 +196,6 @@ static int try_parse_node_value(tree_t* tree_ptr, node_type_t* node_type_ptr, va
 
         value_end_ptr = scan_pointer;
         char delimiter_char = *value_end_ptr;
-        *value_end_ptr = '\0';
 
         int is_number_flag = is_integer_token(value_start_ptr);
         if (is_number_flag) {
@@ -215,12 +218,7 @@ static int try_parse_node_value(tree_t* tree_ptr, node_type_t* node_type_ptr, va
                 return 0;
             }
         }
-
-        if (delimiter_char == '\0') {
-            current_ptr = value_end_ptr;
-        } else {
-            current_ptr = value_end_ptr + 1;
-        }
+        current_ptr = value_end_ptr;
     }
 
     *current_ptr_ref     = current_ptr;
@@ -229,9 +227,9 @@ static int try_parse_node_value(tree_t* tree_ptr, node_type_t* node_type_ptr, va
     return 1;
 }
 
-static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_node_t* parent_node_ptr,
+static tree_node_t* read_node(tree_t* tree_ptr, tree_node_t* parent_node_ptr,
                               error_code* error,
-                              char* buffer_start_ptr, size_t buffer_size_val)
+                              char** current_ptr_ref, string_t buff_str)
 {
     HARD_ASSERT(tree_ptr        != nullptr, "tree_ptr is nullptr");
     HARD_ASSERT(current_ptr_ref != nullptr, "current_ptr_ref is nullptr");
@@ -273,19 +271,18 @@ static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_nod
             debug_print_buffer_remainder(tree_ptr,
                                          value_start_ptr,
                                          value_end_ptr,
-                                         buffer_start_ptr,
-                                         buffer_size_val);
+                                         buff_str);
         }
 
         current_ptr = skip_whitespace(current_ptr);
-        new_node_ptr->left = read_node(tree_ptr, &current_ptr, new_node_ptr, error, buffer_start_ptr, buffer_size_val);
+        new_node_ptr->left = read_node(tree_ptr, new_node_ptr, error, &current_ptr, buff_str);
         if (*error) {
             cleanup_failed_node(tree_ptr, new_node_ptr, parent_node_ptr);
             return nullptr;
         }
 
         current_ptr = skip_whitespace(current_ptr);
-        new_node_ptr->right = read_node(tree_ptr, &current_ptr, new_node_ptr, error, buffer_start_ptr, buffer_size_val);
+        new_node_ptr->right = read_node(tree_ptr, new_node_ptr, error,  &current_ptr, buff_str);
         if (*error) {
             cleanup_failed_node(tree_ptr, new_node_ptr, parent_node_ptr);
             return nullptr;
@@ -327,72 +324,13 @@ static tree_node_t* read_node(tree_t* tree_ptr, char** current_ptr_ref, tree_nod
 
 //================================================================================
 
-static size_t count_nodes(tree_node_t* node) {
-    if (node == nullptr) return 0;
-    return 1 + count_nodes(node->left) + count_nodes(node->right);
-}
-
-static long get_file_size(FILE* file) {
-    if(file == nullptr) {
-        return -1;
-    }
-
-    fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    return file_size;
-}
-
-static error_code read_file_to_buffer(const char* filename, char** buffer_out, size_t* buffer_size_out) {
-    HARD_ASSERT(filename != nullptr, "filename is nullptr");
-    HARD_ASSERT(buffer_out != nullptr, "buffer_out is nullptr");
-    HARD_ASSERT(buffer_size_out != nullptr, "buffer_size_out is nullptr");
-    
-    LOGGER_DEBUG("read_file_to_buffer: started");
-
-    FILE* file = fopen(filename, "r");
-    if (file == nullptr) {
-        LOGGER_ERROR("read_file_to_buffer: failed to open file '%s'", filename);
-        return ERROR_OPEN_FILE;
-    }
-    
-    long file_size = get_file_size(file);
-    if (file_size < 0) {
-        LOGGER_ERROR("read_file_to_buffer: failed to get file size");
-        fclose(file);
-        return ERROR_OPEN_FILE;
-    }
-    
-    char* buffer = (char*)calloc(file_size + 1, sizeof(char));
-    if (buffer == nullptr) {
-        LOGGER_ERROR("read_file_to_buffer: failed to allocate buffer");
-        fclose(file);
-        return ERROR_MEM_ALLOC;
-    }
-    
-    size_t bytes_read = fread(buffer, 1, file_size, file);
-    fclose(file);
-    
-    if (bytes_read != (size_t)file_size) {
-        LOGGER_ERROR("read_file_to_buffer: failed to read entire file");
-        free(buffer);
-        return ERROR_OPEN_FILE;
-    }
-    
-    buffer[file_size] = '\0';
-    *buffer_out = buffer;
-    *buffer_size_out = (size_t)file_size;
-    return ERROR_NO;
-}
-
-
-error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size) {
+error_code tree_parse_from_buffer(tree_t* tree) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
-    HARD_ASSERT(buffer != nullptr, "buffer is nullptr");
+    HARD_ASSERT(tree->buff.ptr != nullptr, "buffer is nullptr");
     
     LOGGER_DEBUG("parse_tree_from_buffer: started");
 
-    char* curr = skip_whitespace(buffer);
+    char* curr = skip_whitespace(tree->buff.ptr);
     
     if (*curr == '\0') {
         LOGGER_DEBUG("parse_tree_from_buffer: empty file, returning empty tree");
@@ -402,7 +340,7 @@ error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size
     
     
     error_code parse_error = 0;
-    tree_node_t* root = read_node(tree, &curr, tree->head, &parse_error, buffer, buffer_size);
+    tree_node_t* root = read_node(tree, tree->head, &parse_error, &curr, tree->buff);
 
     if (parse_error) {
         LOGGER_ERROR("parse_tree_from_buffer: failed to parse tree");
@@ -415,17 +353,17 @@ error_code parse_tree_from_buffer(tree_t* tree, char* buffer, size_t buffer_size
         tree->size = 0;
         return ERROR_NO;
     }    
-    tree->size = count_nodes(root);
+    tree->size = count_nodes_recursive(root);
     
     LOGGER_DEBUG("parse_tree_from_buffer: successfully parsed tree with %zu nodes", tree->size);
     return ERROR_NO;
 }
 
-error_code tree_read_from_file(tree_t* tree, const char* filename) {
+error_code tree_read_from_file(tree_t* tree, FILE* file) {
     HARD_ASSERT(tree != nullptr, "tree pointer is nullptr");
-    HARD_ASSERT(filename != nullptr, "filename is nullptr");
+    HARD_ASSERT(file != nullptr, "filename is nullptr");
     
-    LOGGER_DEBUG("tree_read_from_file: started, filename=%s", filename);
+    LOGGER_DEBUG("tree_read_from_file: started");
     
     if (tree->head == nullptr) {
         LOGGER_ERROR("ensure_tree_initialized: tree_init failed");
@@ -434,17 +372,15 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
 
     error_code error = ERROR_NO;
 
-    char* buffer = nullptr;
-    size_t buffer_size = 0;
-    error = read_file_to_buffer(filename, &buffer, &buffer_size);
+    string_t buff_str = {};
+    error = read_file_to_buffer(file, &buff_str);
     if (error != ERROR_NO) {
         return error;
     }
 
-    tree->buff = buffer;
+    tree->buff = buff_str;
 
-
-    error = parse_tree_from_buffer(tree, buffer, buffer_size);
+    error = tree_parse_from_buffer(tree);
     if (error != ERROR_NO) {
         return error;
     }

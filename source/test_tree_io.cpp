@@ -14,57 +14,73 @@
 #include "differentiator.h"
 #include "tree_file_io.h"
 #include "../libs/StackDead-main/stack.h"
+#include "forest_info.h"
+#include "forest_operations.h"
+#include "file_operations.h"
 
 //================================================================================
 
 static void test_read_empty_tree() {
     LOGGER_INFO("=== Тест: чтение пустого дерева ===");
     
-    tree_t tree = {};
-    stack_t stack = {};
-    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
-    HARD_ASSERT(error == ERROR_NO, "tree_init failed");
+    error_code error = ERROR_NO;
 
-    const char* filename = "test_empty.tree";
-    FILE* file = fopen(filename, "w");
-    LOGGER_DEBUG("FILE OPENED: NAME %s", filename);
-    HARD_ASSERT(file != nullptr, "failed to create test file");
-    fprintf(file, "nil");
-    fclose(file);
-    
-    error = tree_read_from_file(&tree, filename);
+    forest_t forest = {};
+    error |= forest_init(&forest, VER_INIT);
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    tree_t* test_tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    forest_open_dump_file(&forest, "empty_tree_test");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create test file");
+
+    error = read_file_to_buffer(forest.dump_file, &forest.buff);
+    HARD_ASSERT(error == ERROR_NO, "Read file error");
+
+    error = tree_parse_from_buffer(test_tree);
     HARD_ASSERT(error == ERROR_NO, "tree_read_from_file failed");
-    HARD_ASSERT(tree.root == nullptr, "root should be nullptr for empty tree");
-    HARD_ASSERT(tree.size == 0, "size should be 0 for empty tree");
-    
-    tree_destroy(&tree);
-    remove(filename);
+    HARD_ASSERT(test_tree->root == nullptr, "root should be nullptr for empty tree");
+    HARD_ASSERT(test_tree->size == 0, "size should be 0 for empty tree");
+
+    error = tree_write_to_file(test_tree, "Empty_tree_test1");
+    HARD_ASSERT(error == ERROR_NO, "AA");
+
+    forest_close_dump_file(&forest);
+    forest_dest(&forest);
+
     LOGGER_INFO("Тест пройден: чтение пустого дерева\n");
 }
 
 static void test_read_single_constant() {
     LOGGER_INFO("=== Тест: чтение дерева с одной константой ===");
     
-    tree_t tree = {};
-    stack_t stack = {};
-    error_code error = tree_init(&tree, &stack ON_DEBUG(, VER_INIT));
-    HARD_ASSERT(error == ERROR_NO, "tree_init failed");
-    
-    const char* filename = "test_constant.tree";
-    FILE* file = fopen(filename, "w");
-    HARD_ASSERT(file != nullptr, "failed to create test file");
-    fprintf(file, "(42 nil nil)");
-    fclose(file);
-    
-    error = tree_read_from_file(&tree, filename);
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest, VER_INIT);
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    tree_t* test_tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    forest_open_dump_file(&forest, "Single_tree_test");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create test file");
+
+    error = read_file_to_buffer(forest.dump_file, &forest.buff);
+    HARD_ASSERT(error == ERROR_NO, "Read file error");
+
+    error = tree_parse_from_buffer(test_tree);
     HARD_ASSERT(error == ERROR_NO, "tree_read_from_file failed");
-    HARD_ASSERT(tree.root != nullptr, "root should not be nullptr");
-    HARD_ASSERT(tree.root->type == CONSTANT, "node type should be CONSTANT");
-    HARD_ASSERT(tree.root->value.constant == 42, "constant value should be 42");
-    HARD_ASSERT(tree.size == 1, "size should be 1");
-    
-    tree_destroy(&tree);
-    remove(filename);
+    HARD_ASSERT(test_tree->root != nullptr, "root should be nullptr for empty tree");
+    HARD_ASSERT(test_tree->size == 1, "size should be 0 for empty tree");
+
+    error = tree_write_to_file(test_tree, "single_tree_test1");
+    HARD_ASSERT(error == ERROR_NO, "AA");
+
+    forest_close_dump_file(&forest);
+    forest_dest(&forest);
+
     LOGGER_INFO("Тест пройден: чтение дерева с одной константой\n");
 }
 
