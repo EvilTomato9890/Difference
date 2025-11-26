@@ -516,6 +516,43 @@ static void test_dump_tree_with_nodes() {
     LOGGER_INFO("Тест пройден: дамп дерева с узлами\n");
 }
 
+static void test_dump_copied_tree() {
+    LOGGER_INFO("=== Тест: дамп скопированного ===");
+    
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+    
+    tree_node_t* new_root = ADD_(SIN_(c(1)), c(2));
+    HARD_ASSERT(new_root != nullptr, "New_root is nullptr");
+    tree_change_root(tree, new_root);
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "test_dump_copied_tree.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    )
+    error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    tree_node_t* copied_root = subtree_deep_copy(tree->root, &error, tree);
+    HARD_ASSERT(copied_root != nullptr, "root is nullptr");
+
+    error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    )
+    
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: дамп скопированного дерева\n");
+}
+
+
 //================================================================================
 
 int run_tests() {
@@ -536,7 +573,9 @@ int run_tests() {
     
     test_dump_empty_tree();
     test_DSL();
+    test_dump_copied_tree();
     test_diff_big_tree();
+    
 
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
