@@ -1,9 +1,9 @@
 #ifndef FOREST_INFO_H_INCLUDED
 #define FOREST_INFO_H_INCLUDED
 
+#include "debug_meta.h"
 #include "../libs/List/include/list_info.h"
 #include "../libs/StackDead-main/stack.h"
-#include "debug_meta.h"
 
 struct forest_t {
     list_t*  tree_list;

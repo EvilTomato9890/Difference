@@ -1,9 +1,5 @@
 digraph T{
   node [fontname="Fira Mono",shape=record,style="filled,rounded",fontsize=12];
   graph [splines=true, nodesep=0.6, ranksep=0.6];
-  node_0x5a0ee4f7e6f0[shape=record,label="{ {ptr: 0x5a0ee4f7e6f0} | {val: +} | { prev: 0x5a0ee4f7e720 | next: 0x5a0ee4f7e750 } }",color="#5aa99b",fillcolor="#e9fbf5"];
-  node_0x5a0ee4f7e720[shape=record,label="{ {ptr: 0x5a0ee4f7e720} | {val: 10} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
-  node_0x5a0ee4f7e750[shape=record,label="{ {ptr: 0x5a0ee4f7e750} | {val: y} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
-  node_0x5a0ee4f7e6f0 -> node_0x5a0ee4f7e720 [color="#999999"];
-  node_0x5a0ee4f7e6f0 -> node_0x5a0ee4f7e750 [color="#999999"];
+  node_0x579ba71d14a0[shape=record,label="{ {ptr: 0x579ba71d14a0} | {val: 0} | { prev: (nil) | next: (nil) } }",color="#5aa99b",fillcolor="#e9fbf5"];
 }

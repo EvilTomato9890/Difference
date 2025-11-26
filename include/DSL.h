@@ -1,9 +1,13 @@
 #ifndef DSL_H_INCLUDED
 #define DSL_H_INCLUDED
 
+#include "debug_meta.h"
+
 #define d(node) get_diff(tree, node)
 
-#ifdef DIFF_DUMP
+#define cpy(node) clone_node_recursive(node, nullptr ON_CREATION_DEBUG(, tree))
+
+#ifdef CREATION_DEBUG
 #define c(val) \
     init_node_with_dump(CONSTANT, make_union(CONSTANT, val), nullptr, nullptr, tree)
 
@@ -29,4 +33,5 @@
 #define MUL_(left, right) FUNC_TEMPLATE(MUL, left, right)
 #define SIN_(left, ...)   FUNC_TEMPLATE(SIN, left, nullptr)
 #define COS_(left, ...)   FUNC_TEMPLATE(COS, left, nullptr)
+
 #endif

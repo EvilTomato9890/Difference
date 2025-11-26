@@ -9,6 +9,8 @@
         "tuple": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "copy_past_file": "cpp"
+        "copy_past_file": "cpp",
+        "optional": "cpp",
+        "system_error": "cpp"
     }
 }

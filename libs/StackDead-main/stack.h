@@ -5,29 +5,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "debug_meta.h"
 #include "error_handlers.h"
 #include "node_info.h"
-#include "debug_meta.h"
-
-#ifdef HASH_DEBUG
-	#define VERIFY_DEBUG
-	#define ON_HASH_DEBUG(...) __VA_ARGS__
-#else
-	#define ON_HASH_DEBUG(...)
-#endif	
-
-#ifdef CANARY_DEBUG
-	#define VERIFY_DEBUG
-	#define ON_CANARY_DEBUG(...) __VA_ARGS__
-#else
-	#define ON_CANARY_DEBUG(...)
-#endif
-
-#ifdef VERIFY_DEBUG //Почему нельзя ifdef внутри define
-	#define ON_DEBUG(...) __VA_ARGS__
-#else
-	#define ON_DEBUG(...)
-#endif
 
 typedef variable_t st_type;
 

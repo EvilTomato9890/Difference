@@ -1,17 +1,17 @@
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #0 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-26 00:23:57</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 01:10:40</span>
 <span style="color:#ff4d4f;font-weight:700;">After reading node: + (10 nil nil) ("x" nil nil)) 
 Buffer remainder: "(10 nil nil) ("x" nil nil))</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x5a0ee4f780e0
-root ptr : 0x5a0ee4f78140
+tree ptr : 0x579ba71ceec0
+root ptr : 0x579ba71cef20
 size     : 0
 
 -- Created at (tree ver_info) --
 file: source/forest_operations.cpp
 func: forest_add_tree
-line: 92
+line: 105
 
 -- Called at (passed ver_info) --
 file: source/tree_file_io.cpp
@@ -20,7 +20,7 @@ line: 118
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5a0ee4f78140  FUNCTION        (nil)           (nil)           +
+0     0x579ba71cef20  FUNCTION        (nil)           (nil)           +
 
 SVG: dumps/tree_dump_000.svg
 </pre>
@@ -29,18 +29,18 @@ SVG: dumps/tree_dump_000.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #1 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-26 00:23:57</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 01:10:40</span>
 <span style="color:#ff4d4f;font-weight:700;">After reading node: 10 nil nil) ("x" nil nil)) 
 Buffer remainder: "nil nil) ("x" nil nil))</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x5a0ee4f780e0
-root ptr : 0x5a0ee4f78140
+tree ptr : 0x579ba71ceec0
+root ptr : 0x579ba71cef20
 size     : 0
 
 -- Created at (tree ver_info) --
 file: source/forest_operations.cpp
 func: forest_add_tree
-line: 92
+line: 105
 
 -- Called at (passed ver_info) --
 file: source/tree_file_io.cpp
@@ -49,8 +49,8 @@ line: 118
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5a0ee4f78140  FUNCTION        0x5a0ee4f781d0  (nil)           +
-1     0x5a0ee4f781d0  CONSTANT        (nil)           (nil)           10
+0     0x579ba71cef20  FUNCTION        0x579ba71cefb0  (nil)           +
+1     0x579ba71cefb0  CONSTANT        (nil)           (nil)           10
 
 SVG: dumps/tree_dump_001.svg
 </pre>
@@ -59,18 +59,18 @@ SVG: dumps/tree_dump_001.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #2 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-26 00:23:57</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 01:10:40</span>
 <span style="color:#ff4d4f;font-weight:700;">After reading node: x" nil nil)) 
 Buffer remainder: " nil nil))</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x5a0ee4f780e0
-root ptr : 0x5a0ee4f78140
+tree ptr : 0x579ba71ceec0
+root ptr : 0x579ba71cef20
 size     : 0
 
 -- Created at (tree ver_info) --
 file: source/forest_operations.cpp
 func: forest_add_tree
-line: 92
+line: 105
 
 -- Called at (passed ver_info) --
 file: source/tree_file_io.cpp
@@ -79,9 +79,9 @@ line: 118
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5a0ee4f78140  FUNCTION        0x5a0ee4f781d0  0x5a0ee4f78290  +
-1     0x5a0ee4f781d0  CONSTANT        (nil)           (nil)           10
-2     0x5a0ee4f78290  VARIABLE        (nil)           (nil)           x
+0     0x579ba71cef20  FUNCTION        0x579ba71cefb0  0x579ba71cf070  +
+1     0x579ba71cefb0  CONSTANT        (nil)           (nil)           10
+2     0x579ba71cf070  VARIABLE        (nil)           (nil)           x
 
 SVG: dumps/tree_dump_002.svg
 </pre>
@@ -90,17 +90,17 @@ SVG: dumps/tree_dump_002.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #3 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-26 00:23:57</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 01:10:40</span>
 <span style="color:#ff4d4f;font-weight:700;">Test dump tree with nodes</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x5a0ee4f780e0
-root ptr : 0x5a0ee4f78140
+tree ptr : 0x579ba71ceec0
+root ptr : 0x579ba71cef20
 size     : 3
 
 -- Created at (tree ver_info) --
 file: source/forest_operations.cpp
 func: forest_add_tree
-line: 92
+line: 105
 
 -- Called at (passed ver_info) --
 file: source/test_tree_io.cpp
@@ -109,9 +109,9 @@ line: 202
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5a0ee4f78140  FUNCTION        0x5a0ee4f781d0  0x5a0ee4f78290  +
-1     0x5a0ee4f781d0  CONSTANT        (nil)           (nil)           10
-2     0x5a0ee4f78290  VARIABLE        (nil)           (nil)           x
+0     0x579ba71cef20  FUNCTION        0x579ba71cefb0  0x579ba71cf070  +
+1     0x579ba71cefb0  CONSTANT        (nil)           (nil)           10
+2     0x579ba71cf070  VARIABLE        (nil)           (nil)           x
 
 SVG: dumps/tree_dump_003.svg
 </pre>
@@ -120,17 +120,103 @@ SVG: dumps/tree_dump_003.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #4 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-26 00:23:57</span>
-<span style="color:#ff4d4f;font-weight:700;">After diff</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 01:10:40</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x5a0ee4f783e0
-root ptr : 0x5a0ee4f7d180
+tree ptr : 0x7fffbc107f30
+root ptr : 0x579ba71d1470
+size     : 1
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 71
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x579ba71d1470  CONSTANT        (nil)           (nil)           1
+
+SVG: dumps/tree_dump_004.svg
+</pre>
+<img src="dumps/tree_dump_004.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #5 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 01:10:40</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7fffbc107f30
+root ptr : 0x579ba71d14a0
+size     : 1
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 71
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x579ba71d14a0  CONSTANT        (nil)           (nil)           0
+
+SVG: dumps/tree_dump_005.svg
+</pre>
+<img src="dumps/tree_dump_005.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #6 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 01:10:40</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff dumps</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x7fffbc107f90
+root ptr : 0x579ba71d1500
 size     : 3
 
 -- Created at (tree ver_info) --
 file: source/forest_operations.cpp
 func: forest_add_tree
-line: 92
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tree_operations.cpp
+func: init_node_with_dump
+line: 71
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x579ba71d1500  FUNCTION        0x579ba71d14a0  0x579ba71d1470  +
+1     0x579ba71d14a0  CONSTANT        (nil)           (nil)           0
+2     0x579ba71d1470  CONSTANT        (nil)           (nil)           1
+
+SVG: dumps/tree_dump_006.svg
+</pre>
+<img src="dumps/tree_dump_006.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #7 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 01:10:40</span>
+<span style="color:#ff4d4f;font-weight:700;">After diff</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x579ba71cf1c0
+root ptr : 0x579ba71d1500
+size     : 3
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
 
 -- Called at (passed ver_info) --
 file: source/test_tree_io.cpp
@@ -139,12 +225,12 @@ line: 215
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5a0ee4f7d180  FUNCTION        0x5a0ee4f7d150  0x5a0ee4f7d120  +
-1     0x5a0ee4f7d150  CONSTANT        (nil)           (nil)           0
-2     0x5a0ee4f7d120  CONSTANT        (nil)           (nil)           1
+0     0x579ba71d1500  FUNCTION        0x579ba71d14a0  0x579ba71d1470  +
+1     0x579ba71d14a0  CONSTANT        (nil)           (nil)           0
+2     0x579ba71d1470  CONSTANT        (nil)           (nil)           1
 
-SVG: dumps/tree_dump_004.svg
+SVG: dumps/tree_dump_007.svg
 </pre>
-<img src="dumps/tree_dump_004.svg" style="max-width:2250px;"/>
+<img src="dumps/tree_dump_007.svg" style="max-width:2250px;"/>
 
 <hr>

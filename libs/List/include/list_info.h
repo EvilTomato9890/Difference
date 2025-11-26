@@ -8,18 +8,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static const size_t  MIN_LIST_SIZE    = 10;
-static tree_t* const POISON_VAL       = (tree_t*)1111;
-static const int     POISON_IDX       = -100;
-static const float   REDUCTION_FACTOR = 4.0f;
-static const float   GROWTH_FACTOR    = 2.0f;
-static tree_t* const CANARY_NUM       = (tree_t*)0xEBA1DEDA;
+typedef tree_t* list_type;
+
+
+static const size_t    MIN_LIST_SIZE    = 10;
+static list_type const POISON_VAL       = (list_type)1111;
+static const int       POISON_IDX       = -100;
+static const float     REDUCTION_FACTOR = 4.0f;
+static const float     GROWTH_FACTOR    = 2.0f;
+static list_type const CANARY_NUM       = (list_type)0xEBA1DEDA;
+
 
 
 struct node_t {
     ssize_t next;
     ssize_t prev;
-    tree_t* val;
+    list_type val;
 };
 
 struct list_t {

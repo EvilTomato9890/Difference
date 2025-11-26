@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "debug_meta.h"
 #include "asserts.h"
 #include "logger.h"
 #include "tree_operations.h"
@@ -13,7 +14,7 @@
 #include "../libs/StackDead-main/stack.h" //КАК
 #include "forest_operations.h"
 #include "forest_info.h"
-#include "debug_meta.h"
+
 
 //================================================================================
 
@@ -60,7 +61,7 @@ tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, 
     return node;
 }
 
-tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, tree_t* tree) {
+tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node_t* left, tree_node_t* right, const tree_t* tree) {
     HARD_ASSERT(tree  != nullptr, "tree is nullptr");
 
     tree_node_t* node = init_node(node_type, value, left, right);
@@ -101,12 +102,9 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
     tree->size = 0;
     tree->buff = {nullptr, 0};
 
-    error = stack_init(stack, 10 ON_DEBUG(, VER_INIT));
+    //error = stack_init(stack, 10 ON_DEBUG(, VER_INIT));
     tree->var_stack = stack;
-    if(error != ERROR_NO) {
-        LOGGER_ERROR("Tree_init: stack_init failed");
-        return ERROR_MEM_ALLOC;
-    }
+
     ON_DEBUG({
         tree->ver_info  = ver_info;
         tree->dump_file = nullptr;
@@ -126,6 +124,41 @@ error_code tree_destroy(tree_t* tree) {
     tree->size = 0;
 
     return error;
+}
+
+tree_node_t* clone_node_recursive(const tree_node_t* node, error_code* error ON_CREATION_DEBUG(, const tree_t* tree)) {
+
+    if (error != nullptr && *error != ERROR_NO) return nullptr;
+    if (node == nullptr) return nullptr;
+
+    tree_node_t* left_copy  = clone_node_recursive(node->left,  error ON_CREATION_DEBUG(, tree));
+    tree_node_t* right_copy = clone_node_recursive(node->right, error ON_CREATION_DEBUG(, tree));
+
+    if (error != nullptr && *error != ERROR_NO) {
+        return nullptr;
+    }
+    #ifdef CREATION_DEBUG
+        tree_node_t* copy = init_node_with_dump(node->type, node->value, left_copy, right_copy, tree);
+    #else 
+        tree_node_t* copy = init_node(node->type, node->value, left_copy, right_copy);
+    #endif
+
+    if (!copy) {
+        LOGGER_ERROR("clone_subtree: init_node failed");
+        if(error != nullptr) *error |= ERROR_MEM_ALLOC;
+        return nullptr;
+    }
+
+    return copy;
+}
+
+tree_node_t* clone_child_subtree(tree_node_t* node, error_code* error ON_CREATION_DEBUG(, const tree_t* tree)) {
+    HARD_ASSERT(node != nullptr, "Node is nullptr");
+
+    node->left  = clone_node_recursive(node->left, error ON_CREATION_DEBUG(, tree));
+    node->right = clone_node_recursive(node->right, error ON_CREATION_DEBUG(, tree));
+
+    return node;
 }
 
 bool tree_is_empty(const tree_t* tree) {
