@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "debug_meta.h"
 #include "error_handlers.h"
 #include "node_info.h"
-#include "debug_meta.h"
 
 typedef variable_t st_type;
 

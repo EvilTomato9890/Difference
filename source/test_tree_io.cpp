@@ -141,18 +141,12 @@ static void test_DSL() {
     forest_open_dump_file(&forest, "test_dump_DSL.html");
     HARD_ASSERT(forest.dump_file != nullptr, "failed to create file");
     )
-    
-    tree_t tree_origin = {};
-    error = tree_init(&tree_origin, forest.var_stack ON_DEBUG(, VER_INIT));
-    HARD_ASSERT(error == ERROR_NO, "tree_init failed");
 
-    tree_t* tree = &tree_origin;
-    tree_origin.root = ADD_(SIN_(c(1)), c(2));
-
-    tree = forest_include_tree(&forest, &tree_origin, &error);
+    tree_t* tree = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == ERROR_NO, "forest_include_tree failed");
 
-    
+    tree_node_t* new_root = ADD_(SIN_(c(1)), c(2));
+    tree_change_root(tree, new_root);
 
     error = tree_dump(tree, VER_INIT, true, "FF");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");

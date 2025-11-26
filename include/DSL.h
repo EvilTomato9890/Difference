@@ -5,7 +5,7 @@
 
 #define d(node) get_diff(tree, node)
 
-#define cpy(node) clone_child_subtree(node, nullptr ON_CREATION_DEBUG(, tree))
+#define cpy(node) clone_node_recursive(node, nullptr ON_CREATION_DEBUG(, tree))
 
 #ifdef CREATION_DEBUG
 #define c(val) \
