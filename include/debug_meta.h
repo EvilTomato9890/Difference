@@ -9,6 +9,29 @@
     #define ON_DEBUG(...)
 #endif
 
+
+#ifdef CREATION_DEBUG
+    #define ON_CREATION_DEBUG(...) __VA_ARGS__
+#else
+    #define ON_CREATION_DEBUG(...)
+#endif
+
+
+#ifdef HASH_DEBUG
+	#define VERIFY_DEBUG
+	#define ON_HASH_DEBUG(...) __VA_ARGS__
+#else
+	#define ON_HASH_DEBUG(...)
+#endif	
+
+
+#ifdef CANARY_DEBUG
+	#define VERIFY_DEBUG
+	#define ON_CANARY_DEBUG(...) __VA_ARGS__
+#else
+	#define ON_CANARY_DEBUG(...)
+#endif
+
 struct ver_info_t {
     const char* file;
     const char* func;

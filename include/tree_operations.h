@@ -5,7 +5,7 @@
 #include "error_handler.h"
 #include "asserts.h"
 #include "../libs/StackDead-main/stack.h"
-
+#include "debug_meta.h"
 
 error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info));
 
@@ -36,5 +36,8 @@ inline tree_node_t* clone_node(const tree_node_t* node) {
     HARD_ASSERT(node != nullptr, "node is nullptr");
     return init_node(node->type, node->value, node->left, node->right);
 }
+
+tree_node_t* clone_node_recursive(const tree_node_t* node, error_code* error ON_CREATION_DEBUG(, const tree_t* tree));
+tree_node_t* clone_child_subtree(tree_node_t* node, error_code* error ON_CREATION_DEBUG(, const tree_t* tree));
 
 #endif

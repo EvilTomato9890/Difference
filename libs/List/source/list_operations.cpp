@@ -149,17 +149,21 @@ error_code list_init(list_t* list_return, size_t capacity ON_DEBUG(, ver_info_t 
 }
 
 error_code list_dest(list_t* list, elem_dest_func_t elem_dest_func) {
-    HARD_ASSERT(list      != nullptr, "list is nullptr");
+    if(!list) {
+        return ERROR_NO;
+    }
     HARD_ASSERT(list->arr != nullptr, "list->arr is nullptr");
     LOGGER_DEBUG("Destroying list");
     error_code error = ERROR_NO;
 
-    for(size_t i = 0; i < list->capacity; i++) {
-        if(!list_node_is_free(&list->arr[i])) {
-            error |= elem_dest_func(list->arr[i].val);
+
+    if (elem_dest_func) {
+        for(size_t i = 1; i < list->capacity; i++) {
+            if(!list_node_is_free(&list->arr[i])) {
+                error |= elem_dest_func(list->arr[i].val);
+            }
         }
     }
-
     free(list->arr);
     list->arr = nullptr;
     list->capacity = 0;

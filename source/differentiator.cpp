@@ -20,9 +20,9 @@ tree_node_t* get_diff(tree_t* tree, tree_node_t* node) {
 
     switch(node->value.func) {
         case ADD:  return    ADD_(d(l), d(r));
-        case MUL:  return    ADD_(MUL_(d(l), r), MUL_(l, d(r)));
+        case MUL:  return    ADD_(MUL_(d(l), cpy(r)), MUL_(cpy(r), d(r)));
         case SUB:  return    SUB_(d(l), d(r));
-        case SIN:  return    MUL_(COS_(l), d(l));
+        case SIN:  return    MUL_(COS_(cpy(r)), d(l));
         case COS:  return    MUL_(SUB_(c(0), SIN_(l)), d(l));
         default:
             LOGGER_ERROR("Unknown func");

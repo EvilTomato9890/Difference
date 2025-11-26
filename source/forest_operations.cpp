@@ -15,6 +15,15 @@
 
 //================================================================================
 
+static error_code tree_full_destroy(list_type val) {
+    tree_t* tree = (tree_t*)val;
+    if (!tree) return ERROR_NO;
+
+    error_code error = tree_destroy(tree);
+    free(tree);
+    return error;
+}
+
 error_code forest_init(forest_t* forest ON_DEBUG(, ver_info_t ver_info)) {
     HARD_ASSERT(forest != nullptr, "Forest_ptr is nulltpr");
 
@@ -60,15 +69,19 @@ error_code forest_dest(forest_t* forest) {
         return ERROR_NO;
     }
     
-    error_code error = ERROR_NO;
+    error_code error = 0;
 
-    error |= stack_destroy(forest->var_stack);
-    forest->var_stack = nullptr;
-
-    error |= list_dest(forest->tree_list, &tree_destroy);
+    error |= list_dest(forest->tree_list, &tree_full_destroy);
+    free(forest->tree_list);          
     forest->tree_list = nullptr;
 
+    error |= stack_destroy(forest->var_stack);
+    free(forest->var_stack);
+    forest->var_stack = nullptr;
+
     free(forest->buff.ptr);
+    forest->buff.ptr = nullptr;
+    forest->buff.len = 0;
 
     return error;
 }
@@ -123,6 +136,8 @@ error_code forest_delete_tree(forest_t* forest, tree_t* tree) {
 
     error |= list_remove(forest->tree_list, tree->list_idx);
     RETURN_IF_ERROR(error);
+
+    free(tree);
 
     return error;
 
