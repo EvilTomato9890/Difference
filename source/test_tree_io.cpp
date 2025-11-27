@@ -696,6 +696,53 @@ static void test_calculate_tree_nth_diff() {
     LOGGER_INFO("Тест пройден: подсчет n-ой производной \n");
 }
 
+static void test_tree_optimize() {
+    LOGGER_INFO("=== Тест: оптимизация дерева ===");
+
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "test_dump_tree_optimize.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    )
+
+    tree_node_t* new_root =
+        ADD_(
+            ADD_(MUL_(v("x"), c(1)), c(0)),                           
+            ADD_(MUL_(c(0), v("y")),                                  
+                 ADD_(POW_(c(1), v("z")),                             
+                      LOG_(v("x"), c(1)))                            
+        ));
+    HARD_ASSERT(error == ERROR_NO, "creating root failed");
+    tree_change_root(tree, new_root);
+
+    error = tree_dump(tree, VER_INIT, true, "Before tree_optimize");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump before optimize failed");
+
+    error = tree_optimize(tree);
+    HARD_ASSERT(error == ERROR_NO, "tree_optimize failed");
+
+    error = tree_dump(tree, VER_INIT, true, "After tree_optimize");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump after optimize failed");
+
+    var_val_type answer = calculate_tree(tree);
+    LOGGER_INFO("ANSWER AFTER OPTIMIZE: %lf", answer);
+
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    )
+
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: оптимизация дерева \n");
+}
+
 //================================================================================
 
 int run_tests() {
@@ -722,7 +769,8 @@ int run_tests() {
     test_calculate_tree_with_vars();
     test_calculate_tree_diff();
     test_calculate_tree_nth_diff();
-    
+    test_tree_optimize();
+
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
     LOGGER_INFO("========================================\n");

@@ -248,3 +248,332 @@ var_val_type calculate_tree(tree_t* tree) {
     
     return ans;
 }
+
+//================================================================================
+
+static bool node_is_constant(const tree_node_t* node) {
+    return node != nullptr && node->type == CONSTANT;
+}
+
+static bool node_is_zero(const tree_node_t* node) {
+    return node_is_constant(node) && node->value.constant == 0.0;
+}
+
+static bool node_is_one(const tree_node_t* node) {
+    return node_is_constant(node) && node->value.constant == 1.0;
+}
+
+//--------------------------------------------------------------------------------
+
+static error_code handle_fixed_elem(tree_node_t* node, const_val_type constant_value) {
+    if (node == nullptr) return ERROR_NO;
+
+    error_code error = ERROR_NO;
+
+    if (node->left) {
+        error |= destroy_node_recursive(node->left, nullptr);
+        node->left = nullptr;
+    }
+    if (node->right) {
+        error |= destroy_node_recursive(node->right, nullptr);
+        node->right = nullptr;
+    }
+
+    node->type           = CONSTANT;
+    node->value.constant = constant_value;
+
+    if (error != ERROR_NO) {
+        LOGGER_ERROR("handle_fixed_elem: destroy_node_recursive failed");
+    }
+    return error;
+}
+
+//--------------------------------------------------------------------------------
+
+static error_code handle_neutral_elem(tree_node_t* node,
+                                      tree_node_t* child_keep_ptr,
+                                      tree_node_t* child_drop_ptr) {
+    HARD_ASSERT(node           != nullptr,        "handle_neutral_elem: node is nullptr");
+    HARD_ASSERT(child_keep_ptr != nullptr, "handle_neutral_elem: child_keep_ptr is nullptr");
+
+    error_code error = ERROR_NO;
+
+    if (child_drop_ptr != nullptr) {
+        error |= destroy_node_recursive(child_drop_ptr, nullptr);
+    }
+
+    tree_node_t child_copy = *child_keep_ptr;
+    *node = child_copy;
+
+    free(child_keep_ptr);
+
+    if (error != ERROR_NO) {
+        LOGGER_ERROR("handle_neutral_elem: destroy_node_recursive failed");
+    }
+    return error;
+}
+
+//--------------------------------------------------------------------------------
+
+static const_val_type eval_function_constant(func_type_t func_type_value,
+                                             const_val_type left_value,
+                                             const_val_type right_value) {
+
+    #define HANDLE_FUNC(func_name, ...) \
+        case func_name:                 \
+            return func_name##_func(left_value, right_value);
+
+    switch (func_type_value) {
+        #include "copy_past_file"
+        default:
+            LOGGER_ERROR("eval_function_constant: Unknown func op_code %d",
+                         (int)func_type_value);
+            return NAN;
+    }
+
+    #undef HANDLE_FUNC
+}
+
+//--------------------------------------------------------------------------------
+
+static error_code fold_constants_in_node(tree_node_t* node) {
+    HARD_ASSERT(node != nullptr, "fold_constants_in_node: node is nullptr");
+
+    if (node->type != FUNCTION) return ERROR_NO;
+
+    tree_node_t* left_ptr  = node->left;
+    tree_node_t* right_ptr = node->right;
+
+    const bool has_left_constant  = node_is_constant(left_ptr);
+    const bool has_right_constant = node_is_constant(right_ptr);
+
+    const bool is_unary = (right_ptr == nullptr);
+
+    if (is_unary) {
+        if (!has_left_constant) {
+            return ERROR_NO;
+        }
+    } else {
+        if (!has_left_constant || !has_right_constant) {
+            return ERROR_NO;
+        }
+    }
+
+    const_val_type left_value  = left_ptr  ? left_ptr->value.constant  : 0.0;
+    const_val_type right_value = right_ptr ? right_ptr->value.constant : 0.0;
+
+    const_val_type result_value = eval_function_constant(node->value.func,
+                                                         left_value,
+                                                         right_value);
+    if (isnan(result_value)) {
+        LOGGER_ERROR("fold_constants_in_node: eval_function_constant failed");
+        return ERROR_UNKNOWN_FUNC;
+    }
+
+    error_code error = ERROR_NO;
+
+    if (left_ptr != nullptr) {
+        error |= destroy_node_recursive(left_ptr, nullptr);
+    }
+    if (right_ptr != nullptr) {
+        error |= destroy_node_recursive(right_ptr, nullptr);
+    }
+
+    node->left           = nullptr;
+    node->right          = nullptr;
+    node->type           = CONSTANT;
+    node->value.constant = result_value;
+
+    if (error != ERROR_NO) {
+        LOGGER_ERROR("fold_constants_in_node: destroy_node_recursive failed");
+    }
+
+    return error;
+}
+
+//--------------------------------------------------------------------------------
+
+struct arg_rule_t {
+    const_val_type neutral_value;
+    const_val_type fixed_value;
+    const_val_type fixed_result;
+};
+
+struct op_rule_t {
+    func_type_t func_type_value;
+    size_t      arg_count;
+    arg_rule_t  args[2];
+};
+
+#define NO_RULE                  { NAN, NAN, 0.0 }
+#define ARG_RULE(neu, fix, res)  { (neu), (fix), (res) }
+
+static const op_rule_t OP_SIMPLIFY_RULES[] = {
+    { ADD, 2, {
+        ARG_RULE(0.0, NAN, 0.0),
+        ARG_RULE(0.0, NAN, 0.0)
+    }},
+    { SUB, 2, {
+        NO_RULE,
+        ARG_RULE(0.0, NAN, 0.0)
+    }},
+    { MUL, 2, {
+        ARG_RULE(1.0, 0.0, 0.0),
+        ARG_RULE(1.0, 0.0, 0.0)
+    }},
+    { DIV, 2, {
+        ARG_RULE(NAN, 0.0, 0.0),
+        ARG_RULE(1.0, NAN, 0.0)
+    }},
+    { POW, 2, {
+        ARG_RULE(NAN, 1.0, 1.0),
+        ARG_RULE(1.0, 0.0, 1.0)
+    }},
+    { LOG, 2, {
+        NO_RULE,
+        ARG_RULE(NAN, 1.0, 0.0)
+    }},
+};
+
+#undef NO_RULE
+#undef ARG_RULE
+
+static const op_rule_t* find_op_rule(func_type_t func_type_value) {
+    const size_t rules_count = sizeof(OP_SIMPLIFY_RULES) / sizeof(OP_SIMPLIFY_RULES[0]);
+    for (size_t i = 0; i < rules_count; ++i) {
+        if (OP_SIMPLIFY_RULES[i].func_type_value == func_type_value) {
+            return &OP_SIMPLIFY_RULES[i];
+        }
+    }
+    return nullptr;
+}
+
+//--------------------------------------------------------------------------------
+
+static error_code simplify_fixed_elements(tree_node_t* node,
+                                          const op_rule_t* rule) {
+    HARD_ASSERT(node != nullptr, "simplify_fixed_elements: node is nullptr");
+    HARD_ASSERT(rule != nullptr, "simplify_fixed_elements: rule is nullptr");
+
+    tree_node_t* args[2] = { node->left, node->right };
+    error_code error = ERROR_NO;
+
+    for (size_t i = 0; i < rule->arg_count; ++i) {
+        const arg_rule_t& arg_rule = rule->args[i];
+        tree_node_t*      arg_node = args[i];
+
+        if (isnan(arg_rule.fixed_value))                 continue;
+        if (!node_is_constant(arg_node))                 continue;
+        if (arg_node->value.constant != arg_rule.fixed_value) continue;
+
+        error |= handle_fixed_elem(node, arg_rule.fixed_result);
+        return error;
+    }
+
+    return error;
+}
+
+static error_code simplify_neutral_elements(tree_node_t* node,
+                                            const op_rule_t* rule) {
+    HARD_ASSERT(node != nullptr, "simplify_neutral_elements: node is nullptr");
+    HARD_ASSERT(rule != nullptr, "simplify_neutral_elements: rule is nullptr");
+
+    tree_node_t* args[2] = { node->left, node->right };
+    error_code error = ERROR_NO;
+
+    for (size_t i = 0; i < rule->arg_count; ++i) {
+        const arg_rule_t& arg_rule = rule->args[i];
+        tree_node_t*      arg_node = args[i];
+
+        if (isnan(arg_rule.neutral_value))               continue;
+        if (!node_is_constant(arg_node))                 continue;
+        if (arg_node->value.constant != arg_rule.neutral_value) continue;
+
+        size_t other_index = (i == 0 ? 1 : 0);
+        tree_node_t* keep_ptr = args[other_index];
+        tree_node_t* drop_ptr = arg_node;
+
+        if (keep_ptr != nullptr) {
+            error |= handle_neutral_elem(node, keep_ptr, drop_ptr);
+        }
+        return error;
+    }
+
+    return error;
+}
+
+//--------------------------------------------------------------------------------
+
+static error_code simplify_neutral_and_constant_elements(tree_node_t* node) {
+    HARD_ASSERT(node != nullptr,
+                "simplify_neutral_and_constant_elements: node is nullptr");
+
+    if (node->type != FUNCTION) return ERROR_NO;
+
+    const op_rule_t* rule = find_op_rule(node->value.func);
+    if (rule == nullptr) {
+        return ERROR_NO;
+    }
+
+    error_code error = ERROR_NO;
+
+    error |= simplify_fixed_elements(node, rule);
+    if (error != ERROR_NO) {
+        return error;
+    }
+
+    if (node->type != FUNCTION) {
+        return ERROR_NO;
+    }
+
+    error |= simplify_neutral_elements(node, rule);
+    return error;
+}
+
+//--------------------------------------------------------------------------------
+
+static tree_node_t* optimize_subtree_recursive(tree_t* tree,
+                                               tree_node_t* node,
+                                               error_code* error_ptr) {
+    HARD_ASSERT(error_ptr != nullptr, "optimize_subtree_recursive: error_ptr is nullptr");
+    (void)tree;
+
+    if (node == nullptr) {
+        return nullptr;
+    }
+
+    if (*error_ptr != ERROR_NO) {
+        return node;
+    }
+
+    if (node->type == FUNCTION) {
+        node->left  = optimize_subtree_recursive(tree, node->left,  error_ptr);
+        node->right = optimize_subtree_recursive(tree, node->right, error_ptr);
+
+        *error_ptr |= fold_constants_in_node(node);
+        *error_ptr |= simplify_neutral_and_constant_elements(node);
+    }
+
+    return node;
+}
+
+//================================================================================
+
+error_code tree_optimize(tree_t* tree) {
+    HARD_ASSERT(tree != nullptr, "tree_optimize: tree is nullptr");
+
+    if (tree->root == nullptr) {
+        return ERROR_NO;
+    }
+
+    error_code error_value = ERROR_NO;
+    tree->root = optimize_subtree_recursive(tree, tree->root, &error_value);
+
+    if (error_value != ERROR_NO) {
+        LOGGER_ERROR("tree_optimize: optimize_subtree_recursive failed");
+        return error_value;
+    }
+
+    tree->size = count_nodes_recursive(tree->root);
+    return ERROR_NO;
+}

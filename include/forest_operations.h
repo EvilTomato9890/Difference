@@ -12,6 +12,10 @@ ON_DEBUG(
 error_code forest_open_dump_file(forest_t* forest, const char* dump_file_name);
 
 error_code forest_close_dump_file(forest_t* forest);
+
+error_code forest_open_tech_file(forest_t* forest, const char* tech_file_name);
+
+error_code forest_close_tech_file(forest_t* forest);
 )
 tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr);
 
