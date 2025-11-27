@@ -140,8 +140,7 @@ static const char* node_val_to_str(const tree_t* tree, const tree_node_t* node,
 
     switch (node->type) {
         case CONSTANT:
-            snprintf(buf, buf_size, "%lld",
-                     (long long)node->value.constant);
+            snprintf(buf, buf_size, "%lf", node->value.constant);
             return buf;
         case VARIABLE: {
             string_t curr_string = tree->var_stack->data[node->value.var_idx].str;

@@ -328,7 +328,7 @@ static void test_write_constant_tree() {
     tree_t* test_tree = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == ERROR_NO, "add_tree failed");
     
-    value_t value = make_union(CONSTANT, (const_val_type)100);
+    value_t value = make_union_const((const_val_type)100);
     tree_node_t* root = tree_init_root(test_tree, CONSTANT, value);
     HARD_ASSERT(root != nullptr, "tree_init_root failed");
     
@@ -373,7 +373,7 @@ static void test_write_variable_tree() {
     size_t idx = add_var({"test_var", strlen("test_var")}, 0, forest.var_stack, &error);
     HARD_ASSERT(error == ERROR_NO, "add_var failed");
     
-    value_t value = make_union(VARIABLE, idx);
+    value_t value = make_union_var(idx);
     tree_node_t* root = tree_init_root(test_tree, VARIABLE, value);
     HARD_ASSERT(root != nullptr, "tree_init_root failed");
     
@@ -415,16 +415,16 @@ static void test_write_complex_tree() {
     tree_t* test_tree = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == ERROR_NO, "add_tree failed");
     
-    value_t root_value = make_union(FUNCTION, ADD);
+    value_t root_value = make_union_func(ADD);
     tree_node_t* root = tree_init_root(test_tree, FUNCTION, root_value);
     HARD_ASSERT(root != nullptr, "tree_init_root failed");
     
-    value_t left_value = make_union(CONSTANT, (const_val_type)10);
+    value_t left_value = make_union_const((const_val_type)10);
     tree_node_t* left = tree_insert_left(test_tree, CONSTANT, left_value, root);
     HARD_ASSERT(left != nullptr, "tree_insert_left failed");
     
     size_t idx = add_var({"y", 1}, 0, forest.var_stack, nullptr);
-    value_t right_value = make_union(VARIABLE, idx);
+    value_t right_value = make_union_var(idx);
     tree_node_t* right = tree_insert_right(test_tree, VARIABLE, right_value, root);
     HARD_ASSERT(right != nullptr, "tree_insert_right failed");
     
@@ -485,37 +485,6 @@ static void test_dump_empty_tree() {
     LOGGER_INFO("Тест пройден: дамп пустого дерева\n");
 }
 
-static void test_dump_tree_with_nodes() {
-    LOGGER_INFO("=== Тест: дамп дерева с узлами ===");
-    
-    error_code error = ERROR_NO;
-
-    forest_t forest = {};
-    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
-    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
-
-    tree_t* test_tree = forest_add_tree(&forest, &error);
-    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
-    
-    value_t root_value = make_union(CONSTANT, (const_val_type)42);
-    tree_node_t* root = tree_init_root(test_tree, CONSTANT, root_value);
-    HARD_ASSERT(root != nullptr, "tree_init_root failed");
-
-    ON_DEBUG(
-    forest_open_dump_file(&forest, "test_dump_nodes.html");
-    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
-    )
-    error = tree_dump(test_tree, VER_INIT, true, "Test dump tree with nodes");
-    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
-
-    ON_DEBUG(
-    forest_close_dump_file(&forest);
-    )
-    
-    forest_dest(&forest);
-    LOGGER_INFO("Тест пройден: дамп дерева с узлами\n");
-}
-
 static void test_dump_copied_tree() {
     LOGGER_INFO("=== Тест: дамп скопированного ===");
     
@@ -539,7 +508,7 @@ static void test_dump_copied_tree() {
     error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    tree_node_t* copied_root = subtree_deep_copy(tree->root, &error, tree);
+    tree_node_t* copied_root = subtree_deep_copy(tree->root, &error ON_CREATION_DEBUG(, tree));
     HARD_ASSERT(copied_root != nullptr, "root is nullptr");
 
     error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
@@ -552,6 +521,180 @@ static void test_dump_copied_tree() {
     LOGGER_INFO("Тест пройден: дамп скопированного дерева\n");
 }
 
+static void test_calculate_tree_without_vars() {
+    LOGGER_INFO("=== Тест: подсчет дерева без переменных ===");
+    
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "test_dump_calculate_without_vars.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    )
+        
+    tree_node_t* new_root = ADD_(SIN_(c(0)), c(1));
+    HARD_ASSERT(error == ERROR_NO, "creating root failed");
+    tree_change_root(tree, new_root);
+    
+    error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    var_val_type answer = calculate_tree(tree);
+    LOGGER_INFO("ANSWER: %lf", answer);
+
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    )
+    
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: подсчет дерева без переменных \n");
+}
+
+static void test_calculate_tree_with_vars() {
+    LOGGER_INFO("=== Тест: подсчет дерева с переменными ===");
+    
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "test_dump_calculate_with_vars.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    )
+        
+    tree_node_t* new_root = ADD_(COS_(c(0)), v("x"));
+    HARD_ASSERT(error == ERROR_NO, "creating root failed");
+    tree_change_root(tree, new_root);
+    
+    error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    var_val_type answer = calculate_tree(tree);
+    LOGGER_INFO("ANSWER: %lf", answer);
+
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    )
+    
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: подсчет дерева с переменными \n");
+}
+
+static void test_calculate_tree_diff() {
+    LOGGER_INFO("=== Тест: подсчет производной сложного дерева ===");
+    
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "test_dump_calculate_diff.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    )
+    
+    tree_node_t* new_root = ADD_(MUL_(POW_(v("x"), c(2)), LN_(v("x"))),
+                                 EXP_(v("y")));
+    HARD_ASSERT(error == ERROR_NO, "creating root failed");
+    tree_change_root(tree, new_root);
+    
+    error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    tree_t* tree_diff = forest_add_tree(&forest, &error);
+    new_root = get_diff(tree, tree->root);
+    tree_change_root(tree_diff, new_root);
+
+    var_val_type answer = calculate_tree(tree_diff);
+    LOGGER_INFO("ANSWER: %lf", answer);
+
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    )
+    
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: подсчет производной сложного дерева \n");
+}
+
+
+static void test_calculate_tree_nth_diff() {
+    LOGGER_INFO("=== Тест: подсчет n-ой производной ===");
+
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree (base) failed");
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "test_dump_nth_diff.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    )
+
+    tree_node_t* new_root = POW_(v("x"), c(4));
+    HARD_ASSERT(new_root != nullptr, "creating root failed");
+    tree_change_root(tree, new_root);
+
+    error = tree_dump(tree, VER_INIT, true, "Base tree f(x) = x^4");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump base failed");
+
+    size_t n = 0;
+    printf("Enter n (order of derivative): ");
+    if (scanf("%zu", &n) != 1) {
+        LOGGER_ERROR("Failed to read n");
+        ON_DEBUG(forest_close_dump_file(&forest);)
+        forest_dest(&forest);
+        return;
+    }
+
+    tree_t* curr_tree = tree;
+
+    for (size_t k = 0; k < n; k++) {
+        tree_t* diff_tree = forest_add_tree(&forest, &error);
+        HARD_ASSERT(error == ERROR_NO, "add_tree (diff) failed");
+
+        tree_node_t* diff_root = get_diff(curr_tree, curr_tree->root);
+        HARD_ASSERT(diff_root != nullptr, "get_diff returned nullptr");
+        tree_change_root(diff_tree, diff_root);
+
+        ON_DEBUG(
+        char reason[64] = {};
+        snprintf(reason, sizeof(reason), "Derivative #%zu", k + 1);
+        error = tree_dump(diff_tree, VER_INIT, true, reason);
+        HARD_ASSERT(error == ERROR_NO, "tree_dump diff failed");
+        )
+
+        curr_tree = diff_tree;
+    }
+
+    var_val_type answer = calculate_tree(curr_tree);
+    LOGGER_INFO("ANSWER f^(%zu)(x) = %lf", n, answer);
+
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    )
+
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: подсчет n-ой производной \n");
+}
 
 //================================================================================
 
@@ -575,8 +718,11 @@ int run_tests() {
     test_DSL();
     test_dump_copied_tree();
     test_diff_big_tree();
+    test_calculate_tree_without_vars();
+    test_calculate_tree_with_vars();
+    test_calculate_tree_diff();
+    test_calculate_tree_nth_diff();
     
-
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
     LOGGER_INFO("========================================\n");

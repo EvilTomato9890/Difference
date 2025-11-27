@@ -11,6 +11,8 @@
         "utility": "cpp",
         "copy_past_file": "cpp",
         "optional": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "typeinfo": "cpp",
+        "cmath": "cpp"
     }
 }

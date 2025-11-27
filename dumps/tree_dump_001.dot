@@ -1,7 +1,7 @@
 digraph T{
   node [fontname="Fira Mono",shape=record,style="filled,rounded",fontsize=12];
   graph [splines=true, nodesep=0.6, ranksep=0.6];
-  node_0x61cefcbe1f20[shape=record,label="{ {ptr: 0x61cefcbe1f20} | {val: +} | { prev: 0x61cefcbe1fb0 | next: (nil) } }",color="#5aa99b",fillcolor="#e9fbf5"];
-  node_0x61cefcbe1fb0[shape=record,label="{ {ptr: 0x61cefcbe1fb0} | {val: 10} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
-  node_0x61cefcbe1f20 -> node_0x61cefcbe1fb0 [color="#999999"];
+  node_0x583c471bcf20[shape=record,label="{ {ptr: 0x583c471bcf20} | {val: +} | { prev: 0x583c471bcfb0 | next: (nil) } }",color="#5aa99b",fillcolor="#e9fbf5"];
+  node_0x583c471bcfb0[shape=record,label="{ {ptr: 0x583c471bcfb0} | {val: 10.000000} | { prev: (nil) | next: (nil) } }",color="#c9fbdbff",fillcolor="#e8f9e5ff"];
+  node_0x583c471bcf20 -> node_0x583c471bcfb0 [color="#999999"];
 }

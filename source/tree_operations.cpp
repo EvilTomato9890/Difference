@@ -18,7 +18,22 @@
 
 //================================================================================
 
-value_t make_union(node_type_t type, ...) {
+value_t make_union_const(const_val_type constant) {
+    value_t val = {.constant = constant};
+    return val;
+}
+
+value_t make_union_var(size_t var_idx) {
+    value_t val = {.var_idx = var_idx};
+    return val;
+}
+
+value_t make_union_func(func_type_t func) {
+    value_t val = {.func = func};
+    return val;
+}
+
+value_t make_union_universal(node_type_t type, ...) {
     value_t val = {};
 
     va_list ap = {};
@@ -68,7 +83,7 @@ tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node
     tree_t tree_clone = {};
     tree_clone = *tree;
     tree_change_root(&tree_clone, node);
-    tree_dump(&tree_clone, VER_INIT, true, "Diff dumps");
+    tree_dump(&tree_clone, VER_INIT, true, "DSL dumps");
     
     return node;
 }
@@ -97,7 +112,7 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
 
     LOGGER_DEBUG("tree_init: started");
 
-    error_code error = 0;
+    error_code error = ERROR_NO;
     tree->root = nullptr;
     tree->size = 0;
     tree->buff = {nullptr, 0};
@@ -109,7 +124,7 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
         tree->ver_info  = ver_info;
         tree->dump_file = nullptr;
     })
-    return ERROR_NO;
+    return error;
 }
 
 error_code tree_destroy(tree_t* tree) {
@@ -161,6 +176,7 @@ size_t count_nodes_recursive(const tree_node_t* node) {
     if (node == nullptr) return 0;
     return 1 + count_nodes_recursive(node->left) + count_nodes_recursive(node->right);
 }
+
 //================================================================================
 
 tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) {
@@ -231,6 +247,8 @@ error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t 
     return ERROR_NO;
 }
 
+//================================================================================
+
 ssize_t get_var_idx(const string_t var, const stack_t* var_stack) {
     HARD_ASSERT(var_stack != nullptr, "var_stack is nullptr");
 
@@ -258,4 +276,11 @@ size_t get_or_add_var_idx(const string_t str, const var_val_type val, stack_t* v
         return add_var(str, val, var_stack, error);
     } 
     return (size_t)idx;
+}
+
+var_val_type get_var_val(tree_t* tree, tree_node_t* node) {
+    HARD_ASSERT(tree       != nullptr, "Tree is nullptr");
+    HARD_ASSERT(node       != nullptr, "node is nullptr");
+    HARD_ASSERT(node->type == VARIABLE, "Node is not variable");
+    return tree->var_stack->data[node->value.var_idx].val;
 }
