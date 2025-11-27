@@ -23,7 +23,7 @@ struct func_struct {
     const char* func_name;
 };
 
-#define HANDLE_FUNC(op_code, str_name) \
+#define HANDLE_FUNC(op_code, str_name, ...) \
     {op_code, #str_name},
 
 static func_struct op_codes[] = {
@@ -370,7 +370,7 @@ error_code tree_read_from_file(tree_t* tree, const char* filename) {
     return ERROR_NO;
 }
 
-const char* get_func_name_by_type(func_type_t func_type_value) {
+const char* tech_get_func_name_by_type(func_type_t func_type_value) {
     for (size_t index_value = 0; index_value < (size_t)op_codes_num; ++index_value) {
         if (op_codes[index_value].func_type == func_type_value) {
             return op_codes[index_value].func_name;
@@ -409,7 +409,7 @@ static error_code write_node(const tree_t* tree_ptr, FILE* file_ptr, tree_node_t
             return ERROR_OPEN_FILE;
         }
     } else if (node_ptr->type == FUNCTION) {
-        const char* func_name_ptr = get_func_name_by_type(node_ptr->value.func);
+        const char* func_name_ptr = tech_get_func_name_by_type(node_ptr->value.func);
         if (fprintf(file_ptr, "%s", func_name_ptr) < 0) {
             LOGGER_ERROR("write_node: fprintf failed for function");
             return ERROR_OPEN_FILE;

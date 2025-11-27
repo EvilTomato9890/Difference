@@ -1,16 +1,16 @@
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #21 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-27 08:30:55</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 10:51:07</span>
 <span style="color:#ff4d4f;font-weight:700;">Base tree f(x) = x^4</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x559d7b9a18b0
-root ptr : 0x559d7b9a14e0
+tree ptr : 0x5cc3a26078b0
+root ptr : 0x5cc3a26074e0
 size     : 3
 
 -- Created at (tree ver_info) --
 file: source/forest_operations.cpp
 func: forest_add_tree
-line: 105
+line: 106
 
 -- Called at (passed ver_info) --
 file: source/test_tree_io.cpp
@@ -19,9 +19,9 @@ line: 656
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x559d7b9a14e0  FUNCTION        0x559d7b9a0160  0x559d7b9a1420  pow
-1     0x559d7b9a0160  VARIABLE        (nil)           (nil)           x
-2     0x559d7b9a1420  CONSTANT        (nil)           (nil)           4.000000
+0     0x5cc3a26074e0  FUNCTION        0x5cc3a2606160  0x5cc3a2607420  pow
+1     0x5cc3a2606160  VARIABLE        (nil)           (nil)           x
+2     0x5cc3a2607420  CONSTANT        (nil)           (nil)           4.000000
 
 SVG: dumps/tree_dump_021.svg
 </pre>
@@ -30,17 +30,17 @@ SVG: dumps/tree_dump_021.svg
 <hr>
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #22 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-27 08:30:57</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-27 10:51:07</span>
 <span style="color:#ff4d4f;font-weight:700;">Derivative #1</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x559d7b9a2500
-root ptr : 0x559d7b9a3a10
+tree ptr : 0x5cc3a2608500
+root ptr : 0x5cc3a2609a10
 size     : 14
 
 -- Created at (tree ver_info) --
 file: source/forest_operations.cpp
 func: forest_add_tree
-line: 105
+line: 106
 
 -- Called at (passed ver_info) --
 file: source/test_tree_io.cpp
@@ -49,415 +49,23 @@ line: 681
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x559d7b9a3a10  FUNCTION        0x559d7b9a39e0  0x559d7b9a3950  *
-1     0x559d7b9a39e0  FUNCTION        0x559d7b9a39b0  0x559d7b9a3980  pow
-2     0x559d7b9a39b0  VARIABLE        (nil)           (nil)           x
-3     0x559d7b9a3980  CONSTANT        (nil)           (nil)           4.000000
-4     0x559d7b9a3950  FUNCTION        0x559d7b9a3920  0x559d7b9a3860  +
-5     0x559d7b9a3920  FUNCTION        0x559d7b9a38f0  0x559d7b9a38c0  *
-6     0x559d7b9a38f0  CONSTANT        (nil)           (nil)           0.000000
-7     0x559d7b9a38c0  FUNCTION        0x559d7b9a3890  (nil)           ln
-8     0x559d7b9a3890  VARIABLE        (nil)           (nil)           x
-9     0x559d7b9a3860  FUNCTION        0x559d7b9a3830  0x559d7b9a3800  *
-10    0x559d7b9a3830  CONSTANT        (nil)           (nil)           4.000000
-11    0x559d7b9a3800  FUNCTION        0x559d7b9a2560  0x559d7b99e1f0  
-12    0x559d7b9a2560  CONSTANT        (nil)           (nil)           1.000000
-13    0x559d7b99e1f0  VARIABLE        (nil)           (nil)           x
+0     0x5cc3a2609a10  FUNCTION        0x5cc3a26099e0  0x5cc3a2609950  *
+1     0x5cc3a26099e0  FUNCTION        0x5cc3a26099b0  0x5cc3a2609980  pow
+2     0x5cc3a26099b0  VARIABLE        (nil)           (nil)           x
+3     0x5cc3a2609980  CONSTANT        (nil)           (nil)           4.000000
+4     0x5cc3a2609950  FUNCTION        0x5cc3a2609920  0x5cc3a2609860  +
+5     0x5cc3a2609920  FUNCTION        0x5cc3a26098f0  0x5cc3a26098c0  *
+6     0x5cc3a26098f0  CONSTANT        (nil)           (nil)           0.000000
+7     0x5cc3a26098c0  FUNCTION        0x5cc3a2609890  (nil)           ln
+8     0x5cc3a2609890  VARIABLE        (nil)           (nil)           x
+9     0x5cc3a2609860  FUNCTION        0x5cc3a2609830  0x5cc3a2609800  *
+10    0x5cc3a2609830  CONSTANT        (nil)           (nil)           4.000000
+11    0x5cc3a2609800  FUNCTION        0x5cc3a2608560  0x5cc3a26041f0  /
+12    0x5cc3a2608560  CONSTANT        (nil)           (nil)           1.000000
+13    0x5cc3a26041f0  VARIABLE        (nil)           (nil)           x
 
 SVG: dumps/tree_dump_022.svg
 </pre>
 <img src="dumps/tree_dump_022.svg" style="max-width:2250px;"/>
-
-<hr>
-<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
-<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #23 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-27 08:30:57</span>
-<span style="color:#ff4d4f;font-weight:700;">Derivative #2</span>
-<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x559d7b9a3ac0
-root ptr : 0x559d7b9a4630
-size     : 60
-
--- Created at (tree ver_info) --
-file: source/forest_operations.cpp
-func: forest_add_tree
-line: 105
-
--- Called at (passed ver_info) --
-file: source/test_tree_io.cpp
-func: test_calculate_tree_nth_diff
-line: 681
-
-IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
-----  --------------  --------------  --------------  --------------  --------------------
-0     0x559d7b9a4630  FUNCTION        0x559d7b9a4600  0x559d7b9a4150  +
-1     0x559d7b9a4600  FUNCTION        0x559d7b9a45d0  0x559d7b9a4330  *
-2     0x559d7b9a45d0  FUNCTION        0x559d7b9a45a0  0x559d7b9a4510  *
-3     0x559d7b9a45a0  FUNCTION        0x559d7b9a4570  0x559d7b9a4540  pow
-4     0x559d7b9a4570  VARIABLE        (nil)           (nil)           x
-5     0x559d7b9a4540  CONSTANT        (nil)           (nil)           4.000000
-6     0x559d7b9a4510  FUNCTION        0x559d7b9a44e0  0x559d7b9a4420  +
-7     0x559d7b9a44e0  FUNCTION        0x559d7b9a44b0  0x559d7b9a4480  *
-8     0x559d7b9a44b0  CONSTANT        (nil)           (nil)           0.000000
-9     0x559d7b9a4480  FUNCTION        0x559d7b9a4450  (nil)           ln
-10    0x559d7b9a4450  VARIABLE        (nil)           (nil)           x
-11    0x559d7b9a4420  FUNCTION        0x559d7b9a43f0  0x559d7b9a43c0  *
-12    0x559d7b9a43f0  CONSTANT        (nil)           (nil)           4.000000
-13    0x559d7b9a43c0  FUNCTION        0x559d7b9a4390  0x559d7b9a4360  
-14    0x559d7b9a4390  CONSTANT        (nil)           (nil)           1.000000
-15    0x559d7b9a4360  VARIABLE        (nil)           (nil)           x
-16    0x559d7b9a4330  FUNCTION        0x559d7b9a4210  0x559d7b9a4300  +
-17    0x559d7b9a4210  FUNCTION        0x559d7b9a4180  0x559d7b9a41e0  *
-18    0x559d7b9a4180  CONSTANT        (nil)           (nil)           0.000000
-19    0x559d7b9a41e0  FUNCTION        0x559d7b9a41b0  (nil)           ln
-20    0x559d7b9a41b0  VARIABLE        (nil)           (nil)           x
-21    0x559d7b9a4300  FUNCTION        0x559d7b9a4240  0x559d7b9a42d0  *
-22    0x559d7b9a4240  CONSTANT        (nil)           (nil)           4.000000
-23    0x559d7b9a42d0  FUNCTION        0x559d7b9a4270  0x559d7b9a42a0  
-24    0x559d7b9a4270  CONSTANT        (nil)           (nil)           1.000000
-25    0x559d7b9a42a0  VARIABLE        (nil)           (nil)           x
-26    0x559d7b9a4150  FUNCTION        0x559d7b9a4120  0x559d7b9a4090  *
-27    0x559d7b9a4120  FUNCTION        0x559d7b9a40c0  0x559d7b9a40f0  pow
-28    0x559d7b9a40c0  VARIABLE        (nil)           (nil)           x
-29    0x559d7b9a40f0  CONSTANT        (nil)           (nil)           4.000000
-30    0x559d7b9a4090  FUNCTION        0x559d7b9a4060  0x559d7b9a3e80  +
-31    0x559d7b9a4060  FUNCTION        0x559d7b9a4030  0x559d7b9a3f70  +
-32    0x559d7b9a4030  FUNCTION        0x559d7b9a4000  0x559d7b9a3fd0  *
-33    0x559d7b9a4000  CONSTANT        (nil)           (nil)           0.000000
-34    0x559d7b9a3fd0  FUNCTION        0x559d7b9a3fa0  (nil)           ln
-35    0x559d7b9a3fa0  VARIABLE        (nil)           (nil)           x
-36    0x559d7b9a3f70  FUNCTION        0x559d7b9a3f40  0x559d7b9a3f10  *
-37    0x559d7b9a3f40  CONSTANT        (nil)           (nil)           0.000000
-38    0x559d7b9a3f10  FUNCTION        0x559d7b9a3ee0  0x559d7b9a3eb0  
-39    0x559d7b9a3ee0  CONSTANT        (nil)           (nil)           1.000000
-40    0x559d7b9a3eb0  VARIABLE        (nil)           (nil)           x
-41    0x559d7b9a3e80  FUNCTION        0x559d7b9a3e50  0x559d7b9a3d60  +
-42    0x559d7b9a3e50  FUNCTION        0x559d7b9a3e20  0x559d7b9a3df0  *
-43    0x559d7b9a3e20  CONSTANT        (nil)           (nil)           0.000000
-44    0x559d7b9a3df0  FUNCTION        0x559d7b9a3d90  0x559d7b9a3dc0  
-45    0x559d7b9a3d90  CONSTANT        (nil)           (nil)           1.000000
-46    0x559d7b9a3dc0  VARIABLE        (nil)           (nil)           x
-47    0x559d7b9a3d60  FUNCTION        0x559d7b9a3d30  0x559d7b9a3d00  *
-48    0x559d7b9a3d30  CONSTANT        (nil)           (nil)           4.000000
-49    0x559d7b9a3d00  FUNCTION        0x559d7b9a3cd0  0x559d7b9a3b80  
-50    0x559d7b9a3cd0  FUNCTION        0x559d7b9a3ca0  0x559d7b9a3c10  -
-51    0x559d7b9a3ca0  FUNCTION        0x559d7b9a3c70  0x559d7b9a3c40  *
-52    0x559d7b9a3c70  CONSTANT        (nil)           (nil)           0.000000
-53    0x559d7b9a3c40  VARIABLE        (nil)           (nil)           x
-54    0x559d7b9a3c10  FUNCTION        0x559d7b9a3be0  0x559d7b9a3bb0  *
-55    0x559d7b9a3be0  CONSTANT        (nil)           (nil)           1.000000
-56    0x559d7b9a3bb0  CONSTANT        (nil)           (nil)           1.000000
-57    0x559d7b9a3b80  FUNCTION        0x559d7b9a3b50  0x559d7b9a3b20  *
-58    0x559d7b9a3b50  VARIABLE        (nil)           (nil)           x
-59    0x559d7b9a3b20  VARIABLE        (nil)           (nil)           x
-
-SVG: dumps/tree_dump_023.svg
-</pre>
-<img src="dumps/tree_dump_023.svg" style="max-width:2250px;"/>
-
-<hr>
-<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
-<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #24 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-27 08:30:57</span>
-<span style="color:#ff4d4f;font-weight:700;">Derivative #3</span>
-<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x559d7b9a4f60
-root ptr : 0x559d7b9a8d20
-size     : 278
-
--- Created at (tree ver_info) --
-file: source/forest_operations.cpp
-func: forest_add_tree
-line: 105
-
--- Called at (passed ver_info) --
-file: source/test_tree_io.cpp
-func: test_calculate_tree_nth_diff
-line: 681
-
-IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
-----  --------------  --------------  --------------  --------------  --------------------
-0     0x559d7b9a8d20  FUNCTION        0x559d7b9a8cf0  0x559d7b9a7700  +
-1     0x559d7b9a8cf0  FUNCTION        0x559d7b9a8cc0  0x559d7b9a7f70  +
-2     0x559d7b9a8cc0  FUNCTION        0x559d7b9a8c90  0x559d7b9a8150  *
-3     0x559d7b9a8c90  FUNCTION        0x559d7b9a8c60  0x559d7b9a87b0  +
-4     0x559d7b9a8c60  FUNCTION        0x559d7b9a8c30  0x559d7b9a8990  *
-5     0x559d7b9a8c30  FUNCTION        0x559d7b9a8c00  0x559d7b9a8b70  *
-6     0x559d7b9a8c00  FUNCTION        0x559d7b9a8bd0  0x559d7b9a8ba0  pow
-7     0x559d7b9a8bd0  VARIABLE        (nil)           (nil)           x
-8     0x559d7b9a8ba0  CONSTANT        (nil)           (nil)           4.000000
-9     0x559d7b9a8b70  FUNCTION        0x559d7b9a8b40  0x559d7b9a8a80  +
-10    0x559d7b9a8b40  FUNCTION        0x559d7b9a8b10  0x559d7b9a8ae0  *
-11    0x559d7b9a8b10  CONSTANT        (nil)           (nil)           0.000000
-12    0x559d7b9a8ae0  FUNCTION        0x559d7b9a8ab0  (nil)           ln
-13    0x559d7b9a8ab0  VARIABLE        (nil)           (nil)           x
-14    0x559d7b9a8a80  FUNCTION        0x559d7b9a8a50  0x559d7b9a8a20  *
-15    0x559d7b9a8a50  CONSTANT        (nil)           (nil)           4.000000
-16    0x559d7b9a8a20  FUNCTION        0x559d7b9a89f0  0x559d7b9a89c0  
-17    0x559d7b9a89f0  CONSTANT        (nil)           (nil)           1.000000
-18    0x559d7b9a89c0  VARIABLE        (nil)           (nil)           x
-19    0x559d7b9a8990  FUNCTION        0x559d7b9a8870  0x559d7b9a8960  +
-20    0x559d7b9a8870  FUNCTION        0x559d7b9a87e0  0x559d7b9a8840  *
-21    0x559d7b9a87e0  CONSTANT        (nil)           (nil)           0.000000
-22    0x559d7b9a8840  FUNCTION        0x559d7b9a8810  (nil)           ln
-23    0x559d7b9a8810  VARIABLE        (nil)           (nil)           x
-24    0x559d7b9a8960  FUNCTION        0x559d7b9a88a0  0x559d7b9a8930  *
-25    0x559d7b9a88a0  CONSTANT        (nil)           (nil)           4.000000
-26    0x559d7b9a8930  FUNCTION        0x559d7b9a88d0  0x559d7b9a8900  
-27    0x559d7b9a88d0  CONSTANT        (nil)           (nil)           1.000000
-28    0x559d7b9a8900  VARIABLE        (nil)           (nil)           x
-29    0x559d7b9a87b0  FUNCTION        0x559d7b9a8780  0x559d7b9a86f0  *
-30    0x559d7b9a8780  FUNCTION        0x559d7b9a8720  0x559d7b9a8750  pow
-31    0x559d7b9a8720  VARIABLE        (nil)           (nil)           x
-32    0x559d7b9a8750  CONSTANT        (nil)           (nil)           4.000000
-33    0x559d7b9a86f0  FUNCTION        0x559d7b9a86c0  0x559d7b9a84e0  +
-34    0x559d7b9a86c0  FUNCTION        0x559d7b9a8690  0x559d7b9a85d0  +
-35    0x559d7b9a8690  FUNCTION        0x559d7b9a8660  0x559d7b9a8630  *
-36    0x559d7b9a8660  CONSTANT        (nil)           (nil)           0.000000
-37    0x559d7b9a8630  FUNCTION        0x559d7b9a8600  (nil)           ln
-38    0x559d7b9a8600  VARIABLE        (nil)           (nil)           x
-39    0x559d7b9a85d0  FUNCTION        0x559d7b9a85a0  0x559d7b9a8570  *
-40    0x559d7b9a85a0  CONSTANT        (nil)           (nil)           0.000000
-41    0x559d7b9a8570  FUNCTION        0x559d7b9a8540  0x559d7b9a8510  
-42    0x559d7b9a8540  CONSTANT        (nil)           (nil)           1.000000
-43    0x559d7b9a8510  VARIABLE        (nil)           (nil)           x
-44    0x559d7b9a84e0  FUNCTION        0x559d7b9a84b0  0x559d7b9a83c0  +
-45    0x559d7b9a84b0  FUNCTION        0x559d7b9a8480  0x559d7b9a8450  *
-46    0x559d7b9a8480  CONSTANT        (nil)           (nil)           0.000000
-47    0x559d7b9a8450  FUNCTION        0x559d7b9a83f0  0x559d7b9a8420  
-48    0x559d7b9a83f0  CONSTANT        (nil)           (nil)           1.000000
-49    0x559d7b9a8420  VARIABLE        (nil)           (nil)           x
-50    0x559d7b9a83c0  FUNCTION        0x559d7b9a8390  0x559d7b9a8360  *
-51    0x559d7b9a8390  CONSTANT        (nil)           (nil)           4.000000
-52    0x559d7b9a8360  FUNCTION        0x559d7b9a8330  0x559d7b9a81e0  
-53    0x559d7b9a8330  FUNCTION        0x559d7b9a8300  0x559d7b9a8270  -
-54    0x559d7b9a8300  FUNCTION        0x559d7b9a82d0  0x559d7b9a82a0  *
-55    0x559d7b9a82d0  CONSTANT        (nil)           (nil)           0.000000
-56    0x559d7b9a82a0  VARIABLE        (nil)           (nil)           x
-57    0x559d7b9a8270  FUNCTION        0x559d7b9a8240  0x559d7b9a8210  *
-58    0x559d7b9a8240  CONSTANT        (nil)           (nil)           1.000000
-59    0x559d7b9a8210  CONSTANT        (nil)           (nil)           1.000000
-60    0x559d7b9a81e0  FUNCTION        0x559d7b9a81b0  0x559d7b9a8180  *
-61    0x559d7b9a81b0  VARIABLE        (nil)           (nil)           x
-62    0x559d7b9a8180  VARIABLE        (nil)           (nil)           x
-63    0x559d7b9a8150  FUNCTION        0x559d7b9a8030  0x559d7b9a8120  +
-64    0x559d7b9a8030  FUNCTION        0x559d7b9a7fa0  0x559d7b9a8000  *
-65    0x559d7b9a7fa0  CONSTANT        (nil)           (nil)           0.000000
-66    0x559d7b9a8000  FUNCTION        0x559d7b9a7fd0  (nil)           ln
-67    0x559d7b9a7fd0  VARIABLE        (nil)           (nil)           x
-68    0x559d7b9a8120  FUNCTION        0x559d7b9a8060  0x559d7b9a80f0  *
-69    0x559d7b9a8060  CONSTANT        (nil)           (nil)           4.000000
-70    0x559d7b9a80f0  FUNCTION        0x559d7b9a8090  0x559d7b9a80c0  
-71    0x559d7b9a8090  CONSTANT        (nil)           (nil)           1.000000
-72    0x559d7b9a80c0  VARIABLE        (nil)           (nil)           x
-73    0x559d7b9a7f70  FUNCTION        0x559d7b9a7f40  0x559d7b9a7ca0  *
-74    0x559d7b9a7f40  FUNCTION        0x559d7b9a7d30  0x559d7b9a7f10  *
-75    0x559d7b9a7d30  FUNCTION        0x559d7b9a7cd0  0x559d7b9a7d00  pow
-76    0x559d7b9a7cd0  VARIABLE        (nil)           (nil)           x
-77    0x559d7b9a7d00  CONSTANT        (nil)           (nil)           4.000000
-78    0x559d7b9a7f10  FUNCTION        0x559d7b9a7df0  0x559d7b9a7ee0  +
-79    0x559d7b9a7df0  FUNCTION        0x559d7b9a7d60  0x559d7b9a7dc0  *
-80    0x559d7b9a7d60  CONSTANT        (nil)           (nil)           0.000000
-81    0x559d7b9a7dc0  FUNCTION        0x559d7b9a7d90  (nil)           ln
-82    0x559d7b9a7d90  VARIABLE        (nil)           (nil)           x
-83    0x559d7b9a7ee0  FUNCTION        0x559d7b9a7e20  0x559d7b9a7eb0  *
-84    0x559d7b9a7e20  CONSTANT        (nil)           (nil)           4.000000
-85    0x559d7b9a7eb0  FUNCTION        0x559d7b9a7e50  0x559d7b9a7e80  
-86    0x559d7b9a7e50  CONSTANT        (nil)           (nil)           1.000000
-87    0x559d7b9a7e80  VARIABLE        (nil)           (nil)           x
-88    0x559d7b9a7ca0  FUNCTION        0x559d7b9a7c70  0x559d7b9a7a90  +
-89    0x559d7b9a7c70  FUNCTION        0x559d7b9a7c40  0x559d7b9a7b80  +
-90    0x559d7b9a7c40  FUNCTION        0x559d7b9a7c10  0x559d7b9a7be0  *
-91    0x559d7b9a7c10  CONSTANT        (nil)           (nil)           0.000000
-92    0x559d7b9a7be0  FUNCTION        0x559d7b9a7bb0  (nil)           ln
-93    0x559d7b9a7bb0  VARIABLE        (nil)           (nil)           x
-94    0x559d7b9a7b80  FUNCTION        0x559d7b9a7b50  0x559d7b9a7b20  *
-95    0x559d7b9a7b50  CONSTANT        (nil)           (nil)           0.000000
-96    0x559d7b9a7b20  FUNCTION        0x559d7b9a7af0  0x559d7b9a7ac0  
-97    0x559d7b9a7af0  CONSTANT        (nil)           (nil)           1.000000
-98    0x559d7b9a7ac0  VARIABLE        (nil)           (nil)           x
-99    0x559d7b9a7a90  FUNCTION        0x559d7b9a7a60  0x559d7b9a7970  +
-100   0x559d7b9a7a60  FUNCTION        0x559d7b9a7a30  0x559d7b9a7a00  *
-101   0x559d7b9a7a30  CONSTANT        (nil)           (nil)           0.000000
-102   0x559d7b9a7a00  FUNCTION        0x559d7b9a79a0  0x559d7b9a79d0  
-103   0x559d7b9a79a0  CONSTANT        (nil)           (nil)           1.000000
-104   0x559d7b9a79d0  VARIABLE        (nil)           (nil)           x
-105   0x559d7b9a7970  FUNCTION        0x559d7b9a7940  0x559d7b9a7910  *
-106   0x559d7b9a7940  CONSTANT        (nil)           (nil)           4.000000
-107   0x559d7b9a7910  FUNCTION        0x559d7b9a78e0  0x559d7b9a7790  
-108   0x559d7b9a78e0  FUNCTION        0x559d7b9a78b0  0x559d7b9a7820  -
-109   0x559d7b9a78b0  FUNCTION        0x559d7b9a7880  0x559d7b9a7850  *
-110   0x559d7b9a7880  CONSTANT        (nil)           (nil)           0.000000
-111   0x559d7b9a7850  VARIABLE        (nil)           (nil)           x
-112   0x559d7b9a7820  FUNCTION        0x559d7b9a77f0  0x559d7b9a77c0  *
-113   0x559d7b9a77f0  CONSTANT        (nil)           (nil)           1.000000
-114   0x559d7b9a77c0  CONSTANT        (nil)           (nil)           1.000000
-115   0x559d7b9a7790  FUNCTION        0x559d7b9a7760  0x559d7b9a7730  *
-116   0x559d7b9a7760  VARIABLE        (nil)           (nil)           x
-117   0x559d7b9a7730  VARIABLE        (nil)           (nil)           x
-118   0x559d7b9a7700  FUNCTION        0x559d7b9a76d0  0x559d7b9a6e60  +
-119   0x559d7b9a76d0  FUNCTION        0x559d7b9a76a0  0x559d7b9a7400  *
-120   0x559d7b9a76a0  FUNCTION        0x559d7b9a7670  0x559d7b9a75e0  *
-121   0x559d7b9a7670  FUNCTION        0x559d7b9a7640  0x559d7b9a7610  pow
-122   0x559d7b9a7640  VARIABLE        (nil)           (nil)           x
-123   0x559d7b9a7610  CONSTANT        (nil)           (nil)           4.000000
-124   0x559d7b9a75e0  FUNCTION        0x559d7b9a75b0  0x559d7b9a74f0  +
-125   0x559d7b9a75b0  FUNCTION        0x559d7b9a7580  0x559d7b9a7550  *
-126   0x559d7b9a7580  CONSTANT        (nil)           (nil)           0.000000
-127   0x559d7b9a7550  FUNCTION        0x559d7b9a7520  (nil)           ln
-128   0x559d7b9a7520  VARIABLE        (nil)           (nil)           x
-129   0x559d7b9a74f0  FUNCTION        0x559d7b9a74c0  0x559d7b9a7490  *
-130   0x559d7b9a74c0  CONSTANT        (nil)           (nil)           4.000000
-131   0x559d7b9a7490  FUNCTION        0x559d7b9a7460  0x559d7b9a7430  
-132   0x559d7b9a7460  CONSTANT        (nil)           (nil)           1.000000
-133   0x559d7b9a7430  VARIABLE        (nil)           (nil)           x
-134   0x559d7b9a7400  FUNCTION        0x559d7b9a7040  0x559d7b9a73d0  +
-135   0x559d7b9a7040  FUNCTION        0x559d7b9a6f20  0x559d7b9a7010  +
-136   0x559d7b9a6f20  FUNCTION        0x559d7b9a6e90  0x559d7b9a6ef0  *
-137   0x559d7b9a6e90  CONSTANT        (nil)           (nil)           0.000000
-138   0x559d7b9a6ef0  FUNCTION        0x559d7b9a6ec0  (nil)           ln
-139   0x559d7b9a6ec0  VARIABLE        (nil)           (nil)           x
-140   0x559d7b9a7010  FUNCTION        0x559d7b9a6f50  0x559d7b9a6fe0  *
-141   0x559d7b9a6f50  CONSTANT        (nil)           (nil)           0.000000
-142   0x559d7b9a6fe0  FUNCTION        0x559d7b9a6f80  0x559d7b9a6fb0  
-143   0x559d7b9a6f80  CONSTANT        (nil)           (nil)           1.000000
-144   0x559d7b9a6fb0  VARIABLE        (nil)           (nil)           x
-145   0x559d7b9a73d0  FUNCTION        0x559d7b9a7130  0x559d7b9a73a0  +
-146   0x559d7b9a7130  FUNCTION        0x559d7b9a7070  0x559d7b9a7100  *
-147   0x559d7b9a7070  CONSTANT        (nil)           (nil)           0.000000
-148   0x559d7b9a7100  FUNCTION        0x559d7b9a70a0  0x559d7b9a70d0  
-149   0x559d7b9a70a0  CONSTANT        (nil)           (nil)           1.000000
-150   0x559d7b9a70d0  VARIABLE        (nil)           (nil)           x
-151   0x559d7b9a73a0  FUNCTION        0x559d7b9a7160  0x559d7b9a7370  *
-152   0x559d7b9a7160  CONSTANT        (nil)           (nil)           4.000000
-153   0x559d7b9a7370  FUNCTION        0x559d7b9a72b0  0x559d7b9a7340  
-154   0x559d7b9a72b0  FUNCTION        0x559d7b9a71f0  0x559d7b9a7280  -
-155   0x559d7b9a71f0  FUNCTION        0x559d7b9a7190  0x559d7b9a71c0  *
-156   0x559d7b9a7190  CONSTANT        (nil)           (nil)           0.000000
-157   0x559d7b9a71c0  VARIABLE        (nil)           (nil)           x
-158   0x559d7b9a7280  FUNCTION        0x559d7b9a7220  0x559d7b9a7250  *
-159   0x559d7b9a7220  CONSTANT        (nil)           (nil)           1.000000
-160   0x559d7b9a7250  CONSTANT        (nil)           (nil)           1.000000
-161   0x559d7b9a7340  FUNCTION        0x559d7b9a72e0  0x559d7b9a7310  *
-162   0x559d7b9a72e0  VARIABLE        (nil)           (nil)           x
-163   0x559d7b9a7310  VARIABLE        (nil)           (nil)           x
-164   0x559d7b9a6e60  FUNCTION        0x559d7b9a6e30  0x559d7b9a6da0  *
-165   0x559d7b9a6e30  FUNCTION        0x559d7b9a6dd0  0x559d7b9a6e00  pow
-166   0x559d7b9a6dd0  VARIABLE        (nil)           (nil)           x
-167   0x559d7b9a6e00  CONSTANT        (nil)           (nil)           4.000000
-168   0x559d7b9a6da0  FUNCTION        0x559d7b9a6d70  0x559d7b9a67d0  +
-169   0x559d7b9a6d70  FUNCTION        0x559d7b9a6d40  0x559d7b9a6b60  +
-170   0x559d7b9a6d40  FUNCTION        0x559d7b9a6d10  0x559d7b9a6c50  +
-171   0x559d7b9a6d10  FUNCTION        0x559d7b9a6ce0  0x559d7b9a6cb0  *
-172   0x559d7b9a6ce0  CONSTANT        (nil)           (nil)           0.000000
-173   0x559d7b9a6cb0  FUNCTION        0x559d7b9a6c80  (nil)           ln
-174   0x559d7b9a6c80  VARIABLE        (nil)           (nil)           x
-175   0x559d7b9a6c50  FUNCTION        0x559d7b9a6c20  0x559d7b9a6bf0  *
-176   0x559d7b9a6c20  CONSTANT        (nil)           (nil)           0.000000
-177   0x559d7b9a6bf0  FUNCTION        0x559d7b9a6bc0  0x559d7b9a6b90  
-178   0x559d7b9a6bc0  CONSTANT        (nil)           (nil)           1.000000
-179   0x559d7b9a6b90  VARIABLE        (nil)           (nil)           x
-180   0x559d7b9a6b60  FUNCTION        0x559d7b9a6b30  0x559d7b9a6a40  +
-181   0x559d7b9a6b30  FUNCTION        0x559d7b9a6b00  0x559d7b9a6ad0  *
-182   0x559d7b9a6b00  CONSTANT        (nil)           (nil)           0.000000
-183   0x559d7b9a6ad0  FUNCTION        0x559d7b9a6a70  0x559d7b9a6aa0  
-184   0x559d7b9a6a70  CONSTANT        (nil)           (nil)           1.000000
-185   0x559d7b9a6aa0  VARIABLE        (nil)           (nil)           x
-186   0x559d7b9a6a40  FUNCTION        0x559d7b9a6a10  0x559d7b9a69e0  *
-187   0x559d7b9a6a10  CONSTANT        (nil)           (nil)           0.000000
-188   0x559d7b9a69e0  FUNCTION        0x559d7b9a69b0  0x559d7b9a6860  
-189   0x559d7b9a69b0  FUNCTION        0x559d7b9a6980  0x559d7b9a68f0  -
-190   0x559d7b9a6980  FUNCTION        0x559d7b9a6950  0x559d7b9a6920  *
-191   0x559d7b9a6950  CONSTANT        (nil)           (nil)           0.000000
-192   0x559d7b9a6920  VARIABLE        (nil)           (nil)           x
-193   0x559d7b9a68f0  FUNCTION        0x559d7b9a68c0  0x559d7b9a6890  *
-194   0x559d7b9a68c0  CONSTANT        (nil)           (nil)           1.000000
-195   0x559d7b9a6890  CONSTANT        (nil)           (nil)           1.000000
-196   0x559d7b9a6860  FUNCTION        0x559d7b9a6830  0x559d7b9a6800  *
-197   0x559d7b9a6830  VARIABLE        (nil)           (nil)           x
-198   0x559d7b9a6800  VARIABLE        (nil)           (nil)           x
-199   0x559d7b9a67d0  FUNCTION        0x559d7b9a67a0  0x559d7b9a5aa0  +
-200   0x559d7b9a67a0  FUNCTION        0x559d7b9a6770  0x559d7b9a5d10  +
-201   0x559d7b9a6770  FUNCTION        0x559d7b9a6740  0x559d7b9a6710  *
-202   0x559d7b9a6740  CONSTANT        (nil)           (nil)           0.000000
-203   0x559d7b9a6710  FUNCTION        0x559d7b9a5d40  0x559d7b9a66e0  
-204   0x559d7b9a5d40  CONSTANT        (nil)           (nil)           1.000000
-205   0x559d7b9a66e0  VARIABLE        (nil)           (nil)           x
-206   0x559d7b9a5d10  FUNCTION        0x559d7b9a5ce0  0x559d7b9a5cb0  *
-207   0x559d7b9a5ce0  CONSTANT        (nil)           (nil)           0.000000
-208   0x559d7b9a5cb0  FUNCTION        0x559d7b9a5c80  0x559d7b9a5b30  
-209   0x559d7b9a5c80  FUNCTION        0x559d7b9a5c50  0x559d7b9a5bc0  -
-210   0x559d7b9a5c50  FUNCTION        0x559d7b9a5c20  0x559d7b9a5bf0  *
-211   0x559d7b9a5c20  CONSTANT        (nil)           (nil)           0.000000
-212   0x559d7b9a5bf0  VARIABLE        (nil)           (nil)           x
-213   0x559d7b9a5bc0  FUNCTION        0x559d7b9a5b90  0x559d7b9a5b60  *
-214   0x559d7b9a5b90  CONSTANT        (nil)           (nil)           1.000000
-215   0x559d7b9a5b60  CONSTANT        (nil)           (nil)           1.000000
-216   0x559d7b9a5b30  FUNCTION        0x559d7b9a5b00  0x559d7b9a5ad0  *
-217   0x559d7b9a5b00  VARIABLE        (nil)           (nil)           x
-218   0x559d7b9a5ad0  VARIABLE        (nil)           (nil)           x
-219   0x559d7b9a5aa0  FUNCTION        0x559d7b9a5a70  0x559d7b9a5800  +
-220   0x559d7b9a5a70  FUNCTION        0x559d7b9a5a40  0x559d7b9a5a10  *
-221   0x559d7b9a5a40  CONSTANT        (nil)           (nil)           0.000000
-222   0x559d7b9a5a10  FUNCTION        0x559d7b9a5950  0x559d7b9a59e0  
-223   0x559d7b9a5950  FUNCTION        0x559d7b9a5890  0x559d7b9a5920  -
-224   0x559d7b9a5890  FUNCTION        0x559d7b9a5830  0x559d7b9a5860  *
-225   0x559d7b9a5830  CONSTANT        (nil)           (nil)           0.000000
-226   0x559d7b9a5860  VARIABLE        (nil)           (nil)           x
-227   0x559d7b9a5920  FUNCTION        0x559d7b9a58c0  0x559d7b9a58f0  *
-228   0x559d7b9a58c0  CONSTANT        (nil)           (nil)           1.000000
-229   0x559d7b9a58f0  CONSTANT        (nil)           (nil)           1.000000
-230   0x559d7b9a59e0  FUNCTION        0x559d7b9a5980  0x559d7b9a59b0  *
-231   0x559d7b9a5980  VARIABLE        (nil)           (nil)           x
-232   0x559d7b9a59b0  VARIABLE        (nil)           (nil)           x
-233   0x559d7b9a5800  FUNCTION        0x559d7b9a57d0  0x559d7b9a57a0  *
-234   0x559d7b9a57d0  CONSTANT        (nil)           (nil)           4.000000
-235   0x559d7b9a57a0  FUNCTION        0x559d7b9a5770  0x559d7b9a50e0  
-236   0x559d7b9a5770  FUNCTION        0x559d7b9a5740  0x559d7b9a53b0  -
-237   0x559d7b9a5740  FUNCTION        0x559d7b9a5710  0x559d7b9a5440  *
-238   0x559d7b9a5710  FUNCTION        0x559d7b9a56e0  0x559d7b9a5590  -
-239   0x559d7b9a56e0  FUNCTION        0x559d7b9a56b0  0x559d7b9a5620  +
-240   0x559d7b9a56b0  FUNCTION        0x559d7b9a5680  0x559d7b9a5650  *
-241   0x559d7b9a5680  CONSTANT        (nil)           (nil)           0.000000
-242   0x559d7b9a5650  VARIABLE        (nil)           (nil)           x
-243   0x559d7b9a5620  FUNCTION        0x559d7b9a55f0  0x559d7b9a55c0  *
-244   0x559d7b9a55f0  CONSTANT        (nil)           (nil)           0.000000
-245   0x559d7b9a55c0  CONSTANT        (nil)           (nil)           1.000000
-246   0x559d7b9a5590  FUNCTION        0x559d7b9a5560  0x559d7b9a54d0  +
-247   0x559d7b9a5560  FUNCTION        0x559d7b9a5530  0x559d7b9a5500  *
-248   0x559d7b9a5530  CONSTANT        (nil)           (nil)           0.000000
-249   0x559d7b9a5500  CONSTANT        (nil)           (nil)           1.000000
-250   0x559d7b9a54d0  FUNCTION        0x559d7b9a54a0  0x559d7b9a5470  *
-251   0x559d7b9a54a0  CONSTANT        (nil)           (nil)           1.000000
-252   0x559d7b9a5470  CONSTANT        (nil)           (nil)           0.000000
-253   0x559d7b9a5440  FUNCTION        0x559d7b9a53e0  0x559d7b9a5410  *
-254   0x559d7b9a53e0  VARIABLE        (nil)           (nil)           x
-255   0x559d7b9a5410  VARIABLE        (nil)           (nil)           x
-256   0x559d7b9a53b0  FUNCTION        0x559d7b9a5380  0x559d7b9a5230  *
-257   0x559d7b9a5380  FUNCTION        0x559d7b9a52c0  0x559d7b9a5350  -
-258   0x559d7b9a52c0  FUNCTION        0x559d7b9a5260  0x559d7b9a5290  *
-259   0x559d7b9a5260  CONSTANT        (nil)           (nil)           0.000000
-260   0x559d7b9a5290  VARIABLE        (nil)           (nil)           x
-261   0x559d7b9a5350  FUNCTION        0x559d7b9a52f0  0x559d7b9a5320  *
-262   0x559d7b9a52f0  CONSTANT        (nil)           (nil)           1.000000
-263   0x559d7b9a5320  CONSTANT        (nil)           (nil)           1.000000
-264   0x559d7b9a5230  FUNCTION        0x559d7b9a5200  0x559d7b9a5170  +
-265   0x559d7b9a5200  FUNCTION        0x559d7b9a51d0  0x559d7b9a51a0  *
-266   0x559d7b9a51d0  CONSTANT        (nil)           (nil)           1.000000
-267   0x559d7b9a51a0  VARIABLE        (nil)           (nil)           x
-268   0x559d7b9a5170  FUNCTION        0x559d7b9a5140  0x559d7b9a5110  *
-269   0x559d7b9a5140  VARIABLE        (nil)           (nil)           x
-270   0x559d7b9a5110  CONSTANT        (nil)           (nil)           1.000000
-271   0x559d7b9a50e0  FUNCTION        0x559d7b9a50b0  0x559d7b9a5020  *
-272   0x559d7b9a50b0  FUNCTION        0x559d7b9a5050  0x559d7b9a5080  *
-273   0x559d7b9a5050  VARIABLE        (nil)           (nil)           x
-274   0x559d7b9a5080  VARIABLE        (nil)           (nil)           x
-275   0x559d7b9a5020  FUNCTION        0x559d7b9a4fc0  0x559d7b9a4ff0  *
-276   0x559d7b9a4fc0  VARIABLE        (nil)           (nil)           x
-277   0x559d7b9a4ff0  VARIABLE        (nil)           (nil)           x
-
-SVG: dumps/tree_dump_024.svg
-</pre>
-<img src="dumps/tree_dump_024.svg" style="max-width:2250px;"/>
 
 <hr>

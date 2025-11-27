@@ -12,6 +12,7 @@
 #include "tree_operations.h"
 #include "forest_info.h"
 #include "file_operations.h"
+#include "tech_io.h"
 
 //================================================================================
 
@@ -119,7 +120,7 @@ tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr) {
     tree->buff     = forest->buff;
     ON_DEBUG(
     tree->dump_file = &forest->dump_file;
-    tree->tech_file = &forest->tech_file;
+    tree->tex_file = &forest->tex_file;
     )
     return tree;
 }
@@ -225,29 +226,40 @@ error_code forest_close_dump_file(forest_t* forest) {
     return ERROR_NO;
 }
 
-static void print_tech_header(FILE* tech_file) {
-
-}
-
-error_code forest_open_tech_file(forest_t* forest, const char* tech_file_name) {
+error_code forest_open_tex_file(forest_t* forest, const char* tex_file_name) {
     HARD_ASSERT(forest            != nullptr, "Forest_ptr is nullptr");
-    HARD_ASSERT(dump_file_name    != nullptr, "Dump_file_name is nullptr");
+    HARD_ASSERT(tex_file_name    != nullptr, "Dump_file_name is nullptr");
     HARD_ASSERT(forest->tree_list != nullptr, "List is nullptr");
-    LOGGER_DEBUG("Forest_open_dump_file: started");
 
-    FILE* tech_file = fopen(tech_file_name, "w");
-    if(!tech_file) {
+    LOGGER_DEBUG("Forest_open_tex_file: started");
+
+    FILE* tex_file = fopen(tex_file_name, "w");
+    if(!tex_file) {
         LOGGER_ERROR("File open error");
         errno = 0;
         return ERROR_OPEN_FILE;
     }
-    forest->tech_file = tech_file;
-    print_tech_header(tech_file)
+    forest->tex_file = tex_file;
+    print_tech_header(tex_file);
     return ERROR_NO;
 }
 
-error_code forest_close_tech_file(forest_t* forest) {
+error_code forest_close_tex_file(forest_t* forest) {
+    HARD_ASSERT(forest != nullptr, "Forest is nullptr");
 
+    LOGGER_DEBUG("Forest_close_tex_file: started");
+    if(!forest->tex_file) {
+        LOGGER_WARNING("tex_file is nullptr");
+        return ERROR_NO;
+    }
+
+    print_tech_footer(forest->tex_file);
+    int error = fclose(forest->tex_file);
+    if(error != 0) {
+        LOGGER_ERROR("forest_close_tex_file: Failed to close tex_file");
+        return ERROR_CLOSE_FILE;
+    }
+    return ERROR_NO;
 }
 )
 error_code forest_read_file(forest_t* forest, const char* filename) {
