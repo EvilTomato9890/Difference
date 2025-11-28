@@ -6,10 +6,13 @@
 #include "DSL.h"
 #include "differentiator.h"
 #include "math.h"
+#include "my_string.h"
+
+static const double CMP_PRECISION = 1e-9;
 
 //================================================================================
-
-tree_node_t* get_diff(const tree_t* tree, tree_node_t* node) {
+// TODO - diff on 1 arg Correct?
+tree_node_t* get_diff(tree_node_t* node) {
     if(!node) return nullptr;
 
     if (node->type == CONSTANT) {
@@ -18,6 +21,7 @@ tree_node_t* get_diff(const tree_t* tree, tree_node_t* node) {
     if(node->type == VARIABLE) {
         return c(1);
     }
+
     tree_node_t* l = node->left;
     tree_node_t* r = node->right;
 
@@ -111,22 +115,15 @@ tree_node_t* get_diff(const tree_t* tree, tree_node_t* node) {
         return function;                                                 \
     }
 
-#define BASIC_OPERATION_TEMPLATE(name, operation)                      \
-    static var_val_type name##_func (var_val_type a, var_val_type b) { \
-        HARD_ASSERT(!isnan(a), "a is nan");                            \
-        HARD_ASSERT(!isnan(b), "b is nan");                            \
-        return operation;                                              \
-    }                
-
-BASIC_OPERATION_TEMPLATE(ADD, a + b)
-BASIC_OPERATION_TEMPLATE(MUL, a * b)
-BASIC_OPERATION_TEMPLATE(SUB, a - b)
-BASIC_OPERATION_TEMPLATE(DIV, a / b)
+BASIC_FUNC_TEMPLATE_TWO_ARGS(ADD, a + b)
+BASIC_FUNC_TEMPLATE_TWO_ARGS(MUL, a * b)
+BASIC_FUNC_TEMPLATE_TWO_ARGS(SUB, a - b)
+BASIC_FUNC_TEMPLATE_TWO_ARGS(DIV, a / b)
 
 BASIC_FUNC_TEMPLATE_TWO_ARGS(POW, pow(a, b))
 BASIC_FUNC_TEMPLATE_TWO_ARGS(LOG, log(b) / log(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(LN, log(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(EXP, exp(a))
+BASIC_FUNC_TEMPLATE_ONE_ARG (LN, log(a))
+BASIC_FUNC_TEMPLATE_ONE_ARG (EXP, exp(a))
 
 BASIC_FUNC_TEMPLATE_ONE_ARG(SIN, sin(a))
 BASIC_FUNC_TEMPLATE_ONE_ARG(COS, cos(a))
@@ -250,6 +247,13 @@ var_val_type calculate_tree(tree_t* tree) {
 }
 
 //================================================================================
+
+static bool double_cmp(double a, double b) {
+    if(abs(a - b) < CMP_PRECISION) {
+        return 0;
+    }
+    return a - b;
+}
 
 static bool node_is_constant(const tree_node_t* node) {
     return node != nullptr && node->type == CONSTANT;
@@ -402,24 +406,20 @@ struct arg_rule_t {
 struct op_rule_t {
     func_type_t func_type_value;
     size_t      arg_count;
-    arg_rule_t  args[2];
+    arg_rule_t  args[MAX_NEUTRAL_ARGS];
 };
 
-#define NO_RULE                  { NAN, NAN, 0.0 }
 #define ARG_RULE(neu, fix, res)  { (neu), (fix), (res) }
 
 static const op_rule_t OP_SIMPLIFY_RULES[] = {
-    { ADD, 2, {
+    { ADD, 1, {
         ARG_RULE(0.0, NAN, 0.0),
+    }},
+    { SUB, 1, {
         ARG_RULE(0.0, NAN, 0.0)
     }},
-    { SUB, 2, {
-        NO_RULE,
-        ARG_RULE(0.0, NAN, 0.0)
-    }},
-    { MUL, 2, {
+    { MUL, 1, {
         ARG_RULE(1.0, 0.0, 0.0),
-        ARG_RULE(1.0, 0.0, 0.0)
     }},
     { DIV, 2, {
         ARG_RULE(NAN, 0.0, 0.0),
@@ -429,8 +429,7 @@ static const op_rule_t OP_SIMPLIFY_RULES[] = {
         ARG_RULE(NAN, 1.0, 1.0),
         ARG_RULE(1.0, 0.0, 1.0)
     }},
-    { LOG, 2, {
-        NO_RULE,
+    { LOG, 1, {
         ARG_RULE(NAN, 1.0, 0.0)
     }},
 };
@@ -449,22 +448,22 @@ static const op_rule_t* find_op_rule(func_type_t func_type_value) {
 }
 
 //--------------------------------------------------------------------------------
-
+//TODO: поправить для  фиксированных элементов рзаных аргументов
 static error_code simplify_fixed_elements(tree_node_t* node,
                                           const op_rule_t* rule) {
     HARD_ASSERT(node != nullptr, "simplify_fixed_elements: node is nullptr");
     HARD_ASSERT(rule != nullptr, "simplify_fixed_elements: rule is nullptr");
 
-    tree_node_t* args[2] = { node->left, node->right };
+    tree_node_t* args[MAX_NEUTRAL_ARGS] = { node->left, node->right };
     error_code error = ERROR_NO;
 
     for (size_t i = 0; i < rule->arg_count; ++i) {
         const arg_rule_t& arg_rule = rule->args[i];
         tree_node_t*      arg_node = args[i];
 
-        if (isnan(arg_rule.fixed_value))                 continue;
-        if (!node_is_constant(arg_node))                 continue;
-        if (arg_node->value.constant != arg_rule.fixed_value) continue;
+        if (isnan(arg_rule.fixed_value))                                     continue;
+        if (!node_is_constant(arg_node))                                     continue; 
+        if (double_cmp(arg_node->value.constant, arg_rule.fixed_value) == 0) continue;
 
         error |= handle_fixed_elem(node, arg_rule.fixed_result);
         return error;
@@ -478,7 +477,7 @@ static error_code simplify_neutral_elements(tree_node_t* node,
     HARD_ASSERT(node != nullptr, "simplify_neutral_elements: node is nullptr");
     HARD_ASSERT(rule != nullptr, "simplify_neutral_elements: rule is nullptr");
 
-    tree_node_t* args[2] = { node->left, node->right };
+    tree_node_t* args[MAX_NEUTRAL_ARGS] = { node->left, node->right };
     error_code error = ERROR_NO;
 
     for (size_t i = 0; i < rule->arg_count; ++i) {

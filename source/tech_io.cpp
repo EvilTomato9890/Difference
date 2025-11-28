@@ -123,6 +123,7 @@ static int get_tex_prec(const tree_node_t* node) {
             return TEX_PREC_MUL;
 
         case POW:
+        case LOG:
             return TEX_PREC_POW;
 
         default:
@@ -139,12 +140,12 @@ static bool tex_need_parens(const tree_node_t* node, int parent_prec, assoc_pos_
     if (my_prec > parent_prec)  return false;
     if (node->type != FUNCTION) return false;
 
-    func_type_t f = node->value.func;
+    func_type_t func = node->value.func;
 
-    if ((f == SUB || f == DIV) && pos == ASSOC_RIGHT)
+    if ((func == SUB || func == DIV) && pos == ASSOC_RIGHT)
         return true;
 
-    if (f == POW && pos == ASSOC_LEFT)
+    if (func == POW && pos == ASSOC_LEFT)
         return true;
 
     return false;

@@ -1,10 +1,10 @@
 <pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
 <span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #20 ]====================</span>
-Timestamp: <span style="color:#8be9fd;">2025-11-27 10:51:06</span>
+Timestamp: <span style="color:#8be9fd;">2025-11-28 19:14:04</span>
 <span style="color:#ff4d4f;font-weight:700;">Test dump tree with nodes</span>
 <span style="color:#6b8fd6;font-weight:700;">===================================================</span>
-tree ptr : 0x5cc3a26041c0
-root ptr : 0x5cc3a2608530
+tree ptr : 0x62e738f7d1c0
+root ptr : 0x62e738f81530
 size     : 9
 
 -- Created at (tree ver_info) --
@@ -13,21 +13,21 @@ func: forest_add_tree
 line: 106
 
 -- Called at (passed ver_info) --
-file: source/test_tree_io.cpp
+file: source/tests.cpp
 func: test_calculate_tree_diff
-line: 616
+line: 618
 
 IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
 ----  --------------  --------------  --------------  --------------  --------------------
-0     0x5cc3a2608530  FUNCTION        0x5cc3a2608500  0x5cc3a2607420  +
-1     0x5cc3a2608500  FUNCTION        0x5cc3a2603b70  0x5cc3a26074e0  *
-2     0x5cc3a2603b70  FUNCTION        0x5cc3a2603b40  0x5cc3a2606000  pow
-3     0x5cc3a2603b40  VARIABLE        (nil)           (nil)           x
-4     0x5cc3a2606000  CONSTANT        (nil)           (nil)           2.000000
-5     0x5cc3a26074e0  FUNCTION        0x5cc3a2606070  (nil)           ln
-6     0x5cc3a2606070  VARIABLE        (nil)           (nil)           x
-7     0x5cc3a2607420  FUNCTION        0x5cc3a2606160  (nil)           exp
-8     0x5cc3a2606160  VARIABLE        (nil)           (nil)           y
+0     0x62e738f81530  FUNCTION        0x62e738f81500  0x62e738f80420  +
+1     0x62e738f81500  FUNCTION        0x62e738f7cb70  0x62e738f804e0  *
+2     0x62e738f7cb70  FUNCTION        0x62e738f7cb40  0x62e738f7f000  pow
+3     0x62e738f7cb40  VARIABLE        (nil)           (nil)           x
+4     0x62e738f7f000  CONSTANT        (nil)           (nil)           2.000000
+5     0x62e738f804e0  FUNCTION        0x62e738f7f070  (nil)           ln
+6     0x62e738f7f070  VARIABLE        (nil)           (nil)           x
+7     0x62e738f80420  FUNCTION        0x62e738f7f160  (nil)           exp
+8     0x62e738f7f160  VARIABLE        (nil)           (nil)           y
 
 SVG: dumps/tree_dump_020.svg
 </pre>

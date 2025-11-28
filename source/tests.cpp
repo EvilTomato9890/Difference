@@ -20,6 +20,8 @@
 #include "file_operations.h"
 #include "debug_meta.h"
 #include "tech_io.h"
+#include "input_parser.h"
+
 //================================================================================
 
 static void test_read_empty_tree() {
@@ -207,7 +209,7 @@ static void test_read_complex_tree() {
 
     LOGGER_DEBUG("Diff started");
 
-    tree_node_t* new_root = get_diff(test_tree, test_tree->root);
+    tree_node_t* new_root = get_diff(test_tree->root);
     tree_change_root(tree_diff, new_root);
 
     LOGGER_DEBUG("Diff ended");
@@ -251,7 +253,7 @@ static void test_diff_big_tree() {
     tree_dump(tree, VER_INIT, true, "After reading");
 
     LOGGER_DEBUG("Diff started");
-    tree_node_t* new_root = get_diff(tree, tree->root);
+    tree_node_t* new_root = get_diff(tree->root);
     HARD_ASSERT(new_root != nullptr, "Get diff failed");
     LOGGER_DEBUG("Diff ended");
 
@@ -617,7 +619,7 @@ static void test_calculate_tree_diff() {
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
     tree_t* tree_diff = forest_add_tree(&forest, &error);
-    new_root = get_diff(tree, tree->root);
+    new_root = get_diff(tree->root);
     tree_change_root(tree_diff, new_root);
 
     var_val_type answer = calculate_tree(tree_diff);
@@ -671,7 +673,7 @@ static void test_calculate_tree_nth_diff() {
         tree_t* diff_tree = forest_add_tree(&forest, &error);
         HARD_ASSERT(error == ERROR_NO, "add_tree (diff) failed");
 
-        tree_node_t* diff_root = get_diff(curr_tree, curr_tree->root);
+        tree_node_t* diff_root = get_diff(curr_tree->root);
         HARD_ASSERT(diff_root != nullptr, "get_diff returned nullptr");
         tree_change_root(diff_tree, diff_root);
 
@@ -776,6 +778,38 @@ static void test_tree_tech_print() {
     LOGGER_INFO("Тест пройден: печать теха \n");
 }
 
+static void test_tree_input() {
+    LOGGER_INFO("=== Тест: новый ввод ===");
+
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    error |= forest_read_file(&forest, "tree_new_input.tree");    
+    HARD_ASSERT(error == ERROR_NO, "read tree failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "tree_new_input.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    )
+    tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
+    tree_change_root(tree, new_root);
+    error = tree_dump(tree, VER_INIT, true, "Test dump input tree");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    )
+
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: новый ввод \n");
+}
+
 //================================================================================
 
 int run_tests() {
@@ -804,6 +838,7 @@ int run_tests() {
     test_calculate_tree_nth_diff();
     test_tree_optimize();
     test_tree_tech_print();
+    test_tree_input();
 
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
