@@ -16,6 +16,7 @@
 #include "../libs/StackDead-main/stack.h"
 #include "my_string.h"
 #include "file_operations.h"
+#include "tex_io.h"
 
 //================================================================================
 
@@ -24,7 +25,7 @@ struct func_struct {
     const char* func_name;   
 };
 
-#define HANDLE_FUNC(op_code, str_name, tex_pattern) \
+#define HANDLE_FUNC(op_code, str_name, ...) \
     { op_code, #str_name },
 
 static func_struct op_codes[] = {
@@ -70,7 +71,7 @@ struct tex_func_fmt {
     const char*  pattern;  
 };
 
-#define HANDLE_FUNC(op_code, symbol, pattern) \
+#define HANDLE_FUNC(op_code, symbol, num_args, pattern) \
     { op_code, #symbol, pattern },
 
 static tex_func_fmt tex_fmt_table[] = {
@@ -153,26 +154,26 @@ static bool tex_need_parens(const tree_node_t* node, int parent_prec, assoc_pos_
 
 //================================================================================
 
-static void print_node_tech_const (FILE* tex, const tree_t* tree, const tree_node_t* node);
-static void print_node_tech_var   (FILE* tex, const tree_t* tree, const tree_node_t* node);
+static void print_node_tex_const (FILE* tex, const tree_t* tree, const tree_node_t* node);
+static void print_node_tex_var   (FILE* tex, const tree_t* tree, const tree_node_t* node);
 
 
-static void print_node_tech_impl  (FILE* tex, const tree_t* tree, tree_node_t* node,
+static void print_node_tex_impl  (FILE* tex, const tree_t* tree, tree_node_t* node,
                                    int parent_prec, assoc_pos_t pos);
 
-static void print_node_tech_leaf      (FILE* tex, const tree_t* tree, const tree_node_t* node);
+static void print_node_tex_leaf      (FILE* tex, const tree_t* tree, const tree_node_t* node);
 
-static void print_node_tech_function  (FILE* tex, const tree_t* tree, tree_node_t* node,
+static void print_node_tex_function  (FILE* tex, const tree_t* tree, tree_node_t* node,
                                        int parent_prec, assoc_pos_t pos);
 
-static void print_node_tech_pattern_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
+static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
                                          const tex_func_fmt* fmt,
                                          int my_prec);
 
 
 //--------------------------------------------------------------------------------
 
-static void print_node_tech_const(FILE* tex, const tree_t* /*tree*/,
+static void print_node_tex_const(FILE* tex, const tree_t* /*tree*/,
                                   const tree_node_t* node)
 {
     fprintf(tex, "%.6g", (double)node->value.constant);
@@ -180,7 +181,7 @@ static void print_node_tech_const(FILE* tex, const tree_t* /*tree*/,
 
 //--------------------------------------------------------------------------------
 
-static void print_node_tech_var(FILE* tex, const tree_t* tree,
+static void print_node_tex_var(FILE* tex, const tree_t* tree,
                                 const tree_node_t* node)
 {
     if (!tree || !tree->var_stack) {
@@ -202,13 +203,13 @@ static void print_node_tech_var(FILE* tex, const tree_t* tree,
 
 //--------------------------------------------------------------------------------
 
-static void print_node_tech(FILE* tex, const tree_t* tree, tree_node_t* node) {
-    print_node_tech_impl(tex, tree, node, TEX_PREC_LOWEST, ASSOC_ROOT);
+static void print_node_tex(FILE* tex, const tree_t* tree, tree_node_t* node) {
+    print_node_tex_impl(tex, tree, node, TEX_PREC_LOWEST, ASSOC_ROOT);
 }
 
 //--------------------------------------------------------------------------------
 
-static void print_node_tech_leaf(FILE* tex, const tree_t* tree,
+static void print_node_tex_leaf(FILE* tex, const tree_t* tree,
                                  const tree_node_t* node) {
     if (!node) {
         fprintf(tex, "\\varnothing");
@@ -217,15 +218,15 @@ static void print_node_tech_leaf(FILE* tex, const tree_t* tree,
 
     switch (node->type) {
         case CONSTANT:
-            print_node_tech_const(tex, tree, node);
+            print_node_tex_const(tex, tree, node);
             break;
 
         case VARIABLE:
-            print_node_tech_var(tex, tree, node);
+            print_node_tex_var(tex, tree, node);
             break;
 
         default:
-            LOGGER_ERROR("print_node_tech_leaf: unexpected node type %d", node->type);
+            LOGGER_ERROR("print_node_tex_leaf: unexpected node type %d", node->type);
             fprintf(tex, "??");
             break;
     }
@@ -233,7 +234,7 @@ static void print_node_tech_leaf(FILE* tex, const tree_t* tree,
 
 //--------------------------------------------------------------------------------
 
-static void print_node_tech_pattern_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
+static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
                                          const tex_func_fmt* fmt, int my_prec) {
     const char* pattern = fmt->pattern ? fmt->pattern : "";
 
@@ -244,7 +245,7 @@ static void print_node_tech_pattern_impl(FILE* tex, const tree_t* tree, tree_nod
             tree_node_t* child = is_a ? node->left : node->right;
             assoc_pos_t  pos   = is_a ? ASSOC_LEFT : ASSOC_RIGHT;
 
-            print_node_tech_impl(tex, tree, child, my_prec, pos);
+            print_node_tex_impl(tex, tree, child, my_prec, pos);
 
             ++p; 
         } else {
@@ -256,7 +257,7 @@ static void print_node_tech_pattern_impl(FILE* tex, const tree_t* tree, tree_nod
 
 //--------------------------------------------------------------------------------
 
-static void print_node_tech_function(FILE* tex, const tree_t* tree,tree_node_t* node,
+static void print_node_tex_function(FILE* tex, const tree_t* tree,tree_node_t* node,
                                      int parent_prec, assoc_pos_t pos) {
     int my_prec = get_tex_prec(node);
     bool need_paren = tex_need_parens(node, parent_prec, pos);
@@ -266,7 +267,7 @@ static void print_node_tech_function(FILE* tex, const tree_t* tree,tree_node_t* 
     const tex_func_fmt* fmt = get_tex_fmt_by_type(node->value.func);
 
     if (fmt) {
-        print_node_tech_pattern_impl(tex, tree, node, fmt, my_prec);
+        print_node_tex_pattern_impl(tex, tree, node, fmt, my_prec);
     } else {
         const char* name = get_func_name_by_type(node->value.func);
         if (!name) name = "f";
@@ -276,11 +277,11 @@ static void print_node_tech_function(FILE* tex, const tree_t* tree,tree_node_t* 
         if (node->left || node->right) {
             fputc('(', tex);
             if (node->left) {
-                print_node_tech_impl(tex, tree, node->left,
+                print_node_tex_impl(tex, tree, node->left,
                                      TEX_PREC_LOWEST, ASSOC_LEFT);
                 if (node->right) {
                     fprintf(tex, ", ");
-                    print_node_tech_impl(tex, tree, node->right,
+                    print_node_tex_impl(tex, tree, node->right,
                                          TEX_PREC_LOWEST, ASSOC_RIGHT);
                 }
             }
@@ -293,7 +294,7 @@ static void print_node_tech_function(FILE* tex, const tree_t* tree,tree_node_t* 
 
 //--------------------------------------------------------------------------------
 
-static void print_node_tech_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
+static void print_node_tex_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
                                  int parent_prec, assoc_pos_t pos) {
     if (!node) {
         fprintf(tex, "\\varnothing");
@@ -301,16 +302,16 @@ static void print_node_tech_impl(FILE* tex, const tree_t* tree, tree_node_t* nod
     }
 
     if (node->type == CONSTANT || node->type == VARIABLE) {
-        print_node_tech_leaf(tex, tree, node);
+        print_node_tex_leaf(tex, tree, node);
         return;
     }
 
-    print_node_tech_function(tex, tree, node, parent_prec, pos);
+    print_node_tex_function(tex, tree, node, parent_prec, pos);
 }
 
 //================================================================================
 
-void print_tech_header(FILE* tex) {
+void print_tex_header(FILE* tex) {
     HARD_ASSERT(tex != nullptr, "tex is nullptr");
 
     fprintf(tex,
@@ -325,7 +326,7 @@ void print_tech_header(FILE* tex) {
     fflush(tex);
 }
 
-void print_tech_footer(FILE* tex) {
+void print_tex_footer(FILE* tex) {
     HARD_ASSERT(tex != nullptr, "tex is nullptr");
 
     fprintf(tex,
@@ -335,7 +336,7 @@ void print_tech_footer(FILE* tex) {
     fflush(tex);
 }
 
-error_code tree_print_tech_expr(const tree_t* tree,
+error_code tree_print_tex_expr(const tree_t* tree,
                                 tree_node_t*  node,
                                 const char*   fmt, ...)
 {
@@ -346,7 +347,7 @@ error_code tree_print_tech_expr(const tree_t* tree,
 
     ON_DEBUG({
         if (tree->tex_file == nullptr || *tree->tex_file == nullptr) {
-            LOGGER_WARNING("tree_print_tech_expr: tex is nullptr");
+            LOGGER_WARNING("tree_print_tex_expr: tex is nullptr");
             return ERROR_NO;
         }
 
@@ -360,11 +361,11 @@ error_code tree_print_tech_expr(const tree_t* tree,
         }
 
         //fprintf(tex, "\\[");
-        print_node_tech(tex, tree, node);
+        print_node_tex(tex, tree, node);
         //fprintf(tex, "\\]");
 
         if (fprintf(tex, " \\\n") < 0) {
-            LOGGER_ERROR("tree_print_tech_expr: fprintf failed");
+            LOGGER_ERROR("tree_print_tex_expr: fprintf failed");
             error = ERROR_OPEN_FILE;
         }
 

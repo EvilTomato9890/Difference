@@ -19,7 +19,7 @@
 #include "forest_operations.h"
 #include "file_operations.h"
 #include "debug_meta.h"
-#include "tech_io.h"
+#include "tex_io.h"
 #include "input_parser.h"
 
 //================================================================================
@@ -745,7 +745,7 @@ static void test_tree_optimize() {
     LOGGER_INFO("Тест пройден: оптимизация дерева \n");
 }
 
-static void test_tree_tech_print() {
+static void test_tree_tex_print() {
     LOGGER_INFO("=== Тест: печать теха ===");
 
     error_code error = ERROR_NO;
@@ -758,8 +758,8 @@ static void test_tree_tech_print() {
     HARD_ASSERT(error == ERROR_NO, "add_tree failed");
 
     ON_DEBUG(
-    forest_open_tex_file(&forest, "test_tech_tree.tex");
-    HARD_ASSERT(forest.tex_file != nullptr, "failed to create tech file");
+    forest_open_tex_file(&forest, "test_tex_tree.tex");
+    HARD_ASSERT(forest.tex_file != nullptr, "failed to create tex file");
     )
 
     tree_node_t* new_root = ADD_(POW_(DIV_(ADD_(MUL_(POW_(v("x"), c(2)), LN_(v("x"))), EXP_(v("y"))), ADD_(SIN_(v("x")), COS_(v("y")))), c(3)), LN_(DIV_(ADD_(POW_(v("x"), c(2)), POW_(v("y"), c(2))), ADD_(c(1), MUL_(v("x"), v("y"))))));
@@ -767,7 +767,7 @@ static void test_tree_tech_print() {
     HARD_ASSERT(error == ERROR_NO, "creating root failed");
     tree_change_root(tree, new_root);
 
-    error |= tree_print_tech_expr(tree, tree->root, "f(x, y) = ");
+    error |= tree_print_tex_expr(tree, tree->root, "f(x, y) = ");
     HARD_ASSERT(error == ERROR_NO, "tree_dump before optimize failed");
 
     ON_DEBUG(
@@ -810,6 +810,43 @@ static void test_tree_input() {
     LOGGER_INFO("Тест пройден: новый ввод \n");
 }
 
+static void test_tree_hard_tex() {
+    LOGGER_INFO("=== Тест: множественный тех ===");
+
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    error |= forest_read_file(&forest, "tree_hard_tex_input.tree");    //TODO: Почему не рбаотает ассерт
+    HARD_ASSERT(error == ERROR_NO, "read tree failed");
+
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "tree_hard_tex.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    forest_open_tex_file(&forest, "multi_tex.tex");
+    HARD_ASSERT(forest.tex_file != nullptr, "failed to create tex file");
+    )
+    
+    tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
+    tree_change_root(tree, new_root);
+    error = tree_dump(tree, VER_INIT, true, "Test dump input tree");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    error = tree_print_tex_expr(tree, tree->root, "f(x)` = ");
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    forest_close_tex_file(&forest);
+    )
+
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: множественный тех \n");
+}
+
 //================================================================================
 
 int run_tests() {
@@ -837,8 +874,9 @@ int run_tests() {
     test_calculate_tree_diff();
     test_calculate_tree_nth_diff();
     test_tree_optimize();
-    test_tree_tech_print();
+    test_tree_tex_print();
     test_tree_input();
+    test_tree_hard_tex();
 
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");

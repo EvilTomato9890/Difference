@@ -46,7 +46,6 @@ error_code read_file_to_buffer(FILE* file, string_t* buff_str) {
         return ERROR_OPEN_FILE;
     }
     
-    buffer[file_size] = '\0';
     buff_str->ptr = buffer;
     buff_str->len = (size_t)file_size;
     return ERROR_NO;

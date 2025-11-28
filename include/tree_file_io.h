@@ -7,6 +7,7 @@
 error_code tree_read_from_file(tree_t* tree, const char* filename);
 error_code tree_write_to_file(const tree_t* tree, const char* filename);
 
+const char* tech_get_func_name_by_type(func_type_t func_type_value); //TODO что делать
 const char* get_func_name_by_type(func_type_t func_type_value);
 
 error_code tree_parse_from_buffer(tree_t* tree);

@@ -248,23 +248,14 @@ var_val_type calculate_tree(tree_t* tree) {
 
 //================================================================================
 
-static bool double_cmp(double a, double b) {
-    if(abs(a - b) < CMP_PRECISION) {
-        return 0;
-    }
-    return a - b;
+static int double_cmp(double a, double b) {
+    if(abs(a - b) < CMP_PRECISION) return 0;
+    if(a - b      > CMP_PRECISION) return 1;
+    return -1;
 }
 
 static bool node_is_constant(const tree_node_t* node) {
     return node != nullptr && node->type == CONSTANT;
-}
-
-static bool node_is_zero(const tree_node_t* node) {
-    return node_is_constant(node) && node->value.constant == 0.0;
-}
-
-static bool node_is_one(const tree_node_t* node) {
-    return node_is_constant(node) && node->value.constant == 1.0;
 }
 
 //--------------------------------------------------------------------------------
@@ -484,9 +475,9 @@ static error_code simplify_neutral_elements(tree_node_t* node,
         const arg_rule_t& arg_rule = rule->args[i];
         tree_node_t*      arg_node = args[i];
 
-        if (isnan(arg_rule.neutral_value))               continue;
-        if (!node_is_constant(arg_node))                 continue;
-        if (arg_node->value.constant != arg_rule.neutral_value) continue;
+        if (isnan(arg_rule.neutral_value))                                  continue;
+        if (!node_is_constant(arg_node))                                    continue;
+        if (double_cmp(arg_node->value.constant,  arg_rule.neutral_value))  continue;
 
         size_t other_index = (i == 0 ? 1 : 0);
         tree_node_t* keep_ptr = args[other_index];

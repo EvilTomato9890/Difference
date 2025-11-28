@@ -12,7 +12,7 @@
 #include "tree_operations.h"
 #include "forest_info.h"
 #include "file_operations.h"
-#include "tech_io.h"
+#include "tex_io.h"
 
 //================================================================================
 
@@ -240,7 +240,7 @@ error_code forest_open_tex_file(forest_t* forest, const char* tex_file_name) {
         return ERROR_OPEN_FILE;
     }
     forest->tex_file = tex_file;
-    print_tech_header(tex_file);
+    print_tex_header(tex_file);
     return ERROR_NO;
 }
 
@@ -253,7 +253,7 @@ error_code forest_close_tex_file(forest_t* forest) {
         return ERROR_NO;
     }
 
-    print_tech_footer(forest->tex_file);
+    print_tex_footer(forest->tex_file);
     int error = fclose(forest->tex_file);
     if(error != 0) {
         LOGGER_ERROR("forest_close_tex_file: Failed to close tex_file");
