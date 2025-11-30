@@ -19,6 +19,7 @@ enum error_type {
 	ERROR_UNKNOWN_FUNC		 = 1 << 14,
 	ERROR_NO_INIT			 = 1 << 15,
 	ERROR_CLOSE_FILE		 = 1 << 16,
+	ERROR_GET_DIFF			 = 1 << 17
 };
 
 typedef long error_code;

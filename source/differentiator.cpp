@@ -5,21 +5,37 @@
 #include "logger.h"
 #include "DSL.h"
 #include "differentiator.h"
-#include "math.h"
 #include "my_string.h"
+#include "forest_info.h"
+#include "forest_operations.h"
+
+#include <math.h>
 
 static const double CMP_PRECISION = 1e-9;
 
 //================================================================================
 // TODO - diff on 1 arg Correct?
-tree_node_t* get_diff(tree_node_t* node) {
+bool check_in(size_t target, size_t* target_arr, size_t arr_size) {
+    if(target_arr == nullptr || arr_size == 0) return false;
+    
+    for(size_t i = 0; i < arr_size; i++) 
+        if(target == target_arr[i]) return true;
+    return false;
+}
+
+tree_node_t* get_diff(tree_node_t* node, size_t* args_list, size_t args_size) {
+    HARD_ASSERT(args_size == 0 || args_list != nullptr, "Wrong arg list");
     if(!node) return nullptr;
 
     if (node->type == CONSTANT) {
         return c(0);
     }
     if(node->type == VARIABLE) {
-        return c(1);
+        if(args_size == 0) 
+            return c(1);
+        if(check_in(node->value.var_idx, args_list, args_size)) 
+            return c(1);
+        return c(0);
     }
 
     tree_node_t* l = node->left;
@@ -583,11 +599,4 @@ error_code tree_optimize(tree_t* tree) {
 
     tree->size = count_nodes_recursive(tree->root);
     return ERROR_NO;
-}
-
-error_code make_teylor(tree_t* tree) {
-    HARD_ASSERT(tree != nullptr, "tree is nullptr");
-
-    LOGGER_DEBUG("make_teylor: started");
-    
 }

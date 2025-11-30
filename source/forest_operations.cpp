@@ -99,20 +99,21 @@ tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr) {
     tree_t* tree = (tree_t*)calloc(1, sizeof(tree_t));
     if(!tree) {
         LOGGER_ERROR("forest_Add_tree: mem alloc for tree is failed");
-        *error_ptr = ERROR_MEM_ALLOC;
+        *error_ptr |= ERROR_MEM_ALLOC;
         return nullptr;
     }
 
     error |= tree_init(tree, forest->var_stack ON_DEBUG(, VER_INIT));
     if(error != ERROR_NO) {
         LOGGER_ERROR("forest_add_tree: tree_init failed");
+        *error_ptr |= ERROR_INSERT_FAIL;
         return nullptr;
     }
 
     ssize_t idx = list_push_back(forest->tree_list, tree);
     if(idx == -1) {
         LOGGER_ERROR("forest_add_tree: list_push_back failed");
-        *error_ptr = ERROR_INSERT_FAIL;
+        *error_ptr |= ERROR_INSERT_FAIL;
         return nullptr;
     }
 
