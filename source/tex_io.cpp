@@ -238,6 +238,11 @@ static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node
                                          const tex_func_fmt* fmt, int my_prec) {
     const char* pattern = fmt->pattern ? fmt->pattern : "";
 
+    int child_prec = my_prec;
+    if (get_tex_prec(node) == TEX_PREC_ATOM) {
+        child_prec = TEX_PREC_LOWEST;
+    }
+
     for (const char* p = pattern; *p != '\0'; ++p) {
         if (*p == '%' && (p[1] == 'a' || p[1] == 'b')) {
             bool is_a = (p[1] == 'a');
@@ -245,7 +250,7 @@ static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node
             tree_node_t* child = is_a ? node->left : node->right;
             assoc_pos_t  pos   = is_a ? ASSOC_LEFT : ASSOC_RIGHT;
 
-            print_node_tex_impl(tex, tree, child, my_prec, pos);
+            print_node_tex_impl(tex, tree, child, child_prec, pos);
 
             ++p; 
         } else {
@@ -315,14 +320,21 @@ void print_tex_header(FILE* tex) {
     HARD_ASSERT(tex != nullptr, "tex is nullptr");
 
     fprintf(tex,
-                "\\documentclass[a4paper,12pt]{article}\n"
-                "\\usepackage{amsmath}\n"
-                "\\usepackage{autobreak}\n"
-                "\\allowdisplaybreaks\n"
-                "\n"
-                "\\begin{document}\n"
-                "\\begin{align}\n"
-                "\\begin{autobreak}\n");
+            "\\documentclass[a4paper,12pt]{article}\n"
+            "\\usepackage{amsmath}\n"
+            "\\usepackage{autobreak}\n"
+            "\\allowdisplaybreaks\n"
+            "\n"
+            "\\newenvironment{shrinkeq}"
+            "{\\begin{lrbox}{\\eqbox}$\\displaystyle}"
+            "{$\\end{lrbox}%"
+            "\\ifdim\\wd\eqbox>\\linewidth"
+            "    \\resizebox{\\linewidth}{!}{\\usebox{\\eqbox}}%"
+            "\\else"
+            "    \\usebox{\\eqbox}%"
+            "\\fi}"
+
+            "\\begin{document}\n");
     fflush(tex);
 }
 
@@ -330,15 +342,14 @@ void print_tex_footer(FILE* tex) {
     HARD_ASSERT(tex != nullptr, "tex is nullptr");
 
     fprintf(tex,
-                "\\end{autobreak}\n"
-                "\\end{align}\n"
-                "\\end{document}\n");
+            "\\end{document}\n");
     fflush(tex);
 }
 
+
 error_code tree_print_tex_expr(const tree_t* tree,
-                                tree_node_t*  node,
-                                const char*   fmt, ...)
+                               tree_node_t*  node,
+                               const char*   fmt, ...)
 {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(node != nullptr, "node is nullptr");
@@ -353,6 +364,11 @@ error_code tree_print_tex_expr(const tree_t* tree,
 
         FILE* tex = *tree->tex_file;
 
+        if (fprintf(tex, "\\begin{shrinkeq}\n\\begin{align*}\n") < 0) {
+            LOGGER_ERROR("tree_print_tex_expr: fprintf begin align* failed");
+            error |= ERROR_OPEN_FILE;
+        }
+
         if (fmt && *fmt) {
             va_list args = {};
             va_start(args, fmt);
@@ -360,13 +376,11 @@ error_code tree_print_tex_expr(const tree_t* tree,
             va_end(args);
         }
 
-        //fprintf(tex, "\\[");
         print_node_tex(tex, tree, node);
-        //fprintf(tex, "\\]");
 
-        if (fprintf(tex, " \\\n") < 0) {
-            LOGGER_ERROR("tree_print_tex_expr: fprintf failed");
-            error = ERROR_OPEN_FILE;
+        if (fprintf(tex, "\n\\end{shrinkeq}\n\\end{align*}\n\n") < 0) {
+            LOGGER_ERROR("tree_print_tex_expr: fprintf end align* failed");
+            error |= ERROR_OPEN_FILE;
         }
 
         fflush(tex);

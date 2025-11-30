@@ -120,7 +120,7 @@ tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr) {
     tree->buff     = forest->buff;
     ON_DEBUG(
     tree->dump_file = &forest->dump_file;
-    tree->tex_file = &forest->tex_file;
+    tree->tex_file  = &forest->tex_file;
     )
     return tree;
 }
@@ -262,6 +262,7 @@ error_code forest_close_tex_file(forest_t* forest) {
     return ERROR_NO;
 }
 )
+// TODO: функция не должна принимать forest, а скорее string_t  
 error_code forest_read_file(forest_t* forest, const char* filename) {
     HARD_ASSERT(forest   != nullptr, "Forest is nullptr");
     HARD_ASSERT(filename != nullptr, "Filename is nullptr");
@@ -274,7 +275,7 @@ error_code forest_read_file(forest_t* forest, const char* filename) {
     }
 
     error_code error = read_file_to_buffer(read_file, &forest->buff);
-    if(error != ERROR_NO) {
+    if(error != ERROR_NO) { //FIXME - закрытие и очитска буфера
         LOGGER_ERROR("forest_read_file: read_file_to_buffer failed");
         return error;
     }

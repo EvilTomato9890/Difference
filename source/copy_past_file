@@ -1,6 +1,6 @@
 
 //Формат HANDLE_FUNC(имя для enum, представление в файле, количество аргументов функции, представление в техе)
-HANDLE_FUNC(ADD,     +,     2, "%a + %b")
+HANDLE_FUNC(ADD,     +,     2, "%a + %b") //TODO: добавить само вычисление a + b, производную, приоритет
 HANDLE_FUNC(SUB,     -,     2, "%a - %b")
 HANDLE_FUNC(MUL,     *,     2, "%a \\cdot %b")
 HANDLE_FUNC(DIV,     /,     2, "\\frac{%a}{%b}")

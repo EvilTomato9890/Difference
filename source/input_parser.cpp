@@ -185,8 +185,8 @@ tree_node_t* get_g(tree_t* tree, char** str) {
     tree_node_t* node = get_equat(tree, str); 
     if (node == nullptr) { 
         LOGGER_ERROR("get_g: get_equat returned nullptr"); 
-        return nullptr; 
-    } 
+        return nullptr;
+    }
 
     skip_spaces(str);
     if (!expect_char(str, '$')) {

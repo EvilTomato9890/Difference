@@ -5,8 +5,8 @@
 #include <string.h>
 
 struct string_t {
-    char* ptr;
-    size_t      len;
+    char*  ptr;
+    size_t len;
 };
 
 int my_ssstrcmp(string_t str1, string_t str2);

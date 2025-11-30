@@ -831,10 +831,25 @@ static void test_tree_hard_tex() {
     forest_open_tex_file(&forest, "multi_tex.tex");
     HARD_ASSERT(forest.tex_file != nullptr, "failed to create tex file");
     )
-    
+
     tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
     tree_change_root(tree, new_root);
-    error = tree_dump(tree, VER_INIT, true, "Test dump input tree");
+    error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    error = tree_print_tex_expr(tree, tree->root, "f(x) = ");
+
+
+    tree_node_t* new_root_2 = get_diff(tree->root);
+    tree_change_root(tree, new_root_2);
+    error = tree_dump(tree, VER_INIT, true, "Diff tree");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    error = tree_print_tex_expr(tree, tree->root, "f(x)|dx = ");
+
+    error = tree_optimize(tree);
+    HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
+    error = tree_print_tex_expr(tree, tree->root, "optimized f(x)|dx = ");
+
+    error = tree_dump(tree, VER_INIT, true, "optimized tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
     error = tree_print_tex_expr(tree, tree->root, "f(x)` = ");

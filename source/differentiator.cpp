@@ -51,7 +51,7 @@ tree_node_t* get_diff(tree_node_t* node) {
         case TAN:     return    DIV_(d(l), MUL_(COS_(cpy(l)), COS_(cpy(l))));
 
                                 // (ctan u)' = -1 / sin(u)^2 * u'
-        case CTAN:    return    DIV_(d(l), ADD_(c(1), MUL_(cpy(l), cpy(l))));
+        case CTAN:    return    SUB_(c(0), DIV_(d(l), ADD_(c(1), MUL_(cpy(l), cpy(l)))));
 
                                 // (arcsin u)' = 1 / sqrt(1 - u^2) * u'
         case ARCSIN:  return    DIV_(d(l), POW_(SUB_(c(1), MUL_(cpy(l), cpy(l))), c(0.5)));
@@ -73,7 +73,7 @@ tree_node_t* get_diff(tree_node_t* node) {
         case CH:      return    MUL_(SH_(cpy(l)), d(l));
 
                                 // (arcsh u)' = 1 / sqrt(1 + u^2) * u'
-        case ARCSH:   return    DIV_(c(1), POW_(ADD_(d(l), MUL_(cpy(l), cpy(l))), c(0.5)));
+        case ARCSH:   return    DIV_(d(l), POW_(ADD_(c(1), MUL_(cpy(l), cpy(l))), c(0.5)));
 
                                 // (arcch u)' = 1 / sqrt(u^2 - 1) * u'
         case ARCCH:   return    DIV_(d(l), POW_(SUB_(MUL_(cpy(l), cpy(l)), c(1)), c(0.5)));
@@ -115,6 +115,8 @@ tree_node_t* get_diff(tree_node_t* node) {
         return function;                                                 \
     }
 
+// Add -> eval, differentiate, 
+//TODO: вынести в отдельный файл и добавить функции вычисления произодных подобными шаблонами в отдельном файле
 BASIC_FUNC_TEMPLATE_TWO_ARGS(ADD, a + b)
 BASIC_FUNC_TEMPLATE_TWO_ARGS(MUL, a * b)
 BASIC_FUNC_TEMPLATE_TWO_ARGS(SUB, a - b)
@@ -122,7 +124,7 @@ BASIC_FUNC_TEMPLATE_TWO_ARGS(DIV, a / b)
 
 BASIC_FUNC_TEMPLATE_TWO_ARGS(POW, pow(a, b))
 BASIC_FUNC_TEMPLATE_TWO_ARGS(LOG, log(b) / log(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG (LN, log(a))
+BASIC_FUNC_TEMPLATE_ONE_ARG (LN,  log(a))
 BASIC_FUNC_TEMPLATE_ONE_ARG (EXP, exp(a))
 
 BASIC_FUNC_TEMPLATE_ONE_ARG(SIN, sin(a))
@@ -141,7 +143,6 @@ BASIC_FUNC_TEMPLATE_ONE_ARG(SH, sinh(a))
 BASIC_FUNC_TEMPLATE_ONE_ARG(ARCSH, asinh(a))
 BASIC_FUNC_TEMPLATE_ONE_ARG(ARCCH, acosh(a))
 
-#undef BASIC_OPERATION_TEMPLATE
 #undef BASIC_FUNC_TEMPLATE_ONE_ARG
 #undef BASIC_FUNC_TEMPLATE_TWO_ARGS
 
@@ -249,8 +250,8 @@ var_val_type calculate_tree(tree_t* tree) {
 //================================================================================
 
 static int double_cmp(double a, double b) {
-    if(abs(a - b) < CMP_PRECISION) return 0;
-    if(a - b      > CMP_PRECISION) return 1;
+    if(fabs(a - b) < CMP_PRECISION) return 0;
+    if(a - b      > CMP_PRECISION)  return 1;
     return -1;
 }
 
@@ -339,22 +340,22 @@ static error_code fold_constants_in_node(tree_node_t* node) {
     tree_node_t* left_ptr  = node->left;
     tree_node_t* right_ptr = node->right;
 
-    const bool has_left_constant  = node_is_constant(left_ptr);
-    const bool has_right_constant = node_is_constant(right_ptr);
+    const bool is_left_constant  = node_is_constant(left_ptr);
+    const bool is_right_constant = node_is_constant(right_ptr);
 
     const bool is_unary = (right_ptr == nullptr);
 
     if (is_unary) {
-        if (!has_left_constant) {
+        if (!is_left_constant) {
             return ERROR_NO;
         }
     } else {
-        if (!has_left_constant || !has_right_constant) {
+        if (!is_left_constant || !is_right_constant) {
             return ERROR_NO;
         }
     }
 
-    const_val_type left_value  = left_ptr  ? left_ptr->value.constant  : 0.0;
+    const_val_type  left_value =  left_ptr ?  left_ptr->value.constant : 0.0;
     const_val_type right_value = right_ptr ? right_ptr->value.constant : 0.0;
 
     const_val_type result_value = eval_function_constant(node->value.func,
@@ -403,29 +404,44 @@ struct op_rule_t {
 #define ARG_RULE(neu, fix, res)  { (neu), (fix), (res) }
 
 static const op_rule_t OP_SIMPLIFY_RULES[] = {
-    { ADD, 1, {
-        ARG_RULE(0.0, NAN, 0.0),
+    // u + 0 = u, 0 + v = v
+    { ADD, 2, {
+        ARG_RULE(0.0, NAN, 0.0),  
+        ARG_RULE(0.0, NAN, 0.0)   
     }},
-    { SUB, 1, {
-        ARG_RULE(0.0, NAN, 0.0)
+
+    // u - 0 = u
+    { SUB, 2, {
+        ARG_RULE(NAN, NAN, 0.0),
+        ARG_RULE(0.0, NAN, 0.0)  
     }},
-    { MUL, 1, {
-        ARG_RULE(1.0, 0.0, 0.0),
+
+    // 1 * v = v, u * 1 = u
+    // 0 * v = 0, u * 0 = 0
+    { MUL, 2, {
+        ARG_RULE(1.0, 0.0, 0.0),  
+        ARG_RULE(1.0, 0.0, 0.0)  
     }},
+
+    // 0 / v = 0   u / 1 = u
     { DIV, 2, {
-        ARG_RULE(NAN, 0.0, 0.0),
-        ARG_RULE(1.0, NAN, 0.0)
+        ARG_RULE(NAN, 0.0, 0.0), 
+        ARG_RULE(1.0, NAN, 0.0)  
     }},
+
+    // 1^v = 1  u^0 = 1  u^1 = u      
     { POW, 2, {
-        ARG_RULE(NAN, 1.0, 1.0),
-        ARG_RULE(1.0, 0.0, 1.0)
+        ARG_RULE(NAN, 1.0, 1.0),  
+        ARG_RULE(1.0, 0.0, 1.0)   
     }},
-    { LOG, 1, {
-        ARG_RULE(NAN, 1.0, 0.0)
+
+    // log_u(1) = 0 
+    { LOG, 2, {
+        ARG_RULE(NAN, NAN, 0.0),  
+        ARG_RULE(NAN, 1.0, 0.0)   
     }},
 };
 
-#undef NO_RULE
 #undef ARG_RULE
 
 static const op_rule_t* find_op_rule(func_type_t func_type_value) {
@@ -439,7 +455,7 @@ static const op_rule_t* find_op_rule(func_type_t func_type_value) {
 }
 
 //--------------------------------------------------------------------------------
-//TODO: поправить для  фиксированных элементов рзаных аргументов
+//TODO: поправить для разных фиксированных элементов аргументов
 static error_code simplify_fixed_elements(tree_node_t* node,
                                           const op_rule_t* rule) {
     HARD_ASSERT(node != nullptr, "simplify_fixed_elements: node is nullptr");
@@ -453,8 +469,8 @@ static error_code simplify_fixed_elements(tree_node_t* node,
         tree_node_t*      arg_node = args[i];
 
         if (isnan(arg_rule.fixed_value))                                     continue;
-        if (!node_is_constant(arg_node))                                     continue; 
-        if (double_cmp(arg_node->value.constant, arg_rule.fixed_value) == 0) continue;
+        if (!node_is_constant(arg_node))                                     continue;
+        if (double_cmp(arg_node->value.constant, arg_rule.fixed_value) != 0) continue;
 
         error |= handle_fixed_elem(node, arg_rule.fixed_result);
         return error;
@@ -462,6 +478,7 @@ static error_code simplify_fixed_elements(tree_node_t* node,
 
     return error;
 }
+
 
 static error_code simplify_neutral_elements(tree_node_t* node,
                                             const op_rule_t* rule) {
@@ -521,12 +538,11 @@ static error_code simplify_neutral_and_constant_elements(tree_node_t* node) {
 }
 
 //--------------------------------------------------------------------------------
-
+//TODO: 0^0
 static tree_node_t* optimize_subtree_recursive(tree_t* tree,
                                                tree_node_t* node,
                                                error_code* error_ptr) {
     HARD_ASSERT(error_ptr != nullptr, "optimize_subtree_recursive: error_ptr is nullptr");
-    (void)tree;
 
     if (node == nullptr) {
         return nullptr;
@@ -537,7 +553,7 @@ static tree_node_t* optimize_subtree_recursive(tree_t* tree,
     }
 
     if (node->type == FUNCTION) {
-        node->left  = optimize_subtree_recursive(tree, node->left,  error_ptr);
+        node->left  = optimize_subtree_recursive(tree, node->left,  error_ptr); //TODO: delete tree
         node->right = optimize_subtree_recursive(tree, node->right, error_ptr);
 
         *error_ptr |= fold_constants_in_node(node);
@@ -552,6 +568,7 @@ static tree_node_t* optimize_subtree_recursive(tree_t* tree,
 error_code tree_optimize(tree_t* tree) {
     HARD_ASSERT(tree != nullptr, "tree_optimize: tree is nullptr");
 
+    LOGGER_DEBUG("tree_optimize: started");
     if (tree->root == nullptr) {
         return ERROR_NO;
     }
@@ -566,4 +583,11 @@ error_code tree_optimize(tree_t* tree) {
 
     tree->size = count_nodes_recursive(tree->root);
     return ERROR_NO;
+}
+
+error_code make_teylor(tree_t* tree) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+
+    LOGGER_DEBUG("make_teylor: started");
+    
 }
