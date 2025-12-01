@@ -10,26 +10,26 @@
 
 //================================================================================
 
-static void skip_spaces(char** str);
-static bool try_parse_identifier(char** str, size_t* len_ptr);
-static bool get_func_info_by_name(string_t name, func_type_t* func_out, size_t* argc_out);
-static bool expect_char(char** str, char expected);
-static bool parse_func_header(char** str, func_type_t* func_out, size_t* argc_out);
-static tree_node_t* parse_single_argument(tree_t* tree, char** str);
-static bool parse_func_args(tree_t* tree, char** str, size_t argc,
+static void skip_spaces(const char** str);
+static bool try_parse_identifier(const char** str, size_t* len_ptr);
+static bool get_func_info_by_name(c_string_t name, func_type_t* func_out, size_t* argc_out);
+static bool expect_char(const char** str, char expected);
+static bool parse_func_header(const char** str, func_type_t* func_out, size_t* argc_out);
+static tree_node_t* parse_single_argument(tree_t* tree, const char** str);
+static bool parse_func_args(tree_t* tree, const char** str, size_t argc,
                             tree_node_t** left_out, tree_node_t** right_out);
 
-static tree_node_t* get_equat  (tree_t* tree, char** str);
-static tree_node_t* get_term   (tree_t* tree, char** str);
-static tree_node_t* get_power  (tree_t* tree, char** str);
-static tree_node_t* get_primary(tree_t* tree, char** str);
-static tree_node_t* get_num    (              char** str);
-static tree_node_t* get_var    (tree_t* tree, char** str);
-static tree_node_t* get_func   (tree_t* tree, char** str);
+static tree_node_t* get_expr   (tree_t* tree, const char** str);
+static tree_node_t* get_term   (tree_t* tree, const char** str);
+static tree_node_t* get_power  (tree_t* tree, const char** str);
+static tree_node_t* get_primary(tree_t* tree, const char** str);
+static tree_node_t* get_num    (              const char** str);
+static tree_node_t* get_var    (tree_t* tree, const char** str);
+static tree_node_t* get_func   (tree_t* tree, const char** str);
 
 //================================================================================
 
-static void skip_spaces(char** str) {
+static void skip_spaces(const char** str) {
     HARD_ASSERT(str  != nullptr, "str is nullptr");
     HARD_ASSERT(*str != nullptr, "*str is nullptr");
 
@@ -38,7 +38,7 @@ static void skip_spaces(char** str) {
     }
 }
 
-static bool try_parse_identifier(char** str, size_t* len_ptr) {
+static bool try_parse_identifier(const char** str, size_t* len_ptr) {
     HARD_ASSERT(str     != nullptr, "str is nullptr");
     HARD_ASSERT(*str    != nullptr, "*str is nullptr");
     HARD_ASSERT(len_ptr != nullptr, "len_ptr is nullptr");
@@ -52,7 +52,7 @@ static bool try_parse_identifier(char** str, size_t* len_ptr) {
     return len > 0;
 }
 
-static bool get_func_info_by_name(string_t name, func_type_t* func_out, size_t* argc_out) {
+static bool get_func_info_by_name(c_string_t name, func_type_t* func_out, size_t* argc_out) {
     HARD_ASSERT(name.ptr != nullptr, "func_name is nulltrp");
     HARD_ASSERT(func_out != nullptr, "func_out is nullptr");
     HARD_ASSERT(argc_out != nullptr, "argc_out is nullptr");
@@ -76,7 +76,7 @@ static bool get_func_info_by_name(string_t name, func_type_t* func_out, size_t* 
     return false;
 }
 
-static bool expect_char(char** str, char expected) {
+static bool expect_char(const char** str, char expected) {
     HARD_ASSERT(str  != nullptr, "str is nullptr");
     HARD_ASSERT(*str != nullptr, "*str is nullptr");
 
@@ -88,7 +88,7 @@ static bool expect_char(char** str, char expected) {
     return true;
 }
 
-static bool parse_func_header(char** str, func_type_t* func_out, size_t* argc_out) {
+static bool parse_func_header(const char** str, func_type_t* func_out, size_t* argc_out) {
     HARD_ASSERT(str      != nullptr, "str is nullptr");
     HARD_ASSERT(*str     != nullptr, "*str is nullptr");
     HARD_ASSERT(func_out != nullptr, "func_out is nullptr");
@@ -96,8 +96,8 @@ static bool parse_func_header(char** str, func_type_t* func_out, size_t* argc_ou
 
     skip_spaces(str);
 
-    char*  start    = *str;
-    size_t func_len = 0;
+    const char*  start = *str;
+    size_t func_len    = 0;
 
     if (!try_parse_identifier(str, &func_len)) {
         *str = start;
@@ -107,7 +107,7 @@ static bool parse_func_header(char** str, func_type_t* func_out, size_t* argc_ou
     func_type_t func = (func_type_t)0;
     size_t      argc = 0;
 
-    if (!get_func_info_by_name((string_t){ start, func_len }, &func, &argc)) {
+    if (!get_func_info_by_name((c_string_t){start, func_len}, &func, &argc)) {
         LOGGER_ERROR("parse_func_header: unknown function '%.*s'", (int)func_len, start);
         *str = start;
         return false;
@@ -118,13 +118,13 @@ static bool parse_func_header(char** str, func_type_t* func_out, size_t* argc_ou
     return true;
 }
 
-static tree_node_t* parse_single_argument(tree_t* tree, char** str) {
+static tree_node_t* parse_single_argument(tree_t* tree, const char** str) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str is nullptr");
     HARD_ASSERT(*str != nullptr, "str is nullptr");
 
     skip_spaces(str);
-    tree_node_t* arg = get_equat(tree, str);
+    tree_node_t* arg = get_expr(tree, str);
     if (!arg) {
         LOGGER_ERROR("parse_single_argument: failed to parse expression as argument");
         return nullptr;
@@ -133,7 +133,7 @@ static tree_node_t* parse_single_argument(tree_t* tree, char** str) {
     return arg;
 }
 
-static bool parse_func_args(tree_t* tree, char** str, size_t argc,
+static bool parse_func_args(tree_t* tree, const char** str, size_t argc,
                             tree_node_t** left_out, tree_node_t** right_out) {
     HARD_ASSERT(tree      != nullptr, "tree is nullptr");
     HARD_ASSERT(str       != nullptr, "str is nullptr");
@@ -174,7 +174,7 @@ static bool parse_func_args(tree_t* tree, char** str, size_t argc,
 //================================================================================
 
 // G -> E '$'
-tree_node_t* get_g(tree_t* tree, char** str) { 
+tree_node_t* get_g(tree_t* tree, const char** str) { 
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
     HARD_ASSERT(*str != nullptr, "String is nullptr");
@@ -182,9 +182,9 @@ tree_node_t* get_g(tree_t* tree, char** str) {
     LOGGER_DEBUG("get_g: started");
 
     skip_spaces(str);
-    tree_node_t* node = get_equat(tree, str); 
+    tree_node_t* node = get_expr(tree, str); 
     if (node == nullptr) { 
-        LOGGER_ERROR("get_g: get_equat returned nullptr"); 
+        LOGGER_ERROR("get_g: get_expr returned nullptr"); 
         return nullptr;
     }
 
@@ -196,7 +196,7 @@ tree_node_t* get_g(tree_t* tree, char** str) {
 }
 
 // E -> T { ('+' | '-') T }
-static tree_node_t* get_equat(tree_t* tree, char** str) { 
+static tree_node_t* get_expr(tree_t* tree, const char** str) { 
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
     HARD_ASSERT(*str != nullptr, "String is nullptr");
@@ -213,14 +213,14 @@ static tree_node_t* get_equat(tree_t* tree, char** str) {
 
         tree_node_t* right = get_term(tree, str); 
         if (!right) { 
-            LOGGER_ERROR("get_equat: right operand is nullptr"); 
+            LOGGER_ERROR("get_expr: right operand is nullptr"); 
             return left; 
         } 
 
         func_type_t func = (op == '+') ? ADD : SUB; 
         left = init_node(FUNCTION, make_union_func(func), left, right); 
         if (!left) { 
-            LOGGER_ERROR("get_equat: init_node failed"); 
+            LOGGER_ERROR("get_expr: init_node failed"); 
             return nullptr; 
         }
 
@@ -230,7 +230,7 @@ static tree_node_t* get_equat(tree_t* tree, char** str) {
 }
 
 // T -> PWR { ('*' | '/') PWR }
-static tree_node_t* get_term(tree_t* tree, char** str) { 
+static tree_node_t* get_term(tree_t* tree, const char** str) { 
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
     HARD_ASSERT(*str != nullptr, "String is nullptr");
@@ -263,7 +263,7 @@ static tree_node_t* get_term(tree_t* tree, char** str) {
 }
 
 // PWR -> P { '^' PWR }
-static tree_node_t* get_power(tree_t* tree, char** str) {
+static tree_node_t* get_power(tree_t* tree, const char** str) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
     HARD_ASSERT(*str != nullptr, "String is nullptr");
@@ -296,8 +296,7 @@ static tree_node_t* get_power(tree_t* tree, char** str) {
 }
 
 // NUM -> [0-9]+
-static tree_node_t* get_num(char** str) { 
-    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+static tree_node_t* get_num(const char** str) { 
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
     HARD_ASSERT(*str != nullptr, "String is nullptr");
 
@@ -320,7 +319,7 @@ static tree_node_t* get_num(char** str) {
 }
 
 // P -> '(' E ')' | FUNC | VAR | NUM
-static tree_node_t* get_primary(tree_t* tree, char** str) {
+static tree_node_t* get_primary(tree_t* tree, const char** str) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
     HARD_ASSERT(*str != nullptr, "String is nullptr");
@@ -330,7 +329,7 @@ static tree_node_t* get_primary(tree_t* tree, char** str) {
     if (**str == '(') {
         ++*str;
 
-        tree_node_t* node = get_equat(tree, str);
+        tree_node_t* node = get_expr(tree, str);
         if (!node) return nullptr;
 
         skip_spaces(str);
@@ -341,15 +340,15 @@ static tree_node_t* get_primary(tree_t* tree, char** str) {
     }
 
     if (isalpha((unsigned char)**str)) {
-        char*  tmp     = *str;
-        size_t id_len  = 0;
+        const char*  tmp = *str;
+        size_t id_len    = 0;
 
         if (!try_parse_identifier(&tmp, &id_len)) {
             LOGGER_ERROR("get_primary: failed to parse identifier");
             return nullptr;
         }
 
-        char* after_id = tmp;
+        const char* after_id = tmp;
         skip_spaces(&after_id);
 
         if (*after_id == '(') {
@@ -367,14 +366,14 @@ static tree_node_t* get_primary(tree_t* tree, char** str) {
 }
 
 // VAR -> [a-zA-Z]+
-static tree_node_t* get_var(tree_t* tree, char** str) {
+static tree_node_t* get_var(tree_t* tree, const char** str) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
     HARD_ASSERT(*str != nullptr, "String is nullptr");
 
     skip_spaces(str);
 
-    char*  name_buf = *str;
+    const char* name_buf = *str;
     size_t var_len  = 0;
     if (!try_parse_identifier(str, &var_len)) {
         LOGGER_ERROR("get_var: expected variable, but got '%c'", **str);
@@ -383,7 +382,7 @@ static tree_node_t* get_var(tree_t* tree, char** str) {
     }
 
     error_code error = 0;
-    size_t var_idx = get_or_add_var_idx((string_t){name_buf, var_len}, 0, tree->var_stack, &error);
+    size_t var_idx = get_or_add_var_idx((c_string_t){name_buf, var_len}, 0, tree->var_stack, &error);
     if (error != 0) {
         LOGGER_ERROR("get_var: failed to get var_idx");
         *str = name_buf;
@@ -394,14 +393,14 @@ static tree_node_t* get_var(tree_t* tree, char** str) {
 }
 
 // FUNC -> IDENT '(' arg_list ')'
-static tree_node_t* get_func(tree_t* tree, char** str) {
+static tree_node_t* get_func(tree_t* tree, const char** str) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
     HARD_ASSERT(*str != nullptr, "String is nullptr");
 
     skip_spaces(str);
 
-    char* func_start = *str;
+    const char* func_start = *str;
 
     func_type_t func = (func_type_t)0;
     size_t      argc = 0;
@@ -447,3 +446,4 @@ static tree_node_t* get_func(tree_t* tree, char** str) {
 
     return node;
 }
+//Переменная и фнукция не могут иметь одинаковое название

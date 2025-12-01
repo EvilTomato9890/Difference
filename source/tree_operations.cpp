@@ -200,6 +200,7 @@ tree_node_t* tree_change_root(tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(tree != nullptr, "Tree is nullptr");
     if(!node) LOGGER_WARNING("New root is nullptr");
 
+    destroy_node_recursive(tree->root, nullptr);
     tree->root = node;
     tree->size = count_nodes_recursive(node);
 
@@ -249,7 +250,7 @@ error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t 
 
 //================================================================================
 
-ssize_t get_var_idx(const string_t var, const stack_t* var_stack) {
+ssize_t get_var_idx(c_string_t var, const stack_t* var_stack) {
     HARD_ASSERT(var_stack != nullptr, "var_stack is nullptr");
 
     for(size_t i = 0; i < var_stack->size; i++) {
@@ -260,7 +261,7 @@ ssize_t get_var_idx(const string_t var, const stack_t* var_stack) {
     return -1;
 }
 
-size_t add_var(const string_t str, const var_val_type val, stack_t* var_stack, error_code* error) {
+size_t add_var(c_string_t str, const var_val_type val, stack_t* var_stack, error_code* error) {
     HARD_ASSERT(var_stack != nullptr, "var_stack is nulltpr");
 
     if(error == nullptr) stack_push(var_stack, {str, val});
@@ -268,7 +269,7 @@ size_t add_var(const string_t str, const var_val_type val, stack_t* var_stack, e
     return var_stack->size - 1;
 }
 
-size_t get_or_add_var_idx(const string_t str, const var_val_type val, stack_t* var_stack, error_code* error) {
+size_t get_or_add_var_idx(c_string_t str, const var_val_type val, stack_t* var_stack, error_code* error) {
     HARD_ASSERT(var_stack != nullptr, "var_stack is nullptr");
 
     ssize_t idx = get_var_idx(str, var_stack);

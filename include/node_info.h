@@ -16,7 +16,7 @@ typedef double const_val_type;
 typedef double var_val_type;
 
 struct variable_t {
-    string_t     str;
+    c_string_t   str;
     var_val_type val;
 };
 

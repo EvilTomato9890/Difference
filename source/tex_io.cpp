@@ -38,21 +38,6 @@ const int op_codes_num = sizeof(op_codes) / sizeof(func_struct);
 
 //--------------------------------------------------------------------------------
 
-static func_type_t get_op_code(string_t func_str, error_code* error) {
-    HARD_ASSERT(func_str.ptr != nullptr, "func_name nullptr");
-    HARD_ASSERT(error       != nullptr, "error nullptr");
-
-    for (size_t i = 0; i < (size_t)op_codes_num; i++) {
-        if (my_scstrcmp(func_str, op_codes[i].func_name) == 0)
-            return op_codes[i].func_type;
-    }
-
-    LOGGER_ERROR("get_op_code: func not found: '%.*s'",
-                 (int)func_str.len, func_str.ptr);
-    *error |= ERROR_UNKNOWN_FUNC;
-    return ADD;
-}
-
 const char* get_func_name_by_type(func_type_t func_type_value) {
     for (size_t index_value = 0; index_value < (size_t)op_codes_num; ++index_value) {
         if (op_codes[index_value].func_type == func_type_value) {
@@ -191,7 +176,7 @@ static void print_node_tex_var(FILE* tex, const tree_t* tree,
 
     size_t idx = node->value.var_idx;
     if (idx < tree->var_stack->size) {
-        string_t name = tree->var_stack->data[idx].str;
+        c_string_t name = tree->var_stack->data[idx].str;
         if (name.ptr && name.len > 0) {
             fprintf(tex, "%.*s", (int)name.len, name.ptr);
             return;

@@ -27,6 +27,4 @@ error_code forest_exclude_tree(forest_t* forest, tree_t* tree);
 
 error_code forest_dest(forest_t* forest);
 
-error_code forest_read_file(forest_t* forest, const char* filename);
-
 #endif

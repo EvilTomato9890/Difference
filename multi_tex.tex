@@ -1,0 +1,31 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath}
+\usepackage{autobreak}
+\allowdisplaybreaks
+
+\newenvironment{shrinkeq}{\begin{lrbox}{\eqbox}$\displaystyle}{$\end{lrbox}%\ifdim\wdqbox>\linewidth    \resizebox{\linewidth}{!}{\usebox{\eqbox}}%\else    \usebox{\eqbox}%\fi}\begin{document}
+\begin{shrinkeq}
+\begin{align*}
+f(x) = \frac{\operatorname{sh}(2^{x}) \cdot \operatorname{ch}(x^{2} \cdot \log_{4}(1))}{x^{2}}
+\end{shrinkeq}
+\end{align*}
+
+\begin{shrinkeq}
+\begin{align*}
+f(x)|dx = \frac{((\operatorname{ch}(2^{x}) \cdot 2^{x} \cdot (1 \cdot \ln(2) + x \cdot (\frac{0}{2})) \cdot \operatorname{ch}(x^{2} \cdot \log_{4}(1)) + \operatorname{sh}(2^{x}) \cdot \operatorname{sh}(x^{2} \cdot \log_{4}(1)) \cdot (x^{2} \cdot (0 \cdot \ln(x) + 2 \cdot (\frac{1}{x})) \cdot \log_{4}(1) + x^{2} \cdot (\frac{(\frac{0}{1} \cdot \ln(4) - \frac{0}{4} \cdot \ln(1))}{\ln(4) \cdot \ln(4)}))) \cdot x^{2} - \operatorname{sh}(2^{x}) \cdot \operatorname{ch}(x^{2} \cdot \log_{4}(1)) \cdot x^{2} \cdot (0 \cdot \ln(x) + 2 \cdot (\frac{1}{x})))}{x^{2} \cdot x^{2}}
+\end{shrinkeq}
+\end{align*}
+
+\begin{shrinkeq}
+\begin{align*}
+optimized f(x)|dx = \frac{(\operatorname{ch}(2^{x}) \cdot 2^{x} \cdot 0.693147 \cdot x^{2} - \operatorname{sh}(2^{x}) \cdot x^{2} \cdot 2 \cdot (\frac{1}{x}))}{x^{2} \cdot x^{2}}
+\end{shrinkeq}
+\end{align*}
+
+\begin{shrinkeq}
+\begin{align*}
+f(x)` = \frac{(\operatorname{ch}(2^{x}) \cdot 2^{x} \cdot 0.693147 \cdot x^{2} - \operatorname{sh}(2^{x}) \cdot x^{2} \cdot 2 \cdot (\frac{1}{x}))}{x^{2} \cdot x^{2}}
+\end{shrinkeq}
+\end{align*}
+
+\end{document}

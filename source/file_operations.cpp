@@ -6,6 +6,8 @@
 #include "my_string.h"
 #include "file_operations.h"
 
+#include <errno.h>
+
 static long get_file_size(FILE* file) {
     if(file == nullptr) {
         return -1;
@@ -49,4 +51,29 @@ error_code read_file_to_buffer(FILE* file, string_t* buff_str) {
     buff_str->ptr = buffer;
     buff_str->len = (size_t)file_size;
     return ERROR_NO;
+}
+
+error_code read_file_to_buffer_by_name(string_t* buff, const char* filename) {
+    HARD_ASSERT(filename != nullptr, "Filename is nullptr");
+    HARD_ASSERT(buff     != nullptr, "buff is nullptr");
+    FILE* read_file = fopen(filename, "r");
+    if(!read_file) {
+        LOGGER_ERROR("forest_read_file: Opening file failed");
+        errno = 0;
+        return ERROR_OPEN_FILE;
+    }
+
+    error_code error = read_file_to_buffer(read_file, buff);
+    if(error != ERROR_NO) { //FIXME - закрытие и очитска буфера
+        LOGGER_ERROR("forest_read_file: read_file_to_buffer failed");
+        return error;
+    }
+
+    int err = fclose(read_file);
+    if(err != 0) {
+        LOGGER_ERROR("forest_read_File: failed to close file");
+        return ERROR_CLOSE_FILE;
+    }
+
+    return error;
 }

@@ -3,7 +3,7 @@
 
 #include "debug_meta.h"
 
-#define d(node) get_diff(node)
+#define d(node) get_diff(node, args_list, args_size)
 
 #define cpy(node) subtree_deep_copy(node, nullptr ON_CREATION_DEBUG(, tree))
 
@@ -57,7 +57,5 @@
 #define ARCCH_(left)      FUNC_TEMPLATE(ARCCH,   left, nullptr)
 
 //================================================================================
-
-//#undef FUNC_TEMPLATE TODO: ??????????/
 
 #endif

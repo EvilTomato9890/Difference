@@ -15,7 +15,7 @@ static const double CMP_PRECISION = 1e-9;
 
 //================================================================================
 // TODO - diff on 1 arg Correct?
-bool check_in(size_t target, size_t* target_arr, size_t arr_size) {
+static bool check_in(size_t target, size_t* target_arr, size_t arr_size) {
     if(target_arr == nullptr || arr_size == 0) return false;
     
     for(size_t i = 0; i < arr_size; i++) 
@@ -200,7 +200,7 @@ static void clear_input_buff() {
     while ((ch = getchar()) != '\n' && ch != EOF) {}
 }
 
-static var_val_type take_var(string_t var) {
+static var_val_type take_var(c_string_t var) {
     HARD_ASSERT(var.ptr != nullptr, "String is nullptr");
 
     var_val_type num = 0;

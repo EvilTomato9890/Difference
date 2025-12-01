@@ -143,7 +143,7 @@ static const char* node_val_to_str(const tree_t* tree, const tree_node_t* node,
             snprintf(buf, buf_size, "%lf", node->value.constant);
             return buf;
         case VARIABLE: {
-            string_t curr_string = tree->var_stack->data[node->value.var_idx].str;
+            c_string_t curr_string = tree->var_stack->data[node->value.var_idx].str;
             if(buf_size < curr_string.len) LOGGER_WARNING("string len is bigger than buf_size. Printed %ld symbols, srt_len: %ld", buf_size, curr_string.len);
             
             
@@ -180,7 +180,7 @@ static void print_node_label(const tree_t* tree, const tree_node_t* node, FILE* 
                     self, self, val_str,                                                \
                     left, right);                                                       \
         } while (0)
-    clone_node(node);
+
     switch(graph_node_type) {
         case NODE_BASIC:
             NODE_PRINT(NODE_COLOR, NODE_FILL);

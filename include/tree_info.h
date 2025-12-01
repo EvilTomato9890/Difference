@@ -15,7 +15,7 @@ struct tree_t {
     tree_node_t*   root;
     size_t         size;
     stack_t*       var_stack;
-    string_t       buff;
+    c_string_t     buff;
     size_t         list_idx;
     ON_DEBUG(
         ver_info_t ver_info;

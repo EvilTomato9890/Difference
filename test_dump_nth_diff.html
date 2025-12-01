@@ -1,0 +1,71 @@
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #20 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-01 18:27:38</span>
+<span style="color:#ff4d4f;font-weight:700;">Base tree f(x) = x^4</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x508000000b20
+root ptr : 0x503000001810
+size     : 3
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_calculate_tree_nth_diff
+line: 691
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x503000001810  FUNCTION        0x5030000017e0  0x5030000017b0  pow
+1     0x5030000017e0  VARIABLE        (nil)           (nil)           x
+2     0x5030000017b0  CONSTANT        (nil)           (nil)           4.000000
+
+SVG: dumps/tree_dump_020.svg
+</pre>
+<img src="dumps/tree_dump_020.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #21 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-01 18:27:38</span>
+<span style="color:#ff4d4f;font-weight:700;">Derivative #1</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr : 0x508000000ba0
+root ptr : 0x503000001b10
+size     : 14
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_calculate_tree_nth_diff
+line: 716
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x503000001b10  FUNCTION        0x503000001ae0  0x503000001a50  *
+1     0x503000001ae0  FUNCTION        0x503000001ab0  0x503000001a80  pow
+2     0x503000001ab0  VARIABLE        (nil)           (nil)           x
+3     0x503000001a80  CONSTANT        (nil)           (nil)           4.000000
+4     0x503000001a50  FUNCTION        0x503000001a20  0x503000001960  +
+5     0x503000001a20  FUNCTION        0x5030000019f0  0x5030000019c0  *
+6     0x5030000019f0  CONSTANT        (nil)           (nil)           0.000000
+7     0x5030000019c0  FUNCTION        0x503000001990  (nil)           ln
+8     0x503000001990  VARIABLE        (nil)           (nil)           x
+9     0x503000001960  FUNCTION        0x503000001930  0x503000001900  *
+10    0x503000001930  CONSTANT        (nil)           (nil)           4.000000
+11    0x503000001900  FUNCTION        0x5030000018d0  0x5030000018a0  /
+12    0x5030000018d0  CONSTANT        (nil)           (nil)           1.000000
+13    0x5030000018a0  VARIABLE        (nil)           (nil)           x
+
+SVG: dumps/tree_dump_021.svg
+</pre>
+<img src="dumps/tree_dump_021.svg" style="max-width:2250px;"/>
+
+<hr>

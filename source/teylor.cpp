@@ -20,7 +20,7 @@ static unsigned long long calc_fact(int n) {
     }
     return ans;
 }
-
+/*
 static tree_t* add_diff(forest_t* forest, tree_t* target_tree, error_code* error) {
     HARD_ASSERT(forest      != nullptr, "forest is nullptr");
     HARD_ASSERT(target_tree != nullptr, "target_tree is nullptr");
@@ -65,8 +65,8 @@ static tree_t* teylor_add_summand(tree_t* teylor_tree, tree_node_t* summand) {
     tree_change_root(teylor_tree, new_root);
     return teylor_tree;
 }
-
-tree_t* make_teylor(forest_t* forest, tree_t* root_tree) {
+/*
+tree_t* make_teylor(forest_t* forest, tree_t* root_tree, ) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
 
     LOGGER_DEBUG("make_teylor: started");
@@ -83,7 +83,7 @@ tree_t* make_teylor(forest_t* forest, tree_t* root_tree) {
         LOGGER_DEBUG("make_teylor: making %d diff", i);
         const_val_type res = add_and_calculate_diff(forest, root_tree, &root_tree, &error);
 
-        tree_node_t* summand = MUL_(DIV_(c(res), c(calc_fact(i))), POW_()
+        tree_node_t* summand = MUL_(DIV_(c(res), c(calc_fact(i))), POW_(SUB_(v()))
         teylor_add_summand(teylor_tree, )
     }
-}
+}*/

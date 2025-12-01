@@ -6,5 +6,5 @@
 #define CONSTANT_init(val) \
     init_node(CONSTANT, make_union_const(val), nullptr, nullptr);
 
-tree_node_t* get_g(tree_t* tree, char** str);
+tree_node_t* get_g(tree_t* tree, const char** str);
 #endif

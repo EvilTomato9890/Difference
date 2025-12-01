@@ -80,7 +80,6 @@ error_code forest_dest(forest_t* forest) {
     free(forest->var_stack);
     forest->var_stack = nullptr;
 
-    free(forest->buff.ptr);
     forest->buff.ptr = nullptr;
     forest->buff.len = 0;
 
@@ -263,29 +262,3 @@ error_code forest_close_tex_file(forest_t* forest) {
     return ERROR_NO;
 }
 )
-// TODO: функция не должна принимать forest, а скорее string_t  
-error_code forest_read_file(forest_t* forest, const char* filename) {
-    HARD_ASSERT(forest   != nullptr, "Forest is nullptr");
-    HARD_ASSERT(filename != nullptr, "Filename is nullptr");
-
-    FILE* read_file = fopen(filename, "r");
-    if(!read_file) {
-        LOGGER_ERROR("forest_read_file: Opening file failed");
-        errno = 0;
-        return ERROR_OPEN_FILE;
-    }
-
-    error_code error = read_file_to_buffer(read_file, &forest->buff);
-    if(error != ERROR_NO) { //FIXME - закрытие и очитска буфера
-        LOGGER_ERROR("forest_read_file: read_file_to_buffer failed");
-        return error;
-    }
-
-    int err = fclose(read_file);
-    if(err != 0) {
-        LOGGER_ERROR("forest_read_File: failed to close file");
-        return ERROR_CLOSE_FILE;
-    }
-
-    return error;
-}
