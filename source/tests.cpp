@@ -21,6 +21,7 @@
 #include "debug_meta.h"
 #include "tex_io.h"
 #include "input_parser.h"
+#include "teylor.h"
 
 //================================================================================
 
@@ -158,7 +159,7 @@ static void test_DSL() {
 
     tree_node_t* new_root = ADD_(SIN_(c(1)), c(2));
     destroy_node_recursive(tree->root, nullptr);
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
 
     error = tree_dump(tree, VER_INIT, true, "FF");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
@@ -220,8 +221,8 @@ static void test_read_complex_tree() {
 
     LOGGER_DEBUG("Diff started");
 
-    tree_node_t* new_root = get_diff(test_tree->root, nullptr, 0);
-    tree_change_root(tree_diff, new_root);
+    tree_node_t* new_root = get_diff(test_tree->root, {nullptr, 0});
+    tree_replace_root(tree_diff, new_root);
 
     LOGGER_DEBUG("Diff ended");
 
@@ -269,14 +270,14 @@ static void test_diff_big_tree() {
     LOGGER_DEBUG("Diff started");
     
     size_t args_list[1] = {(size_t)get_var_idx({"x", 1}, forest.var_stack)}; 
-    tree_node_t* new_root = get_diff(tree->root, args_list, 1);
+    tree_node_t* new_root = get_diff(tree->root, {args_list, 1});
     HARD_ASSERT(new_root != nullptr, "Get diff failed");
     LOGGER_DEBUG("Diff ended");
 
     tree_t* diff_tree = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == 0 && diff_tree != nullptr, "Adding failed");
 
-    tree_change_root(diff_tree, new_root);
+    tree_replace_root(diff_tree, new_root);
     tree_dump(diff_tree, VER_INIT, true, "Differ tree");
     
     free(forest_buff.ptr);
@@ -532,7 +533,7 @@ static void test_dump_copied_tree() {
     
     tree_node_t* new_root = ADD_(SIN_(c(1)), c(2));
     HARD_ASSERT(new_root != nullptr, "New_root is nullptr");
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
 
     ON_DEBUG(
     forest_open_dump_file(&forest, "test_dump_copied_tree.html");
@@ -544,7 +545,7 @@ static void test_dump_copied_tree() {
     tree_node_t* copied_root = subtree_deep_copy(tree->root, &error ON_CREATION_DEBUG(, tree));
     HARD_ASSERT(copied_root != nullptr, "root is nullptr");
 
-    tree_change_root(tree, copied_root);
+    tree_replace_root(tree, copied_root);
 
     error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
@@ -575,7 +576,7 @@ static void test_calculate_tree_without_vars() {
         
     tree_node_t* new_root = ADD_(SIN_(c(0)), c(1));
     HARD_ASSERT(error == ERROR_NO, "creating root failed");
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
     
     error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
@@ -610,7 +611,7 @@ static void test_calculate_tree_with_vars() {
         
     tree_node_t* new_root = ADD_(COS_(c(0)), v("x"));
     HARD_ASSERT(error == ERROR_NO, "creating root failed");
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
     
     error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
@@ -646,14 +647,14 @@ static void test_calculate_tree_diff() {
     tree_node_t* new_root = ADD_(MUL_(POW_(v("x"), c(2)), LN_(v("x"))),
                                  EXP_(v("y")));
     HARD_ASSERT(error == ERROR_NO, "creating root failed");
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
     
     error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
     tree_t* tree_diff = forest_add_tree(&forest, &error);
-    new_root = get_diff(tree->root, nullptr, 0);
-    tree_change_root(tree_diff, new_root);
+    new_root = get_diff(tree->root, {nullptr, 0});
+    tree_replace_root(tree_diff, new_root);
 
     var_val_type answer = calculate_tree(tree_diff);
     LOGGER_INFO("ANSWER: %lf", answer);
@@ -686,7 +687,7 @@ static void test_calculate_tree_nth_diff() {
 
     tree_node_t* new_root = POW_(v("x"), c(4));
     HARD_ASSERT(new_root != nullptr, "creating root failed");
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
 
     error = tree_dump(tree, VER_INIT, true, "Base tree f(x) = x^4");
     HARD_ASSERT(error == ERROR_NO, "tree_dump base failed");
@@ -706,9 +707,9 @@ static void test_calculate_tree_nth_diff() {
         tree_t* diff_tree = forest_add_tree(&forest, &error);
         HARD_ASSERT(error == ERROR_NO, "add_tree (diff) failed");
 
-        tree_node_t* diff_root = get_diff(curr_tree->root, nullptr, 0);
+        tree_node_t* diff_root = get_diff(curr_tree->root, {nullptr, 0});
         HARD_ASSERT(diff_root != nullptr, "get_diff returned nullptr");
-        tree_change_root(diff_tree, diff_root);
+        tree_replace_root(diff_tree, diff_root);
 
         ON_DEBUG(
         char reason[64] = {};
@@ -756,7 +757,7 @@ static void test_tree_optimize() {
                       LOG_(v("x"), c(1)))                            
         ));
     HARD_ASSERT(error == ERROR_NO, "creating root failed");
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
 
     error = tree_dump(tree, VER_INIT, true, "Before tree_optimize");
     HARD_ASSERT(error == ERROR_NO, "tree_dump before optimize failed");
@@ -798,7 +799,7 @@ static void test_tree_tex_print() {
     tree_node_t* new_root = ADD_(POW_(DIV_(ADD_(MUL_(POW_(v("x"), c(2)), LN_(v("x"))), EXP_(v("y"))), ADD_(SIN_(v("x")), COS_(v("y")))), c(3)), LN_(DIV_(ADD_(POW_(v("x"), c(2)), POW_(v("y"), c(2))), ADD_(c(1), MUL_(v("x"), v("y"))))));
 
     HARD_ASSERT(error == ERROR_NO, "creating root failed");
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
 
     error |= tree_print_tex_expr(tree, tree->root, "f(x, y) = ");
     HARD_ASSERT(error == ERROR_NO, "tree_dump before optimize failed");
@@ -833,7 +834,7 @@ static void test_tree_input() {
     HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
     )
     tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
     error = tree_dump(tree, VER_INIT, true, "Test dump input tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
@@ -871,14 +872,14 @@ static void test_tree_hard_tex() {
     )
     
     tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
-    tree_change_root(tree, new_root);
+    tree_replace_root(tree, new_root);
     error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree"); //TODO
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
     error = tree_print_tex_expr(tree, tree->root, "f(x) = ");
 
 
-    tree_node_t* new_root_2 = get_diff(tree->root, nullptr, 0);
-    tree_change_root(tree, new_root_2);
+    tree_node_t* new_root_2 = get_diff(tree->root, {nullptr, 0});
+    tree_replace_root(tree, new_root_2);
     error = tree_dump(tree, VER_INIT, true, "Diff tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
     error = tree_print_tex_expr(tree, tree->root, "f(x)|dx = ");
@@ -899,6 +900,56 @@ static void test_tree_hard_tex() {
     free(forest_buff.ptr);
     forest_dest(&forest);
     LOGGER_INFO("Тест пройден: множественный тех \n");
+}
+
+static void test_teylor() {
+    LOGGER_INFO("=== Тест: тейлор ===");
+
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    string_t forest_buff = {};
+    error |= read_file_to_buffer_by_name(&forest_buff,  "teylor.tree");
+    HARD_ASSERT(error == ERROR_NO, "read tree failed");
+    forest.buff = {.ptr = forest_buff.ptr, .len = forest_buff.len};
+    
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "tree_teylor.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    forest_open_tex_file(&forest, "teylor.tex");
+    HARD_ASSERT(forest.tex_file != nullptr, "failed to create tex file");
+    )
+    
+    tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
+    tree_replace_root(tree, new_root);
+    error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree"); //TODO
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    error = tree_print_tex_expr(tree, tree->root, "f(x) = ");
+
+    ssize_t temp = get_var_idx({"x", 1}, tree->var_stack);
+    HARD_ASSERT(temp != -1, "Failed to find x");
+    size_t x_idx = (size_t)x_idx;
+    tree_t* tree_teylor = make_teylor(&forest, tree, {&x_idx, 1}, 1);
+    HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
+    error = tree_print_tex_expr(tree_teylor, tree_teylor->root, "teylor f(x)|dx = ");
+
+    error = tree_dump(tree_teylor, VER_INIT, true, "teylor tree");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    forest_close_tex_file(&forest);
+    )
+    
+    free(forest_buff.ptr);
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: тейлор \n");
 }
 
 //================================================================================
@@ -931,6 +982,7 @@ int run_tests() {
     test_tree_tex_print();
     test_tree_input();
     test_tree_hard_tex();
+    test_teylor();
 
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");

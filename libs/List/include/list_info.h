@@ -11,7 +11,7 @@
 typedef tree_t* list_type;
 
 
-static const size_t    MIN_LIST_SIZE    = 10;
+static const size_t    MIN_LIST_SIZE    = 30;
 static list_type const POISON_VAL       = (list_type)1111;
 static const int       POISON_IDX       = -100;
 static const float     REDUCTION_FACTOR = 4.0f;

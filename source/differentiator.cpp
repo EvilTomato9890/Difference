@@ -15,25 +15,25 @@ static const double CMP_PRECISION = 1e-9;
 
 //================================================================================
 // TODO - diff on 1 arg Correct?
-static bool check_in(size_t target, size_t* target_arr, size_t arr_size) {
-    if(target_arr == nullptr || arr_size == 0) return false;
+static bool check_in(size_t target, args_arr_t args_arr) {
+    if(args_arr.arr == nullptr || args_arr.size == 0) return false;
     
-    for(size_t i = 0; i < arr_size; i++) 
-        if(target == target_arr[i]) return true;
+    for(size_t i = 0; i < args_arr.size; i++) 
+        if(target == args_arr.arr[i]) return true;
     return false;
 }
 
-tree_node_t* get_diff(tree_node_t* node, size_t* args_list, size_t args_size) {
-    HARD_ASSERT(args_size == 0 || args_list != nullptr, "Wrong arg list");
+tree_node_t* get_diff(tree_node_t* node, args_arr_t args_arr) {
+    HARD_ASSERT(args_arr.size == 0 || args_arr.arr != nullptr, "Wrong arg list");
     if(!node) return nullptr;
 
     if (node->type == CONSTANT) {
         return c(0);
     }
     if(node->type == VARIABLE) {
-        if(args_size == 0) 
+        if(args_arr.size == 0) 
             return c(1);
-        if(check_in(node->value.var_idx, args_list, args_size)) 
+        if(check_in(node->value.var_idx, args_arr)) 
             return c(1);
         return c(0);
     }

@@ -307,17 +307,19 @@ void print_tex_header(FILE* tex) {
     fprintf(tex,
             "\\documentclass[a4paper,12pt]{article}\n"
             "\\usepackage{amsmath}\n"
+            "\\usepackage{amssymb}\n"
             "\\usepackage{autobreak}\n"
             "\\allowdisplaybreaks\n"
             "\n"
-            "\\newenvironment{shrinkeq}"
-            "{\\begin{lrbox}{\\eqbox}$\\displaystyle}"
-            "{$\\end{lrbox}%"
-            "\\ifdim\\wd\eqbox>\\linewidth"
-            "    \\resizebox{\\linewidth}{!}{\\usebox{\\eqbox}}%"
-            "\\else"
-            "    \\usebox{\\eqbox}%"
-            "\\fi}"
+            "\\newsavebox{\\eqbox}\n"
+            "\\newenvironment{shrinkeq}\n"
+            "{\\begin{lrbox}{\\eqbox}$\\displaystyle}\n"
+            "{$\\end{lrbox}%\n"
+            "\\ifdim\\wd\\eqbox>\\linewidth\n"
+            "    \\resizebox{\\linewidth}{!}{\\usebox{\\eqbox}}%\n"
+            "\\else\n"
+            "    \\usebox{\\eqbox}%\n"
+            "\\fi}\n"
 
             "\\begin{document}\n");
     fflush(tex);
@@ -349,7 +351,7 @@ error_code tree_print_tex_expr(const tree_t* tree,
 
         FILE* tex = *tree->tex_file;
 
-        if (fprintf(tex, "\\begin{shrinkeq}\n\\begin{align*}\n") < 0) {
+        if (fprintf(tex, "\\begin{shrinkeq}\n\\begin{aligned}\n") < 0) {
             LOGGER_ERROR("tree_print_tex_expr: fprintf begin align* failed");
             error |= ERROR_OPEN_FILE;
         }
@@ -363,7 +365,7 @@ error_code tree_print_tex_expr(const tree_t* tree,
 
         print_node_tex(tex, tree, node);
 
-        if (fprintf(tex, "\n\\end{shrinkeq}\n\\end{align*}\n\n") < 0) {
+        if (fprintf(tex, "\n\\end{aligned}\n\\end{shrinkeq}\n\n") < 0) {
             LOGGER_ERROR("tree_print_tex_expr: fprintf end align* failed");
             error |= ERROR_OPEN_FILE;
         }

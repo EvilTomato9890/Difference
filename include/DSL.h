@@ -3,7 +3,7 @@
 
 #include "debug_meta.h"
 
-#define d(node) get_diff(node, args_list, args_size)
+#define d(node) get_diff(node, args_arr)
 
 #define cpy(node) subtree_deep_copy(node, nullptr ON_CREATION_DEBUG(, tree))
 

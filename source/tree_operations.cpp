@@ -196,15 +196,39 @@ tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value) 
     return node;
 }
 
-tree_node_t* tree_change_root(tree_t* tree, tree_node_t* node) {
+error_code tree_change_root(tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(tree != nullptr, "Tree is nullptr");
     if(!node) LOGGER_WARNING("New root is nullptr");
 
-    destroy_node_recursive(tree->root, nullptr);
+    error_code error = ERROR_NO;
+
     tree->root = node;
     tree->size = count_nodes_recursive(node);
 
-    return node;
+    return error;
+}
+
+error_code tree_replace_root(tree_t* tree, tree_node_t* source_node) {
+    HARD_ASSERT(tree        != nullptr, "Tree is nullptr");
+    HARD_ASSERT(source_node != nullptr, "Source_node is nullptr");
+
+    return tree_replace_subtree(&tree->root, source_node, &tree->size);
+}
+
+error_code tree_replace_subtree(tree_node_t** target_node, tree_node_t* source_node, size_t* new_subtree_size) {
+    HARD_ASSERT(target_node      != nullptr, "Node_ptr is nullptr");
+    HARD_ASSERT(new_subtree_size != nullptr, "New_subtree_size is nullptr");
+
+    LOGGER_DEBUG("Tree_replace_subtree: started");
+    error_code error = ERROR_NO;
+
+    size_t removed_elems_cnt = 0;
+    error |= destroy_node_recursive(*target_node, &removed_elems_cnt);
+    *target_node = source_node;
+
+    size_t added_elems_cnt = count_nodes_recursive(*target_node);
+    *new_subtree_size = added_elems_cnt - removed_elems_cnt;
+    return error;
 }
 
 tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent) {

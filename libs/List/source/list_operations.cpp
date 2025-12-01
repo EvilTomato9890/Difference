@@ -46,8 +46,8 @@ static error_code list_recalloc(list_t* list, size_t new_capacity) {
 
     size_t alloc_count = new_capacity ON_DEBUG(+ 1);
     size_t new_bytes   = alloc_count * sizeof(node_t);
+    
     LOGGER_DEBUG("Reallocating %lu bytes for list", new_bytes);
-
     node_t* new_block = (node_t*)(realloc(list->arr, new_bytes));
     if (new_block == nullptr) {
         LOGGER_ERROR("Realloc failed");

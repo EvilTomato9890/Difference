@@ -7,6 +7,8 @@
 #include "tree_info.h"
 #include "tree_operations.h"
 #include "DSL.h"
+#include "teylor.h"
+#include "tree_verification.h"
 
 #include <math.h>
 
@@ -20,8 +22,8 @@ static unsigned long long calc_fact(int n) {
     }
     return ans;
 }
-/*
-static tree_t* add_diff(forest_t* forest, tree_t* target_tree, error_code* error) {
+
+static tree_t* add_diff(forest_t* forest, tree_t* target_tree, args_arr_t args_arr, error_code* error) {
     HARD_ASSERT(forest      != nullptr, "forest is nullptr");
     HARD_ASSERT(target_tree != nullptr, "target_tree is nullptr");
     HARD_ASSERT(error       != nullptr, "error is nullptr");
@@ -31,7 +33,7 @@ static tree_t* add_diff(forest_t* forest, tree_t* target_tree, error_code* error
         LOGGER_ERROR("add_diff: failed add tree");
         return nullptr;
     }
-    tree_node_t* diff_root = get_diff(target_tree->root);
+    tree_node_t* diff_root = get_diff(target_tree->root, args_arr);
     if(diff_root == nullptr) {
         *error |= ERROR_GET_DIFF;
         LOGGER_ERROR("add_diff: failed to take diff");
@@ -42,12 +44,14 @@ static tree_t* add_diff(forest_t* forest, tree_t* target_tree, error_code* error
     return diff_tree;
 }
 
-static const_val_type add_and_calculate_diff(forest_t* forest, tree_t* target_tree, tree_t** diff_out_tree, error_code* error) {
+
+static const_val_type add_and_calculate_diff(forest_t* forest,    tree_t* target_tree, tree_t** diff_out_tree,
+                                             args_arr_t args_arr, error_code* error) {
     HARD_ASSERT(forest      != nullptr, "Forest is nullptr");
     HARD_ASSERT(target_tree != nullptr, "Target_tree is nullptr");
     HARD_ASSERT(error       != nullptr, "error si nullptr");
 
-    *diff_out_tree = add_diff(forest, target_tree, error);
+    *diff_out_tree = add_diff(forest, target_tree, args_arr, error);
     if(*error != ERROR_NO) {
         LOGGER_ERROR("make_teylor: failed make diff");
         return NAN;
@@ -57,6 +61,7 @@ static const_val_type add_and_calculate_diff(forest_t* forest, tree_t* target_tr
     return result;
 }
 
+
 static tree_t* teylor_add_summand(tree_t* teylor_tree, tree_node_t* summand) {
     HARD_ASSERT(teylor_tree != nullptr, "forest is nullptr");
     HARD_ASSERT(summand     != nullptr, "Summand is nullptr");
@@ -65,11 +70,17 @@ static tree_t* teylor_add_summand(tree_t* teylor_tree, tree_node_t* summand) {
     tree_change_root(teylor_tree, new_root);
     return teylor_tree;
 }
-/*
-tree_t* make_teylor(forest_t* forest, tree_t* root_tree, ) {
-    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+
+
+tree_t* make_teylor(forest_t* forest, tree_t* root_tree, args_arr_t args_arr, const_val_type x0) {
+    HARD_ASSERT(forest    != nullptr, "forest is nullptr");
+    HARD_ASSERT(root_tree != nullptr, "tree is nullptr");
 
     LOGGER_DEBUG("make_teylor: started");
+    if(args_arr.arr == nullptr || args_arr.size != 1) {
+        LOGGER_ERROR("Wrong diff args");
+        return nullptr;
+    }
 
     error_code error = ERROR_NO;
     
@@ -79,11 +90,20 @@ tree_t* make_teylor(forest_t* forest, tree_t* root_tree, ) {
         return nullptr;
     }
 
-    for(int i = 0; i < TEYLOR_DEPTH; i++) {
-        LOGGER_DEBUG("make_teylor: making %d diff", i);
-        const_val_type res = add_and_calculate_diff(forest, root_tree, &root_tree, &error);
+    const_val_type first_val = calculate_tree(root_tree);
 
-        tree_node_t* summand = MUL_(DIV_(c(res), c(calc_fact(i))), POW_(SUB_(v()))
-        teylor_add_summand(teylor_tree, )
+    tree_init_root(teylor_tree, CONSTANT, make_union_const(first_val));
+
+    for(int i = 1; i < TEYLOR_DEPTH; i++) {
+        LOGGER_DEBUG("make_teylor: making %d diff", i);
+        const_val_type res = add_and_calculate_diff(forest, root_tree, &root_tree, args_arr, &error);
+
+        tree_node_t* target_var = init_node(VARIABLE, make_union_var(args_arr.arr[0]), nullptr, nullptr);
+
+        tree_node_t* summand = MUL_(DIV_(c(res), c((double)calc_fact(i))),
+                                    POW_(SUB_(target_var, c(x0)),
+                                         c(i)));
+        teylor_add_summand(teylor_tree, summand);
     }
-}*/
+    return teylor_tree;
+}

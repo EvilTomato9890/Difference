@@ -17,12 +17,14 @@ error_code tree_destroy(tree_t* tree);
 bool tree_is_empty(const tree_t* tree);
 size_t count_nodes_recursive(const tree_node_t* node);
 
-tree_node_t* tree_change_root(tree_t* tree, tree_node_t* node); 
+error_code   tree_change_root(tree_t* tree, tree_node_t* node);
 tree_node_t* tree_init_root(tree_t* tree, node_type_t node_type, value_t value);
 tree_node_t* tree_insert_left(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent);
 tree_node_t* tree_insert_right(tree_t* tree, node_type_t node_type, value_t value, tree_node_t* parent);
 
 error_code tree_replace_value(tree_node_t* node, node_type_t node_type, value_t value);
+error_code tree_replace_subtree(tree_node_t** target_node, tree_node_t* source_node, size_t* new_subtree_size);
+error_code tree_replace_root(tree_t* tree, tree_node_t* source_node);
 
 error_code destroy_node_recursive(tree_node_t* node, size_t* removed_out);
 
