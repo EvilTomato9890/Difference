@@ -228,7 +228,11 @@ error_code list_verify(list_t* list,
         error_description = "free_head out of bounds";
         error |= ERROR_INVALID_STRUCTURE;
     }
-
+    if(list->canary_start != CANARY_STRUCT || list->canary_end != CANARY_STRUCT) {
+        LOGGER_WARNING("corrupted struct canaryies");
+        error_description = "Corrupted struct canaries";
+        error |= ERROR_INVALID_STRUCTURE;
+    }
     if (list->arr && capacity > 0) {
         if (list->arr[0].val != CANARY_NUM) {
             LOGGER_ERROR("Left canary corrupted: expected %p, got %p", CANARY_NUM, list->arr[0].val);
@@ -289,6 +293,7 @@ void list_dump(list_t* list,
                 svg_path[0] ? svg_path : "");
 
     dump_idx++;
+    fflush(list->dump_file);
 }
 
 

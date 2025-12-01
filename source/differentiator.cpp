@@ -117,50 +117,18 @@ tree_node_t* get_diff(tree_node_t* node, args_arr_t args_arr) {
 
 //================================================================================
 
-#define BASIC_FUNC_TEMPLATE_ONE_ARG(name, function)                      \
-    static var_val_type name##_func(var_val_type a, var_val_type b) {    \
+#define HANDLE_FUNC(op_code, str_name, impl_func, arg_cnt, ...) \
+    static var_val_type op_code##_func(var_val_type a, var_val_type b) {    \
         HARD_ASSERT(!isnan(a), "a is nan");                              \
-        (void)b;                                                         \
-        return function;                                                 \
+        if(arg_cnt == 2) HARD_ASSERT(!isnan(b), "b is nan");                              \
+        return impl_func;                                                 \
     }
-
-#define BASIC_FUNC_TEMPLATE_TWO_ARGS(name, function)                     \
-    static var_val_type name##_func(var_val_type a, var_val_type b) {    \
-        HARD_ASSERT(!isnan(a), "a is nan");                              \
-        HARD_ASSERT(!isnan(b), "b is nan");                              \
-        return function;                                                 \
-    }
-
 // Add -> eval, differentiate, 
 //TODO: вынести в отдельный файл и добавить функции вычисления произодных подобными шаблонами в отдельном файле
-BASIC_FUNC_TEMPLATE_TWO_ARGS(ADD, a + b)
-BASIC_FUNC_TEMPLATE_TWO_ARGS(MUL, a * b)
-BASIC_FUNC_TEMPLATE_TWO_ARGS(SUB, a - b)
-BASIC_FUNC_TEMPLATE_TWO_ARGS(DIV, a / b)
 
-BASIC_FUNC_TEMPLATE_TWO_ARGS(POW, pow(a, b))
-BASIC_FUNC_TEMPLATE_TWO_ARGS(LOG, log(b) / log(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG (LN,  log(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG (EXP, exp(a))
+#include "copy_past_file"
 
-BASIC_FUNC_TEMPLATE_ONE_ARG(SIN, sin(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(COS, cos(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(TAN, tan(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(CTAN, 1.0 / tan(a))
-
-BASIC_FUNC_TEMPLATE_ONE_ARG(ARCSIN, asin(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(ARCCOS, acos(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(ARCTAN, atan(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(ARCCTAN, M_PI_2 - atan(a))
-
-BASIC_FUNC_TEMPLATE_ONE_ARG(CH, cosh(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(SH, sinh(a))
-
-BASIC_FUNC_TEMPLATE_ONE_ARG(ARCSH, asinh(a))
-BASIC_FUNC_TEMPLATE_ONE_ARG(ARCCH, acosh(a))
-
-#undef BASIC_FUNC_TEMPLATE_ONE_ARG
-#undef BASIC_FUNC_TEMPLATE_TWO_ARGS
+#undef HANDLE_FUNC
 
 //================================================================================
 
@@ -195,63 +163,19 @@ static var_val_type calculate_nodes_recursive(tree_t* tree, tree_node_t* curr_no
 
 //================================================================================
 
-static void clear_input_buff() {
-    int ch = 0;
-    while ((ch = getchar()) != '\n' && ch != EOF) {}
-}
-
-static var_val_type take_var(c_string_t var) {
-    HARD_ASSERT(var.ptr != nullptr, "String is nullptr");
-
-    var_val_type num = 0;
-
-    printf("Enter %.*s: ", (int)var.len, var.ptr);
-    int smb_cnt = scanf("%lf", &num);
-    if(smb_cnt == 0) {
-        clear_input_buff();
-        printf("Wrong type. Enter again: ");
-        smb_cnt = scanf("%lf", &num);
-        if(smb_cnt == 0) {
-            LOGGER_ERROR("Wrong type");
-            clear_input_buff();
-            return nan("1");
-        }
-    }
-    return num;
-
-}
-
-static error_code ask_for_vars(tree_t* tree) {
-    HARD_ASSERT(tree            != nullptr, "Tree is nullptr");
-    HARD_ASSERT(tree->var_stack != nullptr, "Stack is nullptr");
-
-    stack_t* var_stack = tree->var_stack;
-    for(size_t i = 0; i < var_stack->size; i++) {
-        if(var_stack->data[i].str.ptr != nullptr) {
-            var_val_type var_val = take_var(var_stack->data[i].str);
-            if(!isnan(var_val)) var_stack->data[i].val = var_val;
-            else {
-                LOGGER_ERROR("Failed to read var");
-                return ERROR_READ_FILE;
-            }
-        }   
-    }
-    return ERROR_NO;
-}
-
-//================================================================================
-
-var_val_type calculate_tree(tree_t* tree) {
+var_val_type calculate_tree(tree_t* tree, bool is_need_to_ask_vars) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     
     LOGGER_DEBUG("Calculate_tree: started");
 
     error_code error = ERROR_NO;
 
-    error |= ask_for_vars(tree);
-    if(error != ERROR_NO) {
-        LOGGER_ERROR("ask_for_vars failed");
-        return nan("1");
+    if(is_need_to_ask_vars) {
+        error |= ask_for_vars(tree);
+        if(error != ERROR_NO) {
+            LOGGER_ERROR("ask_for_vars failed");
+            return nan("1");
+        }
     }
 
     var_val_type ans = calculate_nodes_recursive(tree, tree->root, &error);
@@ -267,7 +191,7 @@ var_val_type calculate_tree(tree_t* tree) {
 
 static int double_cmp(double a, double b) {
     if(fabs(a - b) < CMP_PRECISION) return 0;
-    if(a - b      > CMP_PRECISION)  return 1;
+    if(a - b       > CMP_PRECISION)  return 1;
     return -1;
 }
 
@@ -555,9 +479,7 @@ static error_code simplify_neutral_and_constant_elements(tree_node_t* node) {
 
 //--------------------------------------------------------------------------------
 //TODO: 0^0
-static tree_node_t* optimize_subtree_recursive(tree_t* tree,
-                                               tree_node_t* node,
-                                               error_code* error_ptr) {
+tree_node_t* optimize_subtree_recursive(tree_node_t* node, error_code* error_ptr) {
     HARD_ASSERT(error_ptr != nullptr, "optimize_subtree_recursive: error_ptr is nullptr");
 
     if (node == nullptr) {
@@ -569,8 +491,8 @@ static tree_node_t* optimize_subtree_recursive(tree_t* tree,
     }
 
     if (node->type == FUNCTION) {
-        node->left  = optimize_subtree_recursive(tree, node->left,  error_ptr); //TODO: delete tree
-        node->right = optimize_subtree_recursive(tree, node->right, error_ptr);
+        node->left  = optimize_subtree_recursive(node->left,  error_ptr);
+        node->right = optimize_subtree_recursive(node->right, error_ptr);
 
         *error_ptr |= fold_constants_in_node(node);
         *error_ptr |= simplify_neutral_and_constant_elements(node);
@@ -590,7 +512,7 @@ error_code tree_optimize(tree_t* tree) {
     }
 
     error_code error_value = ERROR_NO;
-    tree->root = optimize_subtree_recursive(tree, tree->root, &error_value);
+    tree->root = optimize_subtree_recursive(tree->root, &error_value);
 
     if (error_value != ERROR_NO) {
         LOGGER_ERROR("tree_optimize: optimize_subtree_recursive failed");

@@ -296,9 +296,14 @@ static error_code write_html(const tree_t* tree,
     fprintf(html,
         "<span style=\"color:%s;font-weight:700;\">===================================================</span>\n",
         HTML_BORDER);
-    fprintf(html, "tree ptr : %p\n", tree);
-    fprintf(html, "root ptr : %p\n", tree->root);
-    fprintf(html, "size     : %zu\n", tree->size);
+    fprintf(html, "tree ptr  : %p\n", tree);
+    fprintf(html, "root ptr  : %p\n", tree->root);
+    fprintf(html, "size      : %zu\n", tree->size);
+    fprintf(html, "stack ptr : %p\n", tree->var_stack);
+    fprintf(html, "buff.ptr  : %p\n", tree->buff.ptr);
+    fprintf(html, "buff.len  : %zu\n", tree->buff.len);
+    fprintf(html, "list idx  : %zu\n", tree->list_idx);
+    
 
     fprintf(html, "\n-- Created at (tree ver_info) --\n");
     fprintf(html, "file: %s\n", tree->ver_info.file);

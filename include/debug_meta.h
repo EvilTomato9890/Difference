@@ -32,6 +32,13 @@
 	#define ON_CANARY_DEBUG(...)
 #endif
 
+
+#ifdef LIST_CANARY_DEBUG
+	#define ON_LIST_CANARY_DEBUG(...) __VA_ARGS__
+#else
+	#define ON_LIST_CANARY_DEBUG(...)
+#endif
+
 struct ver_info_t {
     const char* file;
     const char* func;

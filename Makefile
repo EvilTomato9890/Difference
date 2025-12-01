@@ -2,7 +2,7 @@ CXX := g++
 
 STACK_DIR := libs/StackDead-main
 LIST_DIR := libs/List
-
+DUMP_DIR := dumps
 CXXFLAGS := -Iinclude -I$(STACK_DIR) -I$(LIST_DIR)/include \
             -fsanitize=address,undefined,leak \
             -fno-omit-frame-pointer \
@@ -19,7 +19,7 @@ CXXFLAGS := -Iinclude -I$(STACK_DIR) -I$(LIST_DIR)/include \
             -Wstack-usage=8192 -Wstrict-aliasing \
             -Wstrict-null-sentinel -Wtype-limits \
             -Wwrite-strings -Werror=vla \
-            -D_DEBUG -D_EJUDGE_CLIENT_SIDE -DVERIFY_DEBUG #-DCREATION_DEBUG
+            -D_DEBUG -D_EJUDGE_CLIENT_SIDE -DVERIFY_DEBUG -DLIST_CANARY_DEBUG #-DCREATION_DEBUG 
 
 LDFLAGS := -fsanitize=address,undefined,leak
 
@@ -60,4 +60,4 @@ clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
 	rm -rf *.html
 	rm -rf *.tex
-
+	rm -rf $(DUMP_DIR)

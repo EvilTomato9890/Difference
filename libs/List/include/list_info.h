@@ -11,13 +11,13 @@
 typedef tree_t* list_type;
 
 
-static const size_t    MIN_LIST_SIZE    = 30;
+static const size_t    MIN_LIST_SIZE    = 10;
 static list_type const POISON_VAL       = (list_type)1111;
 static const int       POISON_IDX       = -100;
 static const float     REDUCTION_FACTOR = 4.0f;
 static const float     GROWTH_FACTOR    = 2.0f;
-static list_type const CANARY_NUM       = (list_type)0xEBA1DEDA;
-
+static const list_type CANARY_NUM       = (list_type)0xEBA1DEDA;
+static const uint64_t  CANARY_STRUCT    = (uint64_t)0xEBA1DEDAEBA1DEDA;
 
 
 struct node_t {
@@ -27,6 +27,10 @@ struct node_t {
 };
 
 struct list_t {
+    ON_LIST_CANARY_DEBUG(
+    uint64_t canary_start = CANARY_STRUCT;
+    )
+
     node_t* arr;
     size_t  capacity;
     size_t  size;
@@ -37,6 +41,10 @@ struct list_t {
     ON_DEBUG(
         ver_info_t ver_info;
         FILE* dump_file;
+    )
+
+    ON_LIST_CANARY_DEBUG(
+    uint64_t canary_end = CANARY_STRUCT;
     )
 };
 

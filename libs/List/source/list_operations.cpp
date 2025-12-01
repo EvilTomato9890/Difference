@@ -33,7 +33,8 @@ static void init_free_list(list_t* list, size_t start_index, size_t end_index) {
 static error_code list_recalloc(list_t* list, size_t new_capacity) {
     HARD_ASSERT(list      != nullptr, "list is nullptr");
     HARD_ASSERT(list->arr != nullptr, "arr is nullptr");
-
+    HARD_ASSERT(new_capacity > list->capacity, "New capacity is smaller than now");
+    
     error_code error = 0;
     ON_DEBUG(
         error |= list_verify(list, VER_INIT, DUMP_IMG, "Before recalloc to %lu", new_capacity);
@@ -53,14 +54,14 @@ static error_code list_recalloc(list_t* list, size_t new_capacity) {
         LOGGER_ERROR("Realloc failed");
         return ERROR_MEM_ALLOC;
     }
+
     list->arr = new_block;
     new_block[0].val = CANARY_NUM;
     ON_DEBUG(
         new_block[new_capacity].val = CANARY_NUM;
     )
-
     size_t old_capacity = list->capacity;
-    if (list->free_head == -1) {
+    if (list->free_head == POISON_IDX) {
         list->free_head = old_capacity;
         init_free_list(list, old_capacity, new_capacity);
     } else {
@@ -68,13 +69,14 @@ static error_code list_recalloc(list_t* list, size_t new_capacity) {
         while (last_free != -1 && list->arr[last_free].next != -1) {
             last_free = list->arr[last_free].next;
         }
+
         if (last_free != -1) {
             list->arr[last_free].next = old_capacity;
         }
         init_free_list(list, old_capacity, new_capacity);
     }
-    list->capacity = new_capacity;
 
+    list->capacity = new_capacity;
     ON_DEBUG(
         error |= list_verify(list, VER_INIT, DUMP_IMG, "After recalloc to %lu", new_capacity);
     )

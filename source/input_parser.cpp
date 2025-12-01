@@ -62,8 +62,8 @@ static bool get_func_info_by_name(c_string_t name, func_type_t* func_out, size_t
         return false;
     }
 
-    #define HANDLE_FUNC(op_code, cmd_name, arg_cnt, ...)   \
-        if (my_scstrcmp(name, #cmd_name) == 0) {           \
+    #define HANDLE_FUNC(op_code, str_name, impl_func, arg_cnt, ...)   \
+        if (my_scstrcmp(name, #str_name) == 0) {           \
             *func_out = op_code;                           \
             *argc_out = (size_t)(arg_cnt);                 \
             return true;                                   \

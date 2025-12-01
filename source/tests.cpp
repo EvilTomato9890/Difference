@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <math.h>
 
 #include "asserts.h"
 #include "tree_operations.h"
@@ -14,7 +15,8 @@
 #include "DSL.h"
 #include "differentiator.h"
 #include "tree_file_io.h"
-#include "../libs/StackDead-main/stack.h"
+#include "stack.h"
+#include "list_verification.h"
 #include "forest_info.h"
 #include "forest_operations.h"
 #include "file_operations.h"
@@ -23,7 +25,14 @@
 #include "input_parser.h"
 #include "teylor.h"
 
+static double CMP_PRECISION = 1e-9;
+
 //================================================================================
+static int double_cmp(double a, double b) {
+    if(fabs(a - b) < CMP_PRECISION) return 0;
+    if(a - b       > CMP_PRECISION)  return 1;
+    return -1;
+}
 
 static void test_read_empty_tree() {
     LOGGER_INFO("=== Тест: чтение пустого дерева ===");
@@ -88,7 +97,7 @@ static void test_read_single_constant() {
     HARD_ASSERT(error == ERROR_NO, "tree_parse_from_buffer failed");
     HARD_ASSERT(test_tree->root != nullptr, "root should not be nullptr for single constant tree");
     HARD_ASSERT(test_tree->root->type == CONSTANT, "type should be CONSTANT");
-    HARD_ASSERT(test_tree->root->value.constant == 42, "value should be 42");
+    HARD_ASSERT(double_cmp(test_tree->root->value.constant, 42) == 0, "value should be 42");
     HARD_ASSERT(test_tree->size == 1, "size should be 1 for single constant tree");
 
     error = tree_write_to_file(test_tree, "single_tree_test1.tree");
@@ -209,7 +218,7 @@ static void test_read_complex_tree() {
     HARD_ASSERT(test_tree->root->left != nullptr, "left child should not be nullptr");
     HARD_ASSERT(test_tree->root->right != nullptr, "right child should not be nullptr");
     HARD_ASSERT(test_tree->root->left->type == CONSTANT, "left child should be CONSTANT");
-    HARD_ASSERT(test_tree->root->left->value.constant == 10, "left child value should be 10");
+    HARD_ASSERT(double_cmp(test_tree->root->left->value.constant, 10) == 0, "left child value should be 10");
     HARD_ASSERT(test_tree->root->right->type == VARIABLE, "right child should be VARIABLE");
     HARD_ASSERT(test_tree->size == 3, "size should be 3");
 
@@ -377,7 +386,7 @@ static void test_write_constant_tree() {
     HARD_ASSERT(error == ERROR_NO, "tree_parse_from_buffer failed");
     HARD_ASSERT(read_tree->root != nullptr, "root should not be nullptr");
     HARD_ASSERT(read_tree->root->type == CONSTANT, "type should be CONSTANT");
-    HARD_ASSERT(read_tree->root->value.constant == 100, "value should be 100");
+    HARD_ASSERT(double_cmp(read_tree->root->value.constant, 100) == 0, "value should be 100");
         
     free(forest_buff.ptr);
     forest_dest(&forest);
@@ -581,7 +590,7 @@ static void test_calculate_tree_without_vars() {
     error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    var_val_type answer = calculate_tree(tree);
+    var_val_type answer = calculate_tree(tree, true);
     LOGGER_INFO("ANSWER: %lf", answer);
 
     ON_DEBUG(
@@ -616,7 +625,10 @@ static void test_calculate_tree_with_vars() {
     error = tree_dump(tree, VER_INIT, true, "Test dump tree with nodes");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    var_val_type answer = calculate_tree(tree);
+    LOGGER_INFO("%.*s is %lf", 
+                 forest.var_stack->data[0].str.len, forest.var_stack->data[0].str.ptr, forest.var_stack->data[0].val);
+
+    var_val_type answer = calculate_tree(tree, false);
     LOGGER_INFO("ANSWER: %lf", answer);
 
     ON_DEBUG(
@@ -656,7 +668,13 @@ static void test_calculate_tree_diff() {
     new_root = get_diff(tree->root, {nullptr, 0});
     tree_replace_root(tree_diff, new_root);
 
-    var_val_type answer = calculate_tree(tree_diff);
+    forest.var_stack->data[0].val = 1;
+    forest.var_stack->data[1].val = 2;
+    LOGGER_INFO("%.*s is %lf, %.*s is %lf", 
+                 forest.var_stack->data[0].str.len, forest.var_stack->data[0].str.ptr, forest.var_stack->data[0].val,
+                 forest.var_stack->data[1].str.len, forest.var_stack->data[1].str.ptr, forest.var_stack->data[1].val);
+
+    var_val_type answer = calculate_tree(tree_diff, false);
     LOGGER_INFO("ANSWER: %lf", answer);
 
     ON_DEBUG(
@@ -720,8 +738,11 @@ static void test_calculate_tree_nth_diff() {
 
         curr_tree = diff_tree;
     }
+    forest.var_stack->data[0].val = 1;
+    LOGGER_INFO("%.*s is %lf", 
+                 forest.var_stack->data[0].str.len, forest.var_stack->data[0].str.ptr, forest.var_stack->data[0].val);
 
-    var_val_type answer = calculate_tree(curr_tree);
+    var_val_type answer = calculate_tree(curr_tree, false);
     LOGGER_INFO("ANSWER f^(%zu)(x) = %lf", n, answer);
 
     ON_DEBUG(
@@ -768,7 +789,13 @@ static void test_tree_optimize() {
     error = tree_dump(tree, VER_INIT, true, "After tree_optimize");
     HARD_ASSERT(error == ERROR_NO, "tree_dump after optimize failed");
 
-    var_val_type answer = calculate_tree(tree);
+    forest.var_stack->data[0].val = 1;
+    forest.var_stack->data[1].val = 2;
+    LOGGER_INFO("%.*s is %lf, %.*s is %lf", 
+                 forest.var_stack->data[0].str.len, forest.var_stack->data[0].str.ptr, forest.var_stack->data[0].val,
+                 forest.var_stack->data[1].str.len, forest.var_stack->data[1].str.ptr, forest.var_stack->data[1].val);
+
+    var_val_type answer = calculate_tree(tree, false);
     LOGGER_INFO("ANSWER AFTER OPTIMIZE: %lf", answer);
 
     ON_DEBUG(
@@ -915,27 +942,32 @@ static void test_teylor() {
     error |= read_file_to_buffer_by_name(&forest_buff,  "teylor.tree");
     HARD_ASSERT(error == ERROR_NO, "read tree failed");
     forest.buff = {.ptr = forest_buff.ptr, .len = forest_buff.len};
-    
     tree_t* tree = forest_add_tree(&forest, &error);
     HARD_ASSERT(error == ERROR_NO, "add_tree failed");
-
+    
     ON_DEBUG(
-    forest_open_dump_file(&forest, "tree_teylor.html");
+    forest_open_dump_file(&forest, "test_teylor.html");
     HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
     forest_open_tex_file(&forest, "teylor.tex");
     HARD_ASSERT(forest.tex_file != nullptr, "failed to create tex file");
     )
-    
+
     tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
     tree_replace_root(tree, new_root);
+
     error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree"); //TODO
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
     error = tree_print_tex_expr(tree, tree->root, "f(x) = ");
 
     ssize_t temp = get_var_idx({"x", 1}, tree->var_stack);
     HARD_ASSERT(temp != -1, "Failed to find x");
-    size_t x_idx = (size_t)x_idx;
-    tree_t* tree_teylor = make_teylor(&forest, tree, {&x_idx, 1}, 1);
+    size_t x_idx = (size_t)temp; //REVIEW Почему не генерируется warning на size_t x_idx = (size_t)x_idx 
+    
+    tree_dump(tree, VER_INIT, false, "AAAAAAAAAAA");
+    HARD_ASSERT(error == ERROR_NO, "ask for vars failed");
+
+    tree_t* tree_teylor = make_teylor(&forest, tree, x_idx, 1);
     HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
     error = tree_print_tex_expr(tree_teylor, tree_teylor->root, "teylor f(x)|dx = ");
 

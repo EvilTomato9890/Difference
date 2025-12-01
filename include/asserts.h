@@ -35,7 +35,7 @@
     #define HARD_ASSERT(test, message) \
         do {            \
             if(!(test)) { \
-                fprintf(stderr, RED_CONSOLE "%s\nERROR WAS OCCURED IN %s IN %i LINE FROM %s BY %s\n" RESET_CONSOLE,  message,__FILE__, __LINE__, __PRETTY_FUNCTION__, stringify(test)); \
+                fprintf(stderr, RED_CONSOLE "%s\nERROR WAS OCCURED IN %s:%i LINE FROM %s BY %s\n" RESET_CONSOLE,  message,__FILE__, __LINE__, __PRETTY_FUNCTION__, stringify(test)); \
                 abort(); \
             }   \
         } while(0)

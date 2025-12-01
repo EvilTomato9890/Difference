@@ -14,5 +14,20 @@
         "system_error": "cpp",
         "typeinfo": "cpp",
         "cmath": "cpp"
+    },
+    "files.watcherExclude": {
+        "**/dumps/**": true,
+        "**/bin/**": true,
+        "**/build/**": true,
+        "**/.git/**": true,
+    },
+    "search.exclude": {
+        "**/dumps/**": true,
+        "**/bin/**": true,
+        "**/build/**": true,
+        "**/.git/**": true,
+        "**/*.tex": true,
+        "**/*.html": true,
+        "**/*.tree": true,
     }
 }

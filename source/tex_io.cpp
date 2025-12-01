@@ -56,8 +56,8 @@ struct tex_func_fmt {
     const char*  pattern;  
 };
 
-#define HANDLE_FUNC(op_code, symbol, num_args, pattern) \
-    { op_code, #symbol, pattern },
+#define HANDLE_FUNC(op_code, str_name, impl_name, num_args, pattern, ...) \
+    { op_code, #str_name, pattern },
 
 static tex_func_fmt tex_fmt_table[] = {
     #include "copy_past_file"

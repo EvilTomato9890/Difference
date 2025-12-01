@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <math.h>
 
 #include "debug_meta.h"
 #include "asserts.h"
@@ -308,4 +309,57 @@ var_val_type get_var_val(tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(node       != nullptr, "node is nullptr");
     HARD_ASSERT(node->type == VARIABLE, "Node is not variable");
     return tree->var_stack->data[node->value.var_idx].val;
+}
+
+var_val_type put_var_val(tree_t* tree, size_t var_idx, var_val_type value) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    tree->var_stack->data[var_idx].val = value;
+    return value;
+}
+
+//--------------------------------------------------------------------------------
+
+static void clear_input_buff() {
+    int ch = 0;
+    while ((ch = getchar()) != '\n' && ch != EOF) {}
+}
+
+static var_val_type take_var(c_string_t var) {
+    HARD_ASSERT(var.ptr != nullptr, "String is nullptr");
+
+    var_val_type num = 0;
+
+    printf("Enter %.*s: ", (int)var.len, var.ptr);
+    int smb_cnt = scanf("%lf", &num);
+    if(smb_cnt == 0) {
+        clear_input_buff();
+        printf("Wrong type. Enter again: ");
+        smb_cnt = scanf("%lf", &num);
+        if(smb_cnt == 0) {
+            LOGGER_ERROR("Wrong type");
+            clear_input_buff();
+            return nan("1");
+        }
+    }
+    return num;
+}
+
+error_code ask_for_vars(tree_t* tree) {
+    HARD_ASSERT(tree            != nullptr, "Tree is nullptr");
+    HARD_ASSERT(tree->var_stack != nullptr, "Stack is nullptr");
+
+    LOGGER_DEBUG("ask_for_vars: started");
+
+    stack_t* var_stack = tree->var_stack;
+    for(size_t i = 0; i < var_stack->size; i++) {
+        if(var_stack->data[i].str.ptr != nullptr) {
+            var_val_type var_val = take_var(var_stack->data[i].str);
+            if(!isnan(var_val)) var_stack->data[i].val = var_val;
+            else {
+                LOGGER_ERROR("Failed to read var");
+                return ERROR_READ_FILE;
+            }
+        }   
+    }
+    return ERROR_NO;
 }
