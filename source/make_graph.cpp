@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#include "tree_info.h"
+#include "tree_operations.h"
+#include "differentiator.h"
+#include "error_handler.h"
+#include "make_graph.h"
+#include "logger.h"
+
+static void print_dat_header(FILE *gnu_file, const char *data_file_name, const char *png_file_name) {
+    fprintf(gnu_file, "set terminal pngcairo size 1280,720\n");
+    fprintf(gnu_file, "set output '%s'\n", png_file_name);
+    fprintf(gnu_file, "set grid\n");
+    fprintf(gnu_file, "set xlabel 'x'\n");
+    fprintf(gnu_file, "set ylabel 'f(x)'\n");
+    fprintf(gnu_file, "plot '%s' using 1:2 with lines title 'f(x)'\n", data_file_name);
+    fprintf(gnu_file, "unset output\n");
+}
+error_code tree_plot_to_gnuplot(tree_t* tree, size_t var_idx,
+                                double x_min, double x_max,
+                                size_t dots_cnt, const char* data_path, const char* png_path) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(tree->var_stack != nullptr, "tree->var_stack is nullptr");
+    HARD_ASSERT(var_idx < tree->var_stack->size, "var_idx is out of range");
+    HARD_ASSERT(data_path != nullptr, "data_path is nullptr");
+    HARD_ASSERT(png_path != nullptr, "png_path is nullptr");
+
+    LOGGER_DEBUG("tree_plot_to_gnuplot: started");
+
+    static int fileCounter = 0;
+    system("mkdir -p graphs");
+
+    char data_file_name[256] = {};
+    char png_file_name[256]  = {};
+    snprintf(data_file_name, sizeof(data_file_name), "graphs/plot_data_%d.dat", fileCounter);
+    snprintf(png_file_name, sizeof(png_file_name), "graphs/plot_image_%d.png", fileCounter);
+    fileCounter++;
+
+    FILE *data_file = fopen(data_file_name, "w");
+    if (!data_file) {
+        perror("fopen data_file_name");
+        return ERROR_OPEN_FILE;
+    }
+
+    error_code error_code = ERROR_NO;
+    const double step_size = (x_max - x_min) / (double)(dots_cnt - 1);
+
+    for (size_t i = 0; i < dots_cnt; ++i) {
+        double x_value = x_min + step_size * (double)i;
+
+        (void)put_var_val(tree, var_idx, (var_val_type)x_value);
+
+        var_val_type y_value = calculate_nodes_recursive(tree, tree->root, &error_code);
+        if (error_code != ERROR_NO) {
+            fclose(data_file);
+            return error_code;
+        }
+
+        fprintf(data_file, "%.15g %.15g\n", x_value, (double)y_value);
+    }
+
+    fclose(data_file);
+
+    FILE *gnu_file = popen("gnuplot", "w");
+    if (!gnu_file) {
+        perror("popen gnuplot");
+        return ERROR_OPEN_FILE;
+    }
+
+    fprintf(gnu_file, "set terminal pngcairo size 1280,720\n");
+    fprintf(gnu_file, "set output '%s'\n", png_file_name);
+    fprintf(gnu_file, "set grid\n");
+    fprintf(gnu_file, "set xlabel 'x'\n");
+    fprintf(gnu_file, "set ylabel 'f(x)'\n");
+    fprintf(gnu_file, "plot '%s' using 1:2 with lines title 'f(x)'\n", data_file_name);
+    fprintf(gnu_file, "unset output\n");
+
+    fflush(gnu_file);
+    pclose(gnu_file);
+    return ERROR_NO;
+}

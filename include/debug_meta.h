@@ -10,10 +10,16 @@
 #endif
 
 
-#ifdef CREATION_DEBUG
-    #define ON_CREATION_DEBUG(...) __VA_ARGS__
+#ifdef DUMP_CREATION_DEBUG
+    #define ON_DUMP_CREATION_DEBUG(...) __VA_ARGS__
 #else
-    #define ON_CREATION_DEBUG(...)
+    #define ON_DUMP_CREATION_DEBUG(...)
+#endif
+
+#ifdef TEX_CREATION_DEBUG
+    #define ON_TEX_CREATION_DEBUG(...) __VA_ARGS__
+#else
+    #define ON_TEX_CREATION_DEBUG(...)
 #endif
 
 

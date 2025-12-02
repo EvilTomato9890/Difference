@@ -120,8 +120,9 @@ tree_t* forest_add_tree(forest_t* forest, error_code* error_ptr) {
     tree->buff     = forest->buff;
     ON_DEBUG(
     tree->dump_file = &forest->dump_file;
-    tree->tex_file  = &forest->tex_file;
     )
+    tree->tex_file  = &forest->tex_file;
+    
     return tree;
 }
 

@@ -142,13 +142,13 @@ error_code tree_destroy(tree_t* tree) {
     return error;
 }
 
-tree_node_t* subtree_deep_copy(const tree_node_t* node, error_code* error ON_CREATION_DEBUG(, const tree_t* tree)) {
+tree_node_t* subtree_deep_copy(const tree_node_t* node, error_code* error ON_DUMP_CREATION_DEBUG(, const tree_t* tree)) {
 
     if (error != nullptr && *error != ERROR_NO) return nullptr;
     if (node == nullptr) return nullptr;
 
-    tree_node_t* left_copy  = subtree_deep_copy(node->left,  error ON_CREATION_DEBUG(, tree));
-    tree_node_t* right_copy = subtree_deep_copy(node->right, error ON_CREATION_DEBUG(, tree));
+    tree_node_t* left_copy  = subtree_deep_copy(node->left,  error ON_DUMP_CREATION_DEBUG(, tree));
+    tree_node_t* right_copy = subtree_deep_copy(node->right, error ON_DUMP_CREATION_DEBUG(, tree));
 
     if (error != nullptr && *error != ERROR_NO) {
         return nullptr;

@@ -20,8 +20,9 @@ struct tree_t {
     ON_DEBUG(
         ver_info_t ver_info;
         FILE* const * dump_file;
-        FILE* const * tex_file;
     )
+    FILE* const * tex_file;
+    
 };
 
 #endif

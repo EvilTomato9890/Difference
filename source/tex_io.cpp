@@ -56,7 +56,7 @@ struct tex_func_fmt {
     const char*  pattern;  
 };
 
-#define HANDLE_FUNC(op_code, str_name, impl_name, num_args, pattern, ...) \
+#define HANDLE_FUNC(op_code, str_name, impl_name, num_args, priority, pattern, ...) \
     { op_code, #str_name, pattern },
 
 static tex_func_fmt tex_fmt_table[] = {
@@ -99,22 +99,18 @@ static int get_tex_prec(const tree_node_t* node) {
         return TEX_PREC_ATOM;
     }
 
+    #define HANDLE_FUNC(op_code, str_name, impl_func, args_cnt, priority, ...) \
+        case op_code:                                                          \
+            return priority;     
+
     switch (node->value.func) {
-        case ADD:
-        case SUB:
-            return TEX_PREC_ADD;
-
-        case MUL:
-        case DIV:
-            return TEX_PREC_MUL;
-
-        case POW:
-        case LOG:
-            return TEX_PREC_POW;
-
+        #include "copy_past_file"
         default:
-            return TEX_PREC_ATOM; 
+            LOGGER_ERROR("Unknown func");
+            return TEX_PREC_LOWEST;
     }
+
+    #undef HANDLE_FUNC
 }
 
 static bool tex_need_parens(const tree_node_t* node, int parent_prec, assoc_pos_t pos) {
@@ -159,16 +155,12 @@ static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node
 //--------------------------------------------------------------------------------
 
 static void print_node_tex_const(FILE* tex, const tree_t* /*tree*/,
-                                  const tree_node_t* node)
-{
+                                  const tree_node_t* node) {
     fprintf(tex, "%.6g", (double)node->value.constant);
 }
 
-//--------------------------------------------------------------------------------
-
 static void print_node_tex_var(FILE* tex, const tree_t* tree,
-                                const tree_node_t* node)
-{
+                                const tree_node_t* node) {
     if (!tree || !tree->var_stack) {
         fprintf(tex, "v_{%zu}", node->value.var_idx);
         return;
@@ -185,8 +177,6 @@ static void print_node_tex_var(FILE* tex, const tree_t* tree,
 
     fprintf(tex, "v_{%zu}", idx);
 }
-
-//--------------------------------------------------------------------------------
 
 static void print_node_tex(FILE* tex, const tree_t* tree, tree_node_t* node) {
     print_node_tex_impl(tex, tree, node, TEX_PREC_LOWEST, ASSOC_ROOT);
@@ -306,22 +296,20 @@ void print_tex_header(FILE* tex) {
 
     fprintf(tex,
             "\\documentclass[a4paper,12pt]{article}\n"
+            "\\usepackage[T2A]{fontenc}\n"
+            "\\usepackage[utf8]{inputenc}\n"
+            "\\usepackage[russian]{babel}\n"
             "\\usepackage{amsmath}\n"
             "\\usepackage{amssymb}\n"
             "\\usepackage{autobreak}\n"
-            "\\allowdisplaybreaks\n"
-            "\n"
-            "\\newsavebox{\\eqbox}\n"
-            "\\newenvironment{shrinkeq}\n"
-            "{\\begin{lrbox}{\\eqbox}$\\displaystyle}\n"
-            "{$\\end{lrbox}%\n"
-            "\\ifdim\\wd\\eqbox>\\linewidth\n"
-            "    \\resizebox{\\linewidth}{!}{\\usebox{\\eqbox}}%\n"
-            "\\else\n"
-            "    \\usebox{\\eqbox}%\n"
-            "\\fi}\n"
-
-            "\\begin{document}\n");
+            "\\usepackage{hyperref}\n"
+            "\\begin{document}\n"
+            "\\title{Деградирование}\n"
+            "\\author{}\n"
+            "\\date{}\n"
+            "\\maketitle\n"
+            "\\tableofcontents\n"
+            "\\newpage\n");
     fflush(tex);
 }
 
@@ -333,45 +321,140 @@ void print_tex_footer(FILE* tex) {
     fflush(tex);
 }
 
-
-error_code tree_print_tex_expr(const tree_t* tree,
-                               tree_node_t*  node,
-                               const char*   fmt, ...)
-{
+error_code tree_print_tex_expr(const tree_t* tree, tree_node_t*  node,
+                               const char*   fmt, ...){
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(node != nullptr, "node is nullptr");
 
+    LOGGER_DEBUG("tree_print_tex_expr: started");
+
     error_code error = ERROR_NO;
 
-    ON_DEBUG({
-        if (tree->tex_file == nullptr || *tree->tex_file == nullptr) {
-            LOGGER_WARNING("tree_print_tex_expr: tex is nullptr");
-            return ERROR_NO;
+    if (tree->tex_file == nullptr || *tree->tex_file == nullptr) {
+        LOGGER_WARNING("tree_print_tex_expr: tex is nullptr");
+        return ERROR_NO;
+    }
+    FILE* tex = *tree->tex_file;
+    
+    if (fprintf(tex, EXPR_HEAD) < 0) {
+        LOGGER_ERROR("tree_print_tex_expr: fprintf begin align* failed");
+        error |= ERROR_OPEN_FILE;
+    }
+         
+    if (fmt && *fmt) {
+        va_list args = {};
+        va_start(args, fmt);
+        vfprintf(tex, fmt, args);
+        va_end(args);
+    }
+     
+    print_node_tex(tex, tree, node);
+     
+    if (fprintf(tex, EXPR_TAIL) < 0) {
+        LOGGER_ERROR("tree_print_tex_expr: fprintf end align* failed");
+        error |= ERROR_OPEN_FILE;
+    }
+     
+    fflush(tex);
+
+    return error;
+}
+
+error_code print_merge_tex_expr(tree_t* left_tree,  tree_node_t* left_node, 
+                                tree_t* right_tree, tree_node_t* right_node,
+                                const char* pattern) {
+    HARD_ASSERT(left_tree != nullptr, "Left_tree is nullptr");
+    HARD_ASSERT(right_tree != nullptr, "Right_tree is nullptr");
+    HARD_ASSERT(left_node != nullptr, "Left_node is nullptr");
+    HARD_ASSERT(right_node != nullptr, "Right_node is nullptr");
+
+    error_code error = ERROR_NO;
+
+    if (left_tree->tex_file == nullptr || *left_tree->tex_file == nullptr) {
+        LOGGER_WARNING("print_merge_tex_expr: tex is nullptr");
+        return ERROR_NO;
+    }
+    FILE* tex = *left_tree->tex_file;
+
+    if (fprintf(tex, EXPR_HEAD) < 0) {
+        LOGGER_ERROR("print_merge_tex_expr: fprintf begin aligned failed");
+        error |= ERROR_OPEN_FILE;
+    }
+
+    for (const char* p = pattern; *p != '\0'; ++p) {
+        if (*p == '%' && (p[1] == 'a' || p[1] == 'b')) {
+            bool is_a = (p[1] == 'a');
+            if (is_a) {
+                print_node_tex(tex, left_tree, left_node);
+            } else {
+                print_node_tex(tex, right_tree, right_node);
+            }
+            ++p; 
+        } else {
+            fputc(*p, tex);
+        }
+    }
+
+    if (fprintf(tex, EXPR_TAIL) < 0) {
+        LOGGER_ERROR("print_merge_tex_expr: fprintf end aligned failed");
+        error |= ERROR_OPEN_FILE;
+    }
+    fflush(tex);
+
+    return error;
+
+}
+
+error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pattern){
+    HARD_ASSERT(tree  != nullptr, "tree is nullptr");
+    HARD_ASSERT(node  != nullptr, "node is nullptr");
+    HARD_ASSERT(pattern != nullptr, "pattern is nullptr");
+
+    if (tree->tex_file == nullptr || *tree->tex_file == nullptr) {
+        LOGGER_WARNING("print_diff_step: tex is nullptr");
+        return ERROR_NO;
+    }
+
+    FILE* tex = *tree->tex_file;
+    error_code error = ERROR_NO;
+
+    if (fprintf(tex, EXPR_HEAD) < 0) {
+        LOGGER_ERROR("print_diff_step: begin failed");
+        error |= ERROR_OPEN_FILE;
+    }
+    fprintf(tex, DIFFERENTIAL "(");
+    print_node_tex(tex, tree, node);
+    fprintf(tex, ") = ");
+    for (const char* p = pattern; *p; ++p) {
+        if (*p != '%') {
+            fputc(*p, tex);
+            continue;
         }
 
-        FILE* tex = *tree->tex_file;
+        ++p;
+        tree_node_t* sub = nullptr;
 
-        if (fprintf(tex, "\\begin{shrinkeq}\n\\begin{aligned}\n") < 0) {
-            LOGGER_ERROR("tree_print_tex_expr: fprintf begin align* failed");
-            error |= ERROR_OPEN_FILE;
+        switch (*p) {
+            case 'd': fprintf(tex, DIFFERENTIAL);    break;
+            case 'p': sub = node;                    break;
+            case 'l': sub = node->left;              break;
+            case 'r': sub = node->right;             break;
+            default:
+                fputc('%', tex);
+                fputc(*p, tex);
+                continue;
         }
 
-        if (fmt && *fmt) {
-            va_list args = {};
-            va_start(args, fmt);
-            vfprintf(tex, fmt, args);
-            va_end(args);
+        if (sub) {
+            print_node_tex(tex, tree, sub);
         }
+    }
 
-        print_node_tex(tex, tree, node);
+    if (fprintf(tex, EXPR_TAIL) < 0) {
+        LOGGER_ERROR("print_diff_step: end failed");
+        error |= ERROR_OPEN_FILE;
+    }
 
-        if (fprintf(tex, "\n\\end{aligned}\n\\end{shrinkeq}\n\n") < 0) {
-            LOGGER_ERROR("tree_print_tex_expr: fprintf end align* failed");
-            error |= ERROR_OPEN_FILE;
-        }
-
-        fflush(tex);
-    });
-
+    fflush(tex);
     return error;
 }

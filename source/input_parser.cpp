@@ -7,7 +7,7 @@
 #include "input_parser.h"
 #include "logger.h"
 #include "my_string.h"
-
+//TODO: init_node_With_Dump
 //================================================================================
 
 static void skip_spaces(const char** str);
@@ -108,7 +108,6 @@ static bool parse_func_header(const char** str, func_type_t* func_out, size_t* a
     size_t      argc = 0;
 
     if (!get_func_info_by_name((c_string_t){start, func_len}, &func, &argc)) {
-        LOGGER_ERROR("parse_func_header: unknown function '%.*s'", (int)func_len, start);
         *str = start;
         return false;
     }
@@ -340,26 +339,9 @@ static tree_node_t* get_primary(tree_t* tree, const char** str) {
     }
 
     if (isalpha((unsigned char)**str)) {
-        const char*  tmp = *str;
-        size_t id_len    = 0;
-
-        if (!try_parse_identifier(&tmp, &id_len)) {
-            LOGGER_ERROR("get_primary: failed to parse identifier");
-            return nullptr;
-        }
-
-        const char* after_id = tmp;
-        skip_spaces(&after_id);
-
-        if (*after_id == '(') {
-            tree_node_t* node = get_func(tree, str);
-            if (!node) {
-                LOGGER_ERROR("get_primary: failed to parse function call");
-            }
-            return node;
-        } else {
-            return get_var(tree, str);
-        }
+        tree_node_t* node = get_func(tree, str);
+        if(!node) return get_var(tree, str);
+        return node;
     }
 
     return get_num(str);
@@ -392,7 +374,7 @@ static tree_node_t* get_var(tree_t* tree, const char** str) {
     return init_node(VARIABLE, make_union_var(var_idx), nullptr, nullptr);
 }
 
-// FUNC -> IDENT '(' arg_list ')'
+// FUNC -> FUNC_NAME '(' arg_list ')'
 static tree_node_t* get_func(tree_t* tree, const char** str) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(str  != nullptr, "str ptr is nullptr");
@@ -412,7 +394,7 @@ static tree_node_t* get_func(tree_t* tree, const char** str) {
 
     skip_spaces(str);
     if (!expect_char(str, '(')) {
-        *str = func_start;
+        LOGGER_ERROR("No () after func");
         return nullptr;
     }
 
@@ -420,6 +402,7 @@ static tree_node_t* get_func(tree_t* tree, const char** str) {
     tree_node_t* right = nullptr;
 
     if (!parse_func_args(tree, str, argc, &left, &right)) {
+        LOGGER_ERROR("parse args failed");
         return nullptr;
     }
 

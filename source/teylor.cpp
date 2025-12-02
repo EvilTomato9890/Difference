@@ -12,7 +12,7 @@
 #include "list_verification.h"
 #include <math.h>
 
-static const int TEYLOR_DEPTH  = 5;
+static const int TEYLOR_DEPTH  = 3;
 
 static unsigned long long calc_fact(int n) {
     if(n > 20) LOGGER_WARNING("Fact wil be overloaded");
@@ -35,7 +35,7 @@ static tree_t* add_diff(forest_t* forest, tree_t* target_tree, args_arr_t args_a
     }
 
     LOGGER_DEBUG("add_diff: get_diff started");
-    tree_node_t* diff_root = get_diff(target_tree->root, args_arr);
+    tree_node_t* diff_root = get_diff(target_tree->root, args_arr ON_TEX_CREATION_DEBUG(, target_tree));
     if(diff_root == nullptr) {
         *error |= ERROR_GET_DIFF;
         LOGGER_ERROR("add_diff: failed to take diff");

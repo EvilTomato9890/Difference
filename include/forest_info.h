@@ -12,8 +12,9 @@ struct forest_t {
     ON_DEBUG(
         ver_info_t ver_info;
         FILE* dump_file;
-        FILE* tex_file;
     )
+    FILE* tex_file;
+    
 };
 
 #endif

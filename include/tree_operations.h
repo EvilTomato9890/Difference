@@ -45,7 +45,7 @@ inline tree_node_t* clone_node(const tree_node_t* node) {
     return init_node(node->type, node->value, node->left, node->right);
 }
 
-tree_node_t* subtree_deep_copy(const tree_node_t* node, error_code* error ON_CREATION_DEBUG(, const tree_t* tree));
-tree_node_t* clone_child_subtree(tree_node_t* node, error_code* error ON_CREATION_DEBUG(, const tree_t* tree));
+tree_node_t* subtree_deep_copy(const tree_node_t* node, error_code* error ON_DUMP_CREATION_DEBUG(, const tree_t* tree));
+tree_node_t* clone_child_subtree(tree_node_t* node, error_code* error ON_DUMP_CREATION_DEBUG(, const tree_t* tree));
 
 #endif

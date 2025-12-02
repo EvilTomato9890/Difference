@@ -3,11 +3,11 @@
 
 #include "debug_meta.h"
 
-#define d(node) get_diff(node, args_arr)
+#define d(node) get_diff(node, args_arr ON_TEX_CREATION_DEBUG(, tree))
 
-#define cpy(node) subtree_deep_copy(node, nullptr ON_CREATION_DEBUG(, tree))
+#define cpy(node) subtree_deep_copy(node, nullptr ON_DUMP_CREATION_DEBUG(, tree))
 
-#ifdef CREATION_DEBUG
+#ifdef DUMP_CREATION_DEBUG
 #define c(val) \
     init_node_with_dump(CONSTANT, make_union_const(val), nullptr, nullptr, tree)
 

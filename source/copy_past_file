@@ -1,28 +1,39 @@
 /*
-HANDLE_FUNC(op_code, str_name, func in code,     args_cnt, priority, LaTex format)
-*/
-HANDLE_FUNC(ADD,     +,        a + b,            2,        2,        "%a + %b") //TODO: добавить само вычисление a + b, производную, приоритет и добавить разнцу между операторами и функциями
-HANDLE_FUNC(SUB,     -,        a - b,            2,        2,        "%a - %b")
-HANDLE_FUNC(MUL,     *,        a * b,            2,        3,        "%a \\cdot %b")
-HANDLE_FUNC(DIV,     /,        a / b,            2,        3,        "\\frac{%a}{%b}")
-        1,        
-HANDLE_FUNC(POW,     pow,      pow(a, b),        2,        4,        "%a^{%b}")
-HANDLE_FUNC(LOG,     log,      log(b) / log(a),  2,        4,        "\\log_{%a}(%b)")
-HANDLE_FUNC(LN,      ln,       log(a),           1,        4,        "\\ln(%a)")
-HANDLE_FUNC(EXP,     exp,      exp(a),           1,        4,        "e^{%a}")
-        1,        
-HANDLE_FUNC(SIN,     sin,      sin(a),           1,        1,        "\\sin(%a)")
-HANDLE_FUNC(COS,     cos,      cos(a),           1,        1,        "\\cos(%a)")
-HANDLE_FUNC(TAN,     tan,      tan(a),           1,        1,        "\\tan(%a)")
-HANDLE_FUNC(CTAN,    ctan,     1.0 / tan(a),     1,        1,        "\\operatorname{ctg}(%a)")
-        1,        
-HANDLE_FUNC(ARCSIN,  asin,     asin(a),          1,        1,        "\\arcsin(%a)")
-HANDLE_FUNC(ARCCOS,  acos,     acos(a),          1,        1,        "\\arccos(%a)")
-HANDLE_FUNC(ARCTAN,  atan,     atan(a),          1,        1,        "\\arctan(%a)")
-HANDLE_FUNC(ARCCTAN, actan,    M_PI_2 - atan(a), 1,        1,        "\\operatorname{arctg}(%a)")
-        1,        
-HANDLE_FUNC(CH,      ch,       cosh(a),          1,        1,        "\\operatorname{ch}(%a)")
-HANDLE_FUNC(SH,      sh,       sinh(a),          1,        1,        "\\operatorname{sh}(%a)")
-        1,        
-HANDLE_FUNC(ARCSH,   ash,      asinh(a),         1,        1,        "\\operatorname{arsh}(%a)")
-HANDLE_FUNC(ARCCH,   ach,      acosh(a),         1,        1,        "\\operatorname{arch}(%a)")
+HANDLE_FUNC(op_code, str_name, func in code,     args_cnt, priority, LaTex format,                LaTex deriv format                                                      DSL for deriv)
+*/                                                                                                                         
+HANDLE_FUNC(ADD,     +,        a + b,            2,        1,        "%a + %b",                   "%d(%l) + %d(%r)",                                                      ADD_(d(l), d(r)))                  // (u + v)' = u' + v' 
+HANDLE_FUNC(SUB,     -,        a - b,            2,        1,        "%a - %b",                   "%d(%l) - %d(%r)",                                                      SUB_(d(l), d(r)))                  // (u - v)' = u' - v'   
+HANDLE_FUNC(MUL,     *,        a * b,            2,        2,        "%a \\cdot %b",              "%d(%l) \\cdot %r + %l \\cdot %d(%r)",                                  ADD_(MUL_(d(l), cpy(r)),           // (u * v)' = u'v + uv' 
+                                                                                                                                                                               MUL_(cpy(l), d(r))))         
+HANDLE_FUNC(DIV,     /,        a / b,            2,        4,        "\\frac{%a}{%b}",            "\\frac{%d(%l) \\cdot %r - %l \\cdot %d(%r)}{%r^2}",                    DIV_(SUB_(MUL_(d(l), cpy(r)),      // (u / v)' = (u'v - uv') / v^2  
+                                                                                                                                                                                    MUL_(cpy(l), d(r))), 
+                                                                                                                                                                               MUL_(cpy(r), cpy(r))))  
+ 
+ 
+HANDLE_FUNC(POW,     ^,        pow(a, b),        2,        3,        "%a^{%b}",                   "%l^%r \\cdot (%d(%r) \\cdot \\ln(%l) + %r \\cdot \\frac{%d(%l)}{%l})",  MUL_(POW_(cpy(l), cpy(r)), ADD_(MUL_(d(r),   LN_(cpy(l))),                                //(u^v) = u^v * (v' ln u + v u'/u)
+                                                                                                                                                                                                           MUL_(cpy(r), DIV_(d(l), cpy(l))))))  
+HANDLE_FUNC(LOG,     log,      log(b) / log(a),  2,        3,        "\\log_{%a}(%b)",            "\\frac{\\frac{%d(%r)}{%r} \\cdot \\ln(%l) - \\frac{%d(%l)}{%l} \\cdot \\ln(%r)}{(\\ln(%l))^2}",          DIV_(SUB_(MUL_(DIV_(d(r), cpy(r)), LN_(cpy(l))),       //log_u(v) = [ (v'/v) ln u - (u'/u) ln v ] / (ln u)^2       
+                                                                                                                                                                                                                           MUL_(DIV_(d(l), cpy(l)), LN_(cpy(r)))), 
+                                                                                                                                                                                                                      MUL_(LN_(cpy(l)), LN_(cpy(l)))))
+HANDLE_FUNC(LN,      ln,       log(a),           1,        4,        "\\ln(%a)",                  "\\frac{%d(%l)}{%l}",                                                   DIV_(d(l), cpy(l)))                // (ln u)' = 1 / u * u'
+HANDLE_FUNC(EXP,     exp,      exp(a),           1,        4,        "e^{%a}",                    "e^{%l} \\cdot %d(%l)",                                                 MUL_(POW_(c(M_E), cpy(l)), d(l)))  // (e^u)'  = e^u * u'
+                     
+                     
+HANDLE_FUNC(SIN,     sin,      sin(a),           1,        4,        "\\sin(%a)",                 "\\cos(%l) \\cdot %d(%l)",                                              MUL_(COS_(cpy(l)), d(l)))                                 // (sin u)'  = cos(u) * u'                                                                                     
+HANDLE_FUNC(COS,     cos,      cos(a),           1,        4,        "\\cos(%a)",                 "-\\sin(%l) \\cdot %d(%l)",                                             MUL_(SUB_(c(0), SIN_(cpy(l))), d(l)))                     // (cos u)'  = -sin(u) * u'  
+HANDLE_FUNC(TAN,     tan,      tan(a),           1,        4,        "\\tan(%a)",                 "\\frac{%d(%l)}{\\cos^2(%l)}",                                          DIV_(d(l), MUL_(COS_(cpy(l)), COS_(cpy(l)))))             // (tan u)'  = 1 / cos(u)^2 * u'
+HANDLE_FUNC(CTAN,    ctan,     1.0 / tan(a),     1,        4,        "\\operatorname{ctg}(%a)",   "-\\frac{%d(%l)}{1 + %l^2}",                                            SUB_(c(0), DIV_(d(l), ADD_(c(1), MUL_(cpy(l), cpy(l)))))) // (ctan u)' = -1 / sin(u)^2 * u'
+                                     
+                                     
+HANDLE_FUNC(ARCSIN,  asin,     asin(a),          1,        4,        "\\arcsin(%a)",              "\\frac{%d(%l)}{\\sqrt{1 - %l^2}}",                                     DIV_(d(l), POW_(SUB_(c(1), MUL_(cpy(l), cpy(l))), c(0.5))))         // (arcsin u)'  = 1 / sqrt(1 - u^2) * u'
+HANDLE_FUNC(ARCCOS,  acos,     acos(a),          1,        4,        "\\arccos(%a)",              "-\\frac{%d(%l)}{\\sqrt{1 - %l^2}}",                                    SUB_(c(0), DIV_(d(l), POW_(SUB_(c(1), 
+                                                                                                                                                                                                            MUL_(cpy(l), cpy(l))), c(0.5))))) // (arccos u)'  = -1 / sqrt(1 - u^2) * u'
+HANDLE_FUNC(ARCTAN,  atan,     atan(a),          1,        4,        "\\arctan(%a)",              "\\frac{%d(%l)}{1 + %l^2}",                                             DIV_(d(l), ADD_(c(1), MUL_(cpy(l), cpy(l)))))                       // (arctan u)'  = 1 / (1 + u^2) * u'   
+HANDLE_FUNC(ARCCTAN, actan,    M_PI_2 - atan(a), 1,        4,        "\\operatorname{arctg}(%a)", "-\\frac{%d(%l)}{1 + %l^2}",                                            SUB_(c(0), DIV_(d(l), ADD_(c(1), MUL_(cpy(l), cpy(l))))))           // (arcctan u)' = -1 / (1 + u^2) * u'
+            
+     
+HANDLE_FUNC(CH,      ch,       cosh(a),          1,        4,        "\\operatorname{ch}(%a)",    "\\operatorname{sh}(%l) \\cdot %d(%l)",                                 MUL_(SH_(cpy(l)), d(l))) // (ch u)' = sh u * u'
+HANDLE_FUNC(SH,      sh,       sinh(a),          1,        4,        "\\operatorname{sh}(%a)",    "\\operatorname{ch}(%l) \\cdot %d(%l)",                                 MUL_(CH_(cpy(l)), d(l))) // (sh u)' = ch u * u'
+           
+HANDLE_FUNC(ARCSH,   ash,      asinh(a),         1,        4,        "\\operatorname{arsh}(%a)",  "\\frac{%d(%l)}{\\sqrt{1 + %l^2}}",                                     DIV_(d(l), POW_(ADD_(c(1), MUL_(cpy(l), cpy(l))), c(0.5)))) // (arcsh u)' = 1 / sqrt(1 + u^2) * u'
+HANDLE_FUNC(ARCCH,   ach,      acosh(a),         1,        4,        "\\operatorname{arch}(%a)",  "\\frac{%d(%l)}{\\sqrt{%l^2 - 1}}",                                     DIV_(d(l), POW_(SUB_(MUL_(cpy(l), cpy(l)), c(1)), c(0.5)))) // (arcch u)' = 1 / sqrt(u^2 - 1) * u'

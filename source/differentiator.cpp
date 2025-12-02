@@ -8,13 +8,14 @@
 #include "my_string.h"
 #include "forest_info.h"
 #include "forest_operations.h"
+#include "tex_io.h"
 
 #include <math.h>
 
 static const double CMP_PRECISION = 1e-9;
 
 //================================================================================
-// TODO - diff on 1 arg Correct?
+
 static bool check_in(size_t target, args_arr_t args_arr) {
     if(args_arr.arr == nullptr || args_arr.size == 0) return false;
     
@@ -23,108 +24,59 @@ static bool check_in(size_t target, args_arr_t args_arr) {
     return false;
 }
 
-tree_node_t* get_diff(tree_node_t* node, args_arr_t args_arr) {
+#define MAKE_CONST_STEP(const)                                              \
+    ON_TEX_CREATION_DEBUG(                                                  \
+    print_diff_step(tree, node, #const);                                    \
+    )                                                                       \
+    return c(const);
+
+tree_node_t* get_diff(tree_node_t* node, args_arr_t args_arr ON_TEX_CREATION_DEBUG(, tree_t* tree)) {
     HARD_ASSERT(args_arr.size == 0 || args_arr.arr != nullptr, "Wrong arg list");
     if(!node) return nullptr;
 
+    tree_node_t* new_node = nullptr;
     if (node->type == CONSTANT) {
-        return c(0);
+        MAKE_CONST_STEP(0);
     }
     if(node->type == VARIABLE) {
-        if(args_arr.size == 0) 
-            return c(1);
-        if(check_in(node->value.var_idx, args_arr)) 
-            return c(1);
-        return c(0);
+        if(args_arr.size == 0) {
+            MAKE_CONST_STEP(1);
+        }
+        if(check_in(node->value.var_idx, args_arr)) {
+            MAKE_CONST_STEP(1);
+        }
+        MAKE_CONST_STEP(0);
     }
 
     tree_node_t* l = node->left;
     tree_node_t* r = node->right;
 
+    #define HANDLE_FUNC(op_code, str_name, impl_func, args_cnt, priority, pattern, rule_pattern, DSL_deriv) \
+    case op_code:                                                                                       \
+        ON_TEX_CREATION_DEBUG(                                                                          \
+        print_diff_step(tree, node, rule_pattern);                                                      \
+        )                                                                                               \
+        return DSL_deriv;             
+
     switch(node->value.func) {
-                                // (u + v)' = u' + v'
-        case ADD:     return    ADD_(d(l), d(r));
-
-                                // (u * v)' = u'v + uv'
-        case MUL:     return    ADD_(MUL_(d(l), cpy(r)), 
-                                     MUL_(cpy(l), d(r)));
-
-                                // (u - v)' = u' - v'     
-        case SUB:     return    SUB_(d(l), d(r));
-
-                                // (u / v)' = (u'v - uv') / v^2
-        case DIV:     return    DIV_(SUB_(MUL_(d(l), cpy(r)), 
-                                          MUL_(cpy(l), d(r))), 
-                                     MUL_(cpy(r), cpy(r)));
-
-                                // (sin u)' = cos(u) * u'     
-        case SIN:     return    MUL_(COS_(cpy(l)), d(l));
-
-                                // (cos u)' = -sin(u) * u'
-        case COS:     return    MUL_(SUB_(c(0), SIN_(cpy(l))), d(l));
-
-                                // (tan u)' = 1 / cos(u)^2 * u'
-        case TAN:     return    DIV_(d(l), MUL_(COS_(cpy(l)), COS_(cpy(l))));
-
-                                // (ctan u)' = -1 / sin(u)^2 * u'
-        case CTAN:    return    SUB_(c(0), DIV_(d(l), ADD_(c(1), MUL_(cpy(l), cpy(l)))));
-
-                                // (arcsin u)' = 1 / sqrt(1 - u^2) * u'
-        case ARCSIN:  return    DIV_(d(l), POW_(SUB_(c(1), MUL_(cpy(l), cpy(l))), c(0.5)));
-
-                                // (arccos u)' = -1 / sqrt(1 - u^2) * u'
-        case ARCCOS:  return    SUB_(c(0), DIV_(d(l), POW_(SUB_(c(1), 
-                                                                MUL_(cpy(l), cpy(l))), c(0.5))));
-
-                                // (arctan u)' = 1 / (1 + u^2) * u'                                   
-        case ARCTAN:  return    DIV_(d(l), ADD_(c(1), MUL_(cpy(l), cpy(l))));
-
-                                // (arcctan u)' = -1 / (1 + u^2) * u'
-        case ARCCTAN: return    SUB_(c(0), DIV_(d(l), ADD_(c(1), MUL_(cpy(l), cpy(l)))));
-
-                                // (sh u)' = ch u * u'
-        case SH:      return    MUL_(CH_(cpy(l)), d(l));
-
-                                // (ch u)' = sh u * u'
-        case CH:      return    MUL_(SH_(cpy(l)), d(l));
-
-                                // (arcsh u)' = 1 / sqrt(1 + u^2) * u'
-        case ARCSH:   return    DIV_(d(l), POW_(ADD_(c(1), MUL_(cpy(l), cpy(l))), c(0.5)));
-
-                                // (arcch u)' = 1 / sqrt(u^2 - 1) * u'
-        case ARCCH:   return    DIV_(d(l), POW_(SUB_(MUL_(cpy(l), cpy(l)), c(1)), c(0.5)));
-
-                                // (ln u)' = 1 / u * u'
-        case LN:      return    DIV_(d(l), cpy(l));
-
-                                // (e^u)' = e^u * u'
-        case EXP:     return    MUL_(POW_(c(M_E), cpy(l)), d(l));
-
-                                //(u^v) = u^v * (v' ln u + v u'/u)
-        case POW:     return    MUL_(POW_(cpy(l), cpy(r)), ADD_(MUL_(d(r),   LN_(cpy(l))),
-                                                                MUL_(cpy(r), DIV_(d(l), cpy(l)))));
-
-                                //log_u(v) = [ (v'/v) ln u - (u'/u) ln v ] / (ln u)^2
-        case LOG:     return    DIV_(SUB_(MUL_(DIV_(d(r), cpy(r)), LN_(cpy(l))),
-                                          MUL_(DIV_(d(l), cpy(l)), LN_(cpy(r)))), 
-                                     MUL_(LN_(cpy(l)), LN_(cpy(l))));
-        
+        #include "copy_past_file"
         default:
             LOGGER_ERROR("Unknown func");
             return nullptr;
     }
+
+    #undef HANDLE_FUNC
 }
+#undef MAKE_STEP
 
 //================================================================================
 
-#define HANDLE_FUNC(op_code, str_name, impl_func, arg_cnt, ...) \
-    static var_val_type op_code##_func(var_val_type a, var_val_type b) {    \
-        HARD_ASSERT(!isnan(a), "a is nan");                              \
-        if(arg_cnt == 2) HARD_ASSERT(!isnan(b), "b is nan");                              \
+#define HANDLE_FUNC(op_code, str_name, impl_func, arg_cnt, ...)           \
+    static var_val_type op_code##_func(var_val_type a, var_val_type b) {  \
+        HARD_ASSERT(!isnan(a), "a is nan");                               \
+        if(arg_cnt == 2) HARD_ASSERT(!isnan(b), "b is nan");              \
         return impl_func;                                                 \
     }
-// Add -> eval, differentiate, 
-//TODO: вынести в отдельный файл и добавить функции вычисления произодных подобными шаблонами в отдельном файле
 
 #include "copy_past_file"
 
@@ -132,7 +84,7 @@ tree_node_t* get_diff(tree_node_t* node, args_arr_t args_arr) {
 
 //================================================================================
 
-static var_val_type calculate_nodes_recursive(tree_t* tree, tree_node_t* curr_node, error_code* error) {
+var_val_type calculate_nodes_recursive(tree_t* tree, tree_node_t* curr_node, error_code* error) {
     HARD_ASSERT(tree      != nullptr, "tree is nullptr");
     HARD_ASSERT(error     != nullptr, "Error is nullptr");
 
