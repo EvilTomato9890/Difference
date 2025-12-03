@@ -30,7 +30,7 @@ static bool check_in(size_t target, args_arr_t args_arr) {
 #define MAKE_STEP(str_num, num)                                                      \
     do {                                                                             \
         ON_TEX_CREATION_DEBUG(                                                       \
-            print_diff_step(tree, node, #num);                                       \
+            print_diff_step_text(tree, node, #num);                                  \
         )                                                                            \
         return c(num);                                                               \
     } while (0)

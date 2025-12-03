@@ -23,34 +23,6 @@ const int MAX_CONST_LEN = 64;
 
 //================================================================================
 
-struct tex_func_fmt {
-    func_type_t  func_type;
-    const char*  symbol;   
-    const char*  pattern;  
-};
-
-#define HANDLE_FUNC(op_code, str_name, impl_name, num_args, priority, pattern, ...) \
-    { op_code, #str_name, pattern },
-
-static tex_func_fmt tex_fmt_table[] = {
-    #include "copy_past_file"
-};
-
-#undef HANDLE_FUNC
-
-static const size_t tex_fmt_count = sizeof(tex_fmt_table) / sizeof(tex_func_fmt);
-
-static const tex_func_fmt* get_tex_fmt_by_type(func_type_t type) {
-    for (size_t i = 0; i < tex_fmt_count; ++i) {
-        if (tex_fmt_table[i].func_type == type) {
-            return &tex_fmt_table[i];
-        }
-    }
-    return nullptr;
-}
-
-//================================================================================
-
 enum tex_prec_t {
     TEX_PREC_LOWEST = 0,
     TEX_PREC_ADD    = 1,  // +, -
@@ -481,7 +453,9 @@ error_code print_tex_expr(const tree_t* tree, tree_node_t*  node, const char* fm
     return error;
 }
 
-error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pattern){
+const char* get_tex_fmt_by_type()
+
+error_code print_diff_step(const tree_t* tree, tree_node_t* node, func_type_t pattern) {
     HARD_ASSERT(tree  != nullptr, "tree is nullptr");
     HARD_ASSERT(node  != nullptr, "node is nullptr");
     HARD_ASSERT(pattern != nullptr, "pattern is nullptr");
@@ -501,6 +475,7 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pa
     fprintf(tex, DIFFERENTIAL "(");
     print_node_tex(tex, tree, node);
     fprintf(tex, ") = ");
+
     for (const char* p = pattern; *p; ++p) {
         if (*p != '%') {
             fputc(*p, tex);
@@ -533,6 +508,10 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pa
 
     fflush(tex);
     return error;
+}
+
+error_Code print_diff_step_text(const tree_t* tree, tree_node_t* node, const char* pattern) {
+
 }
 
 //================================================================================
