@@ -12,10 +12,10 @@
 #include "tree_verification.h"
 #include "tree_info.h"
 #include "error_handler.h"
-#include "../libs/StackDead-main/stack.h" //КАК
+#include "stack.h"
 #include "forest_operations.h"
 #include "forest_info.h"
-
+#include "my_string.h"
 
 //================================================================================
 
@@ -286,7 +286,7 @@ ssize_t get_var_idx(c_string_t var, const stack_t* var_stack) {
     return -1;
 }
 
-size_t add_var(c_string_t str, const var_val_type val, stack_t* var_stack, error_code* error) {
+size_t add_var(c_string_t str, var_val_type val, stack_t* var_stack, error_code* error) {
     HARD_ASSERT(var_stack != nullptr, "var_stack is nulltpr");
 
     if(error == nullptr) stack_push(var_stack, {str, val});
@@ -294,7 +294,7 @@ size_t add_var(c_string_t str, const var_val_type val, stack_t* var_stack, error
     return var_stack->size - 1;
 }
 
-size_t get_or_add_var_idx(c_string_t str, const var_val_type val, stack_t* var_stack, error_code* error) {
+size_t get_or_add_var_idx(c_string_t str, var_val_type val, stack_t* var_stack, error_code* error) {
     HARD_ASSERT(var_stack != nullptr, "var_stack is nullptr");
 
     ssize_t idx = get_var_idx(str, var_stack);
@@ -304,18 +304,26 @@ size_t get_or_add_var_idx(c_string_t str, const var_val_type val, stack_t* var_s
     return (size_t)idx;
 }
 
-var_val_type get_var_val(tree_t* tree, tree_node_t* node) {
+var_val_type get_var_val(const tree_t* tree, const tree_node_t* node) {
     HARD_ASSERT(tree       != nullptr, "Tree is nullptr");
     HARD_ASSERT(node       != nullptr, "node is nullptr");
     HARD_ASSERT(node->type == VARIABLE, "Node is not variable");
     return tree->var_stack->data[node->value.var_idx].val;
 }
 
-var_val_type put_var_val(tree_t* tree, size_t var_idx, var_val_type value) {
+var_val_type put_var_val(const tree_t* tree, size_t var_idx, var_val_type value) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     tree->var_stack->data[var_idx].val = value;
     return value;
 }
+
+c_string_t get_var_name(const tree_t* tree, const tree_node_t* node) {  //REVIEW - Стоит ли node или var_idx
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(node != nullptr, "Node is nullptr");
+    if(node->type != VARIABLE) return {nullptr, 0};
+
+    return tree->var_stack->data[node->value.var_idx].str;
+}   
 
 //--------------------------------------------------------------------------------
 
@@ -344,7 +352,7 @@ static var_val_type take_var(c_string_t var) {
     return num;
 }
 
-error_code ask_for_vars(tree_t* tree) {
+error_code ask_for_vars(const tree_t* tree) {
     HARD_ASSERT(tree            != nullptr, "Tree is nullptr");
     HARD_ASSERT(tree->var_stack != nullptr, "Stack is nullptr");
 

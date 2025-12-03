@@ -13,10 +13,13 @@
 #include "error_handler.h"
 #include "tree_info.h"
 #include "tree_file_io.h"
-#include "../libs/StackDead-main/stack.h"
+#include "stack.h"
 #include "my_string.h"
 #include "file_operations.h"
 #include "tex_io.h"
+//================================================================================
+
+const int MAX_CONST_LEN = 64;
 
 //================================================================================
 
@@ -574,4 +577,36 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pa
 
     fflush(tex);
     return error;
+}
+
+//================================================================================
+
+static size_t get_double_len(double target) {
+    char buf[MAX_CONST_LEN] = {};
+    int n = snprintf(buf, sizeof(buf), "%.2f", target);
+    return (n > 0 ? (size_t)n : 0);
+}
+
+ssize_t get_tex_len(const tree_t* tree, const tree_node_t* node) {
+    HARD_ASSERT(tree != nullptr, "Tree is nullptr");
+
+    error_code error = 0;
+
+    if(node->type == CONSTANT) return get_double_len(node->value.constant);
+    if(node->type == VARIABLE) return strlen(get_var_name(tree, node).ptr);
+    if(node->type != FUNCTION) {LOGGER_ERROR("Unknown type"); return -1;}
+
+    #define HANDLE_FUNC(op_code, str_name, func, args_cnt, priority, latex_fmt, ...) \
+        case op_code:                                                                \
+            return strlen(#latex_fmt) - args_cnt * 2; 
+
+    switch(node->value.func) {
+        #include "copy_past_file"
+        default:
+            LOGGER_ERROR("Unknown function");
+            return -1;
+    }
+
+    #undef HANDLE_FUNC
+
 }

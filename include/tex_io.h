@@ -40,4 +40,5 @@ void print_tex_basic_diff_comment(FILE* tex);
 #define DIFFERENTIAL "\\frac{d}{dx}"
 
 //================================================================================
+
 #endif
