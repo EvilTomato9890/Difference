@@ -10,11 +10,11 @@
 //TODO: init_node_With_Dump
 //================================================================================
 
-static void skip_spaces(const char** str);
-static bool try_parse_identifier(const char** str, size_t* len_ptr);
-static bool get_func_info_by_name(c_string_t name, func_type_t* func_out, size_t* argc_out);
-static bool expect_char(const char** str, char expected);
-static bool parse_func_header(const char** str, func_type_t* func_out, size_t* argc_out);
+static void skip_spaces          (const char** str);
+static bool try_parse_identifier (const char** str, size_t* len_ptr);
+static bool get_func_info_by_name(c_string_t name,  func_type_t* func_out, size_t* argc_out);
+static bool expect_char          (const char** str, char expected);
+static bool parse_func_header    (const char** str, func_type_t* func_out, size_t* argc_out);
 static tree_node_t* parse_single_argument(tree_t* tree, const char** str);
 static bool parse_func_args(tree_t* tree, const char** str, size_t argc,
                             tree_node_t** left_out, tree_node_t** right_out);
@@ -62,8 +62,8 @@ static bool get_func_info_by_name(c_string_t name, func_type_t* func_out, size_t
         return false;
     }
 
-    #define HANDLE_FUNC(op_code, str_name, impl_func, arg_cnt, ...)   \
-        if (my_scstrcmp(name, #str_name) == 0) {           \
+    #define HANDLE_FUNC(op_code, str_name, is_operator, impl_func, arg_cnt, ...)   \
+        if (my_scstrcmp(name, #str_name) == 0 && !is_operator) {           \
             *func_out = op_code;                           \
             *argc_out = (size_t)(arg_cnt);                 \
             return true;                                   \

@@ -1,0 +1,82 @@
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #22 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-04 02:41:35</span>
+<span style="color:#ff4d4f;font-weight:700;">Before tree_optimize</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr  : 0x5080000016a0
+root ptr  : 0x503000001e40
+size      : 17
+stack ptr : 0x506000000860
+buff.ptr  : (nil)
+buff.len  : 0
+list idx  : 1
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_tree_optimize
+line: 784
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x503000001e40  FUNCTION        0x503000001e10  0x503000001d20  +
+1     0x503000001e10  FUNCTION        0x503000001de0  0x503000001d50  +
+2     0x503000001de0  FUNCTION        0x503000001db0  0x503000001d80  *
+3     0x503000001db0  VARIABLE        (nil)           (nil)           x
+4     0x503000001d80  CONSTANT        (nil)           (nil)           1.000000
+5     0x503000001d50  CONSTANT        (nil)           (nil)           0.000000
+6     0x503000001d20  FUNCTION        0x503000001cf0  0x503000001c60  +
+7     0x503000001cf0  FUNCTION        0x503000001cc0  0x503000001c90  *
+8     0x503000001cc0  CONSTANT        (nil)           (nil)           0.000000
+9     0x503000001c90  VARIABLE        (nil)           (nil)           y
+10    0x503000001c60  FUNCTION        0x503000001c30  0x503000001ba0  +
+11    0x503000001c30  FUNCTION        0x503000001c00  0x503000001bd0  ^
+12    0x503000001c00  CONSTANT        (nil)           (nil)           1.000000
+13    0x503000001bd0  VARIABLE        (nil)           (nil)           z
+14    0x503000001ba0  FUNCTION        0x503000001b70  0x503000001b40  log
+15    0x503000001b70  VARIABLE        (nil)           (nil)           x
+16    0x503000001b40  CONSTANT        (nil)           (nil)           1.000000
+
+SVG: dumps/tree_dump_022.svg
+</pre>
+<img src="dumps/tree_dump_022.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #23 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-04 02:41:35</span>
+<span style="color:#ff4d4f;font-weight:700;">After tree_optimize</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr  : 0x5080000016a0
+root ptr  : 0x503000001e40
+size      : 3
+stack ptr : 0x506000000860
+buff.ptr  : (nil)
+buff.len  : 0
+list idx  : 1
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_tree_optimize
+line: 790
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x503000001e40  FUNCTION        0x503000001e10  0x503000001d20  +
+1     0x503000001e10  VARIABLE        (nil)           (nil)           x
+2     0x503000001d20  CONSTANT        (nil)           (nil)           1.000000
+
+SVG: dumps/tree_dump_023.svg
+</pre>
+<img src="dumps/tree_dump_023.svg" style="max-width:2250px;"/>
+
+<hr>

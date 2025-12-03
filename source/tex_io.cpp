@@ -44,12 +44,12 @@ static int get_tex_prec(const tree_node_t* node) {
         return TEX_PREC_ATOM;
     }
 
-    #define HANDLE_FUNC(op_code, str_name, impl_func, args_cnt, priority, ...) \
+    #define HANDLE_FUNC(op_code, priority, ...) \
         case op_code:                                                          \
             return priority;     
 
     switch (node->value.func) {
-        #include "copy_past_file"
+        #include "copy_past_file_tex"
         default:
             LOGGER_ERROR("Unknown func");
             return TEX_PREC_LOWEST;
@@ -69,13 +69,39 @@ static bool tex_need_parens(const tree_node_t* node, int parent_prec, assoc_pos_
 
     func_type_t func = node->value.func;
 
-    if ((func == SUB || func == DIV) && pos == ASSOC_RIGHT)
+    if ((func == DIV) && pos == ASSOC_RIGHT)
         return true;
 
     if (func == POW && pos == ASSOC_LEFT)
         return true;
 
     return false;
+}
+
+static const char* get_tex_fmt(func_type_t func_type) {
+    #define HANDLE_FUNC(op_code, str_name, fmt, ...) \
+        if (func_type == op_code) {                                     \
+            return fmt;                                                \
+        }
+
+    #include "copy_past_file_tex"
+
+    #undef HANDLE_FUNC
+
+    return "%a ? %b";
+}
+
+static const char* get_tex_fmt_diff(func_type_t func_type) {
+    #define HANDLE_FUNC(op_code, str_name, fmt, latex_len, diff_fmt, ...) \
+        if (func_type == op_code) {                                     \
+            return diff_fmt;                                                \
+        }
+
+    #include "copy_past_file_tex"
+
+    #undef HANDLE_FUNC
+    
+    return "%a ? %b";
 }
 
 //================================================================================
@@ -93,7 +119,7 @@ static void print_node_tex_function  (FILE* tex, const tree_t* tree, tree_node_t
                                        int parent_prec, assoc_pos_t pos);
 
 static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
-                                         const tex_func_fmt* fmt,
+                                         const char* fmt,
                                          int my_prec);
 
 
@@ -151,25 +177,28 @@ static void print_node_tex_leaf(FILE* tex, const tree_t* tree,
 }
 
 static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
-                                         const tex_func_fmt* fmt, int my_prec) {
+                                         const char* fmt, int my_prec) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(node != nullptr, "node is nullptr");
-
-    const char* pattern = fmt->pattern ? fmt->pattern : "";
 
     int child_prec = my_prec;
     if (get_tex_prec(node) == TEX_PREC_ATOM) {
         child_prec = TEX_PREC_LOWEST;
     }
 
-    for (const char* p = pattern; *p != '\0'; ++p) {
+    for (const char* p = fmt; *p != '\0'; ++p) {
         if (*p == '%' && (p[1] == 'a' || p[1] == 'b')) {
             bool is_a = (p[1] == 'a');
 
             tree_node_t* child = is_a ? node->left : node->right;
             assoc_pos_t  pos   = is_a ? ASSOC_LEFT : ASSOC_RIGHT;
 
-            print_node_tex_impl(tex, tree, child, child_prec, pos);
+            int child_parent_prec = child_prec;
+
+            if ((node->value.func == SUB || node->value.func == DIV) && pos == ASSOC_RIGHT)
+                child_parent_prec = child_prec + 1;
+            
+            print_node_tex_impl(tex, tree, child, child_parent_prec, pos);
 
             ++p; 
         } else {
@@ -189,7 +218,7 @@ static void print_node_tex_function(FILE* tex, const tree_t* tree, tree_node_t* 
 
     if (need_paren) fputc('(', tex);
 
-    const tex_func_fmt* fmt = get_tex_fmt_by_type(node->value.func);
+    const char* fmt = get_tex_fmt(node->value.func);
 
     print_node_tex_pattern_impl(tex, tree, node, fmt, my_prec);
 
@@ -453,12 +482,9 @@ error_code print_tex_expr(const tree_t* tree, tree_node_t*  node, const char* fm
     return error;
 }
 
-const char* get_tex_fmt_by_type()
-
-error_code print_diff_step(const tree_t* tree, tree_node_t* node, func_type_t pattern) {
+error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pattern) {
     HARD_ASSERT(tree  != nullptr, "tree is nullptr");
     HARD_ASSERT(node  != nullptr, "node is nullptr");
-    HARD_ASSERT(pattern != nullptr, "pattern is nullptr");
 
     if (tree->tex_file == nullptr || *tree->tex_file == nullptr) {
         LOGGER_WARNING("print_diff_step: tex is nullptr");
@@ -476,12 +502,12 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, func_type_t pa
     print_node_tex(tex, tree, node);
     fprintf(tex, ") = ");
 
+
     for (const char* p = pattern; *p; ++p) {
         if (*p != '%') {
             fputc(*p, tex);
             continue;
         }
-
         ++p;
         tree_node_t* sub = nullptr;
 
@@ -510,10 +536,10 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, func_type_t pa
     return error;
 }
 
-error_Code print_diff_step_text(const tree_t* tree, tree_node_t* node, const char* pattern) {
-
+error_code print_diff_step_tex_fmt(const tree_t* tree, tree_node_t* node) {
+    const char* pattern = get_tex_fmt_diff(node->value.func);
+    return print_diff_step(tree, node, pattern);
 }
-
 //================================================================================
 
 static size_t get_double_len(double target) {

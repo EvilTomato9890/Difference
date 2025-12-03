@@ -1,27 +1,27 @@
 /*
 HANDLE_FUNC(op_code, priority, LaTex format,                LaTex_len,     LaTex deriv format)
 */                                                                                                                         
-HANDLE_FUNC(ADD,     1,        "%a + %b",                   3 + a + b,     "%d(%l) + %d(%r)",                                                  
-HANDLE_FUNC(SUB,     1,        "%a - %b",                   3 + a + b,     "%d(%l) - %d(%r)",                                                   
-HANDLE_FUNC(MUL,     2,        "%a \\cdot %b",              3 + a + b,     "%d(%l) \\cdot %r + %l \\cdot %d(%r)",   
-HANDLE_FUNC(DIV,     4,        "\\frac{%a}{%b}",            fmax(a, b),    "\\frac{%d(%l) \\cdot %r - %l \\cdot %d(%r)}{%r^2}",  
+HANDLE_FUNC(ADD,     1,        "%a + %b",                   3 + a + b,     "%d(%l) + %d(%r)")                                                  
+HANDLE_FUNC(SUB,     1,        "%a - %b",                   3 + a + b,     "%d(%l) - %d(%r)")                                                   
+HANDLE_FUNC(MUL,     2,        "%a \\cdot %b",              3 + a + b,     "%d(%l) \\cdot %r + %l \\cdot %d(%r)")   
+HANDLE_FUNC(DIV,     4,        "\\frac{%a}{%b}",            fmax(a, b),    "\\frac{%d(%l) \\cdot %r - %l \\cdot %d(%r)}{%r^2}")  
        
-HANDLE_FUNC(POW,     4,        "%a^{%b}",                   a + b*0.7,     "%l^%r \\cdot (%d(%r) \\cdot \\ln(%l) + %r \\cdot \\frac{%d(%l)}{%l})", 
-HANDLE_FUNC(LOG,     4,        "\\log_{%a}(%b)",            4 + a*0.7 + b, "\\frac{\\frac{%d(%r)}{%r} \\cdot \\ln(%l) - \\frac{%d(%l)}{%l} \\cdot \\ln(%r)}{(\\ln(%l))^2}",           
-HANDLE_FUNC(LN,      4,        "\\ln(%a)",                  3 + a,         "\\frac{%d(%l)}{%l}",                                                   
-HANDLE_FUNC(EXP,     4,        "e^{%a}",                    1 + a*0.7,     "e^{%l} \\cdot %d(%l)",    
+HANDLE_FUNC(POW,     4,        "%a^{%b}",                   a + b*0.7,     "%l^%r \\cdot (%d(%r) \\cdot \\ln(%l) + %r \\cdot \\frac{%d(%l)}{%l})") 
+HANDLE_FUNC(LOG,     4,        "\\log_{%a}(%b)",            4 + a*0.7 + b, "\\frac{\\frac{%d(%r)}{%r} \\cdot \\ln(%l) - \\frac{%d(%l)}{%l} \\cdot \\ln(%r)}{(\\ln(%l))^2}")           
+HANDLE_FUNC(LN,      4,        "\\ln(%a)",                  3 + a,         "\\frac{%d(%l)}{%l}")                                                   
+HANDLE_FUNC(EXP,     4,        "e^{%a}",                    1 + a*0.7,     "e^{%l} \\cdot %d(%l)")    
        
-HANDLE_FUNC(SIN,     4,        "\\sin(%a)",                 4 + a,         "\\cos(%l) \\cdot %d(%l)",                                                                                                                    
-HANDLE_FUNC(COS,     4,        "\\cos(%a)",                 4 + a,         "-\\sin(%l) \\cdot %d(%l)",                                            
-HANDLE_FUNC(TAN,     4,        "\\tan(%a)",                 a + a,         "\\frac{%d(%l)}{\\cos^2(%l)}",                                          
-HANDLE_FUNC(CTAN,    4,        "\\operatorname{ctg}(%a)",   4 + a,         "-\\frac{%d(%l)}{1 + %l^2}",   
+HANDLE_FUNC(SIN,     4,        "\\sin(%a)",                 4 + a,         "\\cos(%l) \\cdot %d(%l)")                                                                                                                    
+HANDLE_FUNC(COS,     4,        "\\cos(%a)",                 4 + a,         "-\\sin(%l) \\cdot %d(%l)")                                            
+HANDLE_FUNC(TAN,     4,        "\\tan(%a)",                 a + a,         "\\frac{%d(%l)}{\\cos^2(%l)}")                                          
+HANDLE_FUNC(CTAN,    4,        "\\operatorname{ctg}(%a)",   4 + a,         "-\\frac{%d(%l)}{1 + %l^2}")   
        
-HANDLE_FUNC(ARCSIN,  4,        "\\arcsin(%a)",              7 + a,         "\\frac{%d(%l)}{\\sqrt{1 - %l^2}}",                                     
-HANDLE_FUNC(ARCCOS,  4,        "\\arccos(%a)",              7 + a,         "-\\frac{%d(%l)}{\\sqrt{1 - %l^2}}",                                    
-HANDLE_FUNC(ARCTAN,  4,        "\\arctan(%a)",              7 + a,         "\\frac{%d(%l)}{1 + %l^2}",                                            
-HANDLE_FUNC(ARCCTAN, 4,        "\\operatorname{arctg}(%a)", 6 + a,         "-\\frac{%d(%l)}{1 + %l^2}", 
+HANDLE_FUNC(ARCSIN,  4,        "\\arcsin(%a)",              7 + a,         "\\frac{%d(%l)}{\\sqrt{1 - %l^2}}")                                     
+HANDLE_FUNC(ARCCOS,  4,        "\\arccos(%a)",              7 + a,         "-\\frac{%d(%l)}{\\sqrt{1 - %l^2}}")                                    
+HANDLE_FUNC(ARCTAN,  4,        "\\arctan(%a)",              7 + a,         "\\frac{%d(%l)}{1 + %l^2}")                                            
+HANDLE_FUNC(ARCCTAN, 4,        "\\operatorname{arctg}(%a)", 6 + a,         "-\\frac{%d(%l)}{1 + %l^2}") 
        
-HANDLE_FUNC(CH,      4,        "\\operatorname{ch}(%a)",    3 + a,         "\\operatorname{sh}(%l) \\cdot %d(%l)",                                
-HANDLE_FUNC(SH,      4,        "\\operatorname{sh}(%a)",    3 + a,         "\\operatorname{ch}(%l) \\cdot %d(%l)",                                 
-HANDLE_FUNC(ARCSH,   4,        "\\operatorname{arsh}(%a)",  5 + a,         "\\frac{%d(%l)}{\\sqrt{1 + %l^2}}",                                    
-HANDLE_FUNC(ARCCH,   4,        "\\operatorname{arch}(%a)",  5 + a,         "\\frac{%d(%l)}{\\sqrt{%l^2 - 1}}",                                     
+HANDLE_FUNC(CH,      4,        "\\operatorname{ch}(%a)",    3 + a,         "\\operatorname{sh}(%l) \\cdot %d(%l)")                                
+HANDLE_FUNC(SH,      4,        "\\operatorname{sh}(%a)",    3 + a,         "\\operatorname{ch}(%l) \\cdot %d(%l)")                                 
+HANDLE_FUNC(ARCSH,   4,        "\\operatorname{arsh}(%a)",  5 + a,         "\\frac{%d(%l)}{\\sqrt{1 + %l^2}}")                                    
+HANDLE_FUNC(ARCCH,   4,        "\\operatorname{arch}(%a)",  5 + a,         "\\frac{%d(%l)}{\\sqrt{%l^2 - 1}}")                                     

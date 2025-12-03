@@ -30,7 +30,7 @@ static bool check_in(size_t target, args_arr_t args_arr) {
 #define MAKE_STEP(str_num, num)                                                      \
     do {                                                                             \
         ON_TEX_CREATION_DEBUG(                                                       \
-            print_diff_step_text(tree, node, #num);                                  \
+            print_diff_step(tree, node, #num);                                  \
         )                                                                            \
         return c(num);                                                               \
     } while (0)
@@ -45,26 +45,32 @@ tree_node_t* get_diff(tree_node_t* node,
         return nullptr;
 
     if (node->type == CONSTANT) {
+        ON_TEX_CREATION_DEBUG(
         print_tex_const_diff_comment(*tree->tex_file);
+        )
         MAKE_STEP(zero, 0);
     }
     if (node->type == VARIABLE) {
         if (args_arr.size == 0 || check_in(node->value.var_idx, args_arr)) {
+            ON_TEX_CREATION_DEBUG(
             print_tex_var_diff_comment(*tree->tex_file);
+            )
             MAKE_STEP(one, 1);
         }
+        ON_TEX_CREATION_DEBUG(
         print_tex_const_diff_comment(*tree->tex_file);
+        )
         MAKE_STEP(zero, 0);
     }
 
     tree_node_t* l = node->left;
     tree_node_t* r = node->right;
 
-    #define HANDLE_FUNC(op_code, str_name, impl_func, args_cnt, DSL_deriv) \
+    #define HANDLE_FUNC(op_code, str_name, is_operator, impl_func, args_cnt, DSL_deriv, ...) \
         case op_code: {                                                                                     \
             ON_TEX_CREATION_DEBUG(                                                                          \
                 print_tex_basic_diff_comment(*tree->tex_file);                                              \
-                print_diff_step(tree, node, op_code);                                                  \
+                print_diff_step_tex_fmt(tree, node);                                                                \
             )                                                                                               \
             return DSL_deriv;                                                                               \
         }
@@ -83,7 +89,7 @@ tree_node_t* get_diff(tree_node_t* node,
 
 //================================================================================
 
-#define HANDLE_FUNC(op_code, str_name, impl_func, arg_cnt, ...)           \
+#define HANDLE_FUNC(op_code, str_name, is_operator, impl_func, arg_cnt, ...)           \
     static var_val_type op_code##_func(var_val_type a, var_val_type b) {  \
         HARD_ASSERT(!isnan(a), "a is nan");                               \
         if(arg_cnt == 2) HARD_ASSERT(!isnan(b), "b is nan");              \

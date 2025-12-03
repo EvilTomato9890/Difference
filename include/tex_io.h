@@ -13,9 +13,9 @@ error_code print_tex_expr(const tree_t* tree,
                                 tree_node_t*  node,
                                 const char*   fmt, ...);  
 
-error_code print_diff_step(const tree_t* tree, tree_node_t*  node, func_type_t pattern);
+error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pattern);
 
-error_code print_diff_step_text(const tree_t* tree, tree_node_t*  node, const char* pattern);
+error_code print_diff_step_tex_fmt(const tree_t* tree, tree_node_t* node);
 
 //================================================================================
 
