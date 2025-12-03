@@ -60,11 +60,11 @@ tree_node_t* get_diff(tree_node_t* node,
     tree_node_t* l = node->left;
     tree_node_t* r = node->right;
 
-    #define HANDLE_FUNC(op_code, str_name, impl_func, args_cnt, priority, pattern, rule_pattern, DSL_deriv) \
+    #define HANDLE_FUNC(op_code, str_name, impl_func, args_cnt, DSL_deriv) \
         case op_code: {                                                                                     \
             ON_TEX_CREATION_DEBUG(                                                                          \
                 print_tex_basic_diff_comment(*tree->tex_file);                                              \
-                print_diff_step(tree, node, rule_pattern);                                                  \
+                print_diff_step(tree, node, op_code);                                                  \
             )                                                                                               \
             return DSL_deriv;                                                                               \
         }

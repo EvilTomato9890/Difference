@@ -23,36 +23,6 @@ const int MAX_CONST_LEN = 64;
 
 //================================================================================
 
-struct func_struct {
-    func_type_t func_type;
-    const char* func_name;   
-};
-
-#define HANDLE_FUNC(op_code, str_name, ...) \
-    { op_code, #str_name },
-
-static func_struct op_codes[] = {
-    #include "copy_past_file"
-};
-
-#undef HANDLE_FUNC
-
-const int op_codes_num = sizeof(op_codes) / sizeof(func_struct);
-
-//--------------------------------------------------------------------------------
-
-const char* get_func_name_by_type(func_type_t func_type_value) {
-    for (size_t index_value = 0; index_value < (size_t)op_codes_num; ++index_value) {
-        if (op_codes[index_value].func_type == func_type_value) {
-            return op_codes[index_value].func_name;
-        }
-    }
-
-    LOGGER_ERROR("get_func_name_by_type: unknown func_type %d", (int)func_type_value);
-    return "";
-}
-//================================================================================
-
 struct tex_func_fmt {
     func_type_t  func_type;
     const char*  symbol;   
@@ -210,6 +180,9 @@ static void print_node_tex_leaf(FILE* tex, const tree_t* tree,
 
 static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
                                          const tex_func_fmt* fmt, int my_prec) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(node != nullptr, "node is nullptr");
+
     const char* pattern = fmt->pattern ? fmt->pattern : "";
 
     int child_prec = my_prec;
@@ -233,8 +206,12 @@ static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node
     }
 }
 
-static void print_node_tex_function(FILE* tex, const tree_t* tree,tree_node_t* node,
+static void print_node_tex_function(FILE* tex, const tree_t* tree, tree_node_t* node,
                                      int parent_prec, assoc_pos_t pos) {
+    HARD_ASSERT(node != nullptr, "node is nullptr");
+    HARD_ASSERT(node->type == FUNCTION, "node is not FUNCTION");
+    HARD_ASSERT(tree  != nullptr, "tex is nullptr");
+
     int my_prec = get_tex_prec(node);
     bool need_paren = tex_need_parens(node, parent_prec, pos);
 
@@ -242,28 +219,7 @@ static void print_node_tex_function(FILE* tex, const tree_t* tree,tree_node_t* n
 
     const tex_func_fmt* fmt = get_tex_fmt_by_type(node->value.func);
 
-    if (fmt) {
-        print_node_tex_pattern_impl(tex, tree, node, fmt, my_prec);
-    } else {
-        const char* name = get_func_name_by_type(node->value.func);
-        if (!name) name = "f";
-
-        fprintf(tex, "\\operatorname{%s}", name);
-
-        if (node->left || node->right) {
-            fputc('(', tex);
-            if (node->left) {
-                print_node_tex_impl(tex, tree, node->left,
-                                     TEX_PREC_LOWEST, ASSOC_LEFT);
-                if (node->right) {
-                    fprintf(tex, ", ");
-                    print_node_tex_impl(tex, tree, node->right,
-                                         TEX_PREC_LOWEST, ASSOC_RIGHT);
-                }
-            }
-            fputc(')', tex);
-        }
-    }
+    print_node_tex_pattern_impl(tex, tree, node, fmt, my_prec);
 
     if (need_paren) fputc(')', tex);
 }
@@ -586,7 +542,7 @@ static size_t get_double_len(double target) {
     int n = snprintf(buf, sizeof(buf), "%.2f", target);
     return (n > 0 ? (size_t)n : 0);
 }
-
+/*
 ssize_t get_tex_len(const tree_t* tree, const tree_node_t* node) {
     HARD_ASSERT(tree != nullptr, "Tree is nullptr");
 
@@ -597,9 +553,8 @@ ssize_t get_tex_len(const tree_t* tree, const tree_node_t* node) {
     if(node->type != FUNCTION) {LOGGER_ERROR("Unknown type"); return -1;}
 
     #define HANDLE_FUNC(op_code, str_name, func, args_cnt, priority, latex_fmt, ...) \
-        case op_code:                                                                \
-            return strlen(#latex_fmt) - args_cnt * 2; 
-
+        case op_code:
+            return strlen(#latex_fmt) - args_cnt * 2;
     switch(node->value.func) {
         #include "copy_past_file"
         default:
@@ -607,6 +562,4 @@ ssize_t get_tex_len(const tree_t* tree, const tree_node_t* node) {
             return -1;
     }
 
-    #undef HANDLE_FUNC
-
-}
+}*/
