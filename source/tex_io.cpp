@@ -182,8 +182,6 @@ static void print_node_tex(FILE* tex, const tree_t* tree, tree_node_t* node) {
     print_node_tex_impl(tex, tree, node, TEX_PREC_LOWEST, ASSOC_ROOT);
 }
 
-//--------------------------------------------------------------------------------
-
 static void print_node_tex_leaf(FILE* tex, const tree_t* tree,
                                  const tree_node_t* node) {
     if (!node) {
@@ -206,8 +204,6 @@ static void print_node_tex_leaf(FILE* tex, const tree_t* tree,
             break;
     }
 }
-
-//--------------------------------------------------------------------------------
 
 static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
                                          const tex_func_fmt* fmt, int my_prec) {
@@ -233,9 +229,6 @@ static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node
         }
     }
 }
-
-
-//--------------------------------------------------------------------------------
 
 static void print_node_tex_function(FILE* tex, const tree_t* tree,tree_node_t* node,
                                      int parent_prec, assoc_pos_t pos) {
@@ -272,8 +265,6 @@ static void print_node_tex_function(FILE* tex, const tree_t* tree,tree_node_t* n
     if (need_paren) fputc(')', tex);
 }
 
-//--------------------------------------------------------------------------------
-
 static void print_node_tex_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
                                  int parent_prec, assoc_pos_t pos) {
     if (!node) {
@@ -295,21 +286,24 @@ void print_tex_header(FILE* tex) {
     HARD_ASSERT(tex != nullptr, "tex is nullptr");
 
     fprintf(tex,
-            "\\documentclass[a4paper,12pt]{article}\n"
-            "\\usepackage[T2A]{fontenc}\n"
-            "\\usepackage[utf8]{inputenc}\n"
-            "\\usepackage[russian]{babel}\n"
-            "\\usepackage{amsmath}\n"
-            "\\usepackage{amssymb}\n"
-            "\\usepackage{autobreak}\n"
-            "\\usepackage{hyperref}\n"
-            "\\begin{document}\n"
-            "\\title{Деградирование}\n"
-            "\\author{}\n"
-            "\\date{}\n"
-            "\\maketitle\n"
-            "\\tableofcontents\n"
-            "\\newpage\n");
+        "\\documentclass[a4paper,12pt]{article}\n"
+        "\\usepackage[T2A]{fontenc}\n"
+        "\\usepackage[utf8]{inputenc}\n"
+        "\\usepackage[russian]{babel}\n"
+        "\\usepackage{amsmath}\n"
+        "\\usepackage{amssymb}\n"
+        "\\usepackage{autobreak}\n"
+        "\\usepackage{hyperref}\n"
+        "\\setcounter{secnumdepth}{0}\n"
+        "\\begin{document}\n"
+        "\\title{Сокращение рода боблина}\n"
+        "\\maketitle\n"
+        "\\newpage\n");
+    print_tex_introduction(tex);
+    fprintf(tex, 
+        "\\tableofcontents\n"
+        "\\newpage\n"
+    );
     fflush(tex);
 }
 
@@ -320,89 +314,212 @@ void print_tex_footer(FILE* tex) {
             "\\end{document}\n");
     fflush(tex);
 }
+    
+void print_tex_H2(FILE* tex, const char* fmt, ...) {
+    if(!tex) return ;
+    if (fmt && *fmt) {
+        va_list args;
+        va_start(args, fmt);
 
-error_code tree_print_tex_expr(const tree_t* tree, tree_node_t*  node,
-                               const char*   fmt, ...){
+        fprintf(tex, "\\subsection{");  
+        vfprintf(tex, fmt, args);     
+        fprintf(tex, "}\n");          
+
+        va_end(args);
+    }
+}
+
+void print_tex_H1(FILE* tex, const char* fmt, ...) {
+    if(!tex) return ;
+    if (fmt && *fmt) {
+        va_list args;
+        va_start(args, fmt);
+
+        fprintf(tex, "\\section{");  
+        vfprintf(tex, fmt, args);     
+        fprintf(tex, "}\n");          
+
+        va_end(args);
+    }
+}
+
+void print_tex_P(FILE* tex,   const char* fmt, ...) {
+    if(!tex) return ;
+    if (fmt && *fmt) {
+        va_list args;
+        va_start(args, fmt);
+
+        fprintf(tex, "\\begin{center}\n");  
+        vfprintf(tex, fmt, args);     
+        fprintf(tex, "\n\\end{center}\n");          
+
+        va_end(args);
+    }
+}
+
+void print_tex_delimeter(FILE* tex) {
+    if(!tex) return ;
+    fprintf(tex, "\\noindent\\hrulefill");  
+}
+//================================================================================
+
+void print_tex_introduction(FILE* tex) {
+    HARD_ASSERT(tex != nullptr, "tex is nullptr");
+    fprintf(tex, 
+        "\\begin{titlepage}\n"
+        "    \\centering\n"
+        "\n"
+        "    {\\Large Уставший волшебник}\\\\[1cm]\n"
+        "\n"
+        "    {\\huge\\bfseries «Завершение рода Боблина»}\\\\[0.5cm]\n"
+        "\n"
+        "    \\raggedright\n"
+        "\n"
+        "    \\textbf{Предыстория} \\\\[0.3cm]\n"
+        "\n"
+        "    Жил-был самый обычный гоблин по имени Боблин и его очень большая семья. \\\\ \n"
+        "    Как-то раз, одним жарким летом они все вместе решили отправиться на пикник.\\\\ \n"
+        "    Они нашли великолепную полянку посреди болота: солнышко, зеленая трава, тенеко от непонятно башни, одним словом - благодать. \\\\ \n"
+        "    Шел 5-ый час гоблинской пъянки, тут уже нервы волшебника живущего в башне не выдержали. \\\\ \n"
+        "    и он решил обрушиить свой праведный гнев не семейство Боблина, истребив некоторую его часть. \\\\ "
+        "\n"
+        "    \\vspace{0.8cm}\n"
+        "    \\textbf{Боевой журнал}\\\\[0.3cm]\n"
+        "\n"
+        "    В башне стоял особенный артефакт, который записывал ход сражения в виде странного набора символов.\\\\ \n"
+        "    Которые лишь сам маг был способен понять, здесь и будет приведет этот боевой журнал. \\\\ "
+        "    \\vfill\n"
+        "\n"
+        "    \\raggedleft\n"
+        "    \\textit{«Если на странице стало больше знаков — значит, кто-то из клана Боблина опять что-то натворил.»}\\\\[0.3cm]\n"
+        "\n"
+        "\\end{titlepage}\n"
+
+    );
+}
+
+//================================================================================
+
+struct comment_t {
+    const char* const* arr;
+    size_t             size;
+    size_t             curr_idx;
+};
+
+//--------------------------------------------------------------------------------
+
+static const char* get_next_comment(comment_t* comments) {
+    if (!comments || !comments->arr || comments->size == 0) return nullptr;
+
+    if (comments->curr_idx >= comments->size)
+        comments->curr_idx = 0;
+
+    return comments->arr[comments->curr_idx++];
+}
+
+static const char* const comments_arr_zero[] = {
+    "Ваше заклинание дезинтегрировало брата Боблина",
+    "Ваше колдовство низвело сестру Боблина до атомов",
+    "Вы разложили дядю Боблина на молекулы",
+    "Ваше волшебство оказалось не по зубам тёте Боблина, кстати, куда она делась?",
+    "Огненный шар испарил бабушку Боблина",
+    "Заклинание хаоса раскидало части племянника Боблина по разным планам",
+    "Ваш портал небытия вежливо удалил тещу Боблина из этого измерения"
+};
+
+static comment_t comments_zero = {
+    comments_arr_zero,
+    sizeof(comments_arr_zero) / sizeof(comments_arr_zero[0]),
+    0
+};
+
+static const char* const comments_arr_one[] = {
+    "Полиморф сработал отлично: зять Боблина теперь лягушка",
+    "Поздравляю! От свояка Боблина осталась только полоыина",
+    "Ваше заклинание свернуло невестку Боблина в шарик",
+    "ААХХАХААХАХ Гоблин-Боблин",
+    "Ваше вошшебство откатило деверя Боблина до младенчества"
+};
+
+static comment_t comments_one = {
+    comments_arr_one,
+    sizeof(comments_arr_one) / sizeof(comments_arr_one[0]),
+    0
+};
+
+static const char* const comments_arr_basic[] = {
+    "Битва продолжается, не теряйте духу, они когда-то, наверное, закончаться!",
+    "Их не становиться меньше, откуда они только лезут?!",
+    "Вот так и рождаются легенды о герое, истребившем половину рода Боблина.",
+    "Небольшой взмах посохом — и план сражения выглядит куда приличнее.",
+    "Один из гоблинов упал",
+    "Родственники Боблина продолжают лезть к вам, держите посох крепче!"
+};
+
+static comment_t comments_basic = {
+    comments_arr_basic,
+    sizeof(comments_arr_basic) / sizeof(comments_arr_basic[0]),
+    0
+};
+
+//--------------------------------------------------------------------------------
+
+#define PRINT_DIFF_COMMENT_TEMPLATE(arr_name)               \
+    const char* comment = get_next_comment(&comments_##arr_name); \
+    if (comment) print_tex_P(tex, comment);                 
+
+
+void print_tex_const_diff_comment(FILE* tex) {
+    PRINT_DIFF_COMMENT_TEMPLATE(zero); 
+}
+
+void print_tex_var_diff_comment(FILE* tex) {
+    PRINT_DIFF_COMMENT_TEMPLATE(one);  
+}
+
+void print_tex_basic_diff_comment(FILE* tex) {
+    PRINT_DIFF_COMMENT_TEMPLATE(basic); 
+}
+
+#undef PRINT_DIFF_COMMENT_TEMPLATE
+
+//================================================================================
+
+error_code print_tex_expr(const tree_t* tree, tree_node_t*  node, const char* fmt, ...){
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(node != nullptr, "node is nullptr");
 
-    LOGGER_DEBUG("tree_print_tex_expr: started");
+    LOGGER_DEBUG("print_tex_expr: started");
 
     error_code error = ERROR_NO;
 
     if (tree->tex_file == nullptr || *tree->tex_file == nullptr) {
-        LOGGER_WARNING("tree_print_tex_expr: tex is nullptr");
+        LOGGER_WARNING("print_tex_expr: tex is nullptr");
         return ERROR_NO;
     }
     FILE* tex = *tree->tex_file;
-    
-    if (fprintf(tex, EXPR_HEAD) < 0) {
-        LOGGER_ERROR("tree_print_tex_expr: fprintf begin align* failed");
-        error |= ERROR_OPEN_FILE;
-    }
-         
+
     if (fmt && *fmt) {
         va_list args = {};
         va_start(args, fmt);
         vfprintf(tex, fmt, args);
         va_end(args);
     }
-     
+
+    if (fprintf(tex, EXPR_HEAD) < 0) {
+        LOGGER_ERROR("print_tex_expr: fprintf begin align* failed");
+        error |= ERROR_OPEN_FILE;
+    }
     print_node_tex(tex, tree, node);
      
     if (fprintf(tex, EXPR_TAIL) < 0) {
-        LOGGER_ERROR("tree_print_tex_expr: fprintf end align* failed");
+        LOGGER_ERROR("print_tex_expr: fprintf end align* failed");
         error |= ERROR_OPEN_FILE;
     }
      
     fflush(tex);
 
     return error;
-}
-
-error_code print_merge_tex_expr(tree_t* left_tree,  tree_node_t* left_node, 
-                                tree_t* right_tree, tree_node_t* right_node,
-                                const char* pattern) {
-    HARD_ASSERT(left_tree != nullptr, "Left_tree is nullptr");
-    HARD_ASSERT(right_tree != nullptr, "Right_tree is nullptr");
-    HARD_ASSERT(left_node != nullptr, "Left_node is nullptr");
-    HARD_ASSERT(right_node != nullptr, "Right_node is nullptr");
-
-    error_code error = ERROR_NO;
-
-    if (left_tree->tex_file == nullptr || *left_tree->tex_file == nullptr) {
-        LOGGER_WARNING("print_merge_tex_expr: tex is nullptr");
-        return ERROR_NO;
-    }
-    FILE* tex = *left_tree->tex_file;
-
-    if (fprintf(tex, EXPR_HEAD) < 0) {
-        LOGGER_ERROR("print_merge_tex_expr: fprintf begin aligned failed");
-        error |= ERROR_OPEN_FILE;
-    }
-
-    for (const char* p = pattern; *p != '\0'; ++p) {
-        if (*p == '%' && (p[1] == 'a' || p[1] == 'b')) {
-            bool is_a = (p[1] == 'a');
-            if (is_a) {
-                print_node_tex(tex, left_tree, left_node);
-            } else {
-                print_node_tex(tex, right_tree, right_node);
-            }
-            ++p; 
-        } else {
-            fputc(*p, tex);
-        }
-    }
-
-    if (fprintf(tex, EXPR_TAIL) < 0) {
-        LOGGER_ERROR("print_merge_tex_expr: fprintf end aligned failed");
-        error |= ERROR_OPEN_FILE;
-    }
-    fflush(tex);
-
-    return error;
-
 }
 
 error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pattern){

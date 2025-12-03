@@ -17,48 +17,59 @@ static const double CMP_PRECISION = 1e-9;
 //================================================================================
 
 static bool check_in(size_t target, args_arr_t args_arr) {
-    if(args_arr.arr == nullptr || args_arr.size == 0) return false;
-    
-    for(size_t i = 0; i < args_arr.size; i++) 
-        if(target == args_arr.arr[i]) return true;
+    if (args_arr.arr == nullptr || args_arr.size == 0) return false;
+
+    for (size_t i = 0; i < args_arr.size; i++)
+        if (target == args_arr.arr[i]) return true;
+
     return false;
 }
 
-#define MAKE_CONST_STEP(const)                                              \
-    ON_TEX_CREATION_DEBUG(                                                  \
-    print_diff_step(tree, node, #const);                                    \
-    )                                                                       \
-    return c(const);
+//================================================================================
 
-tree_node_t* get_diff(tree_node_t* node, args_arr_t args_arr ON_TEX_CREATION_DEBUG(, tree_t* tree)) {
+#define MAKE_STEP(str_num, num)                                                      \
+    do {                                                                             \
+        ON_TEX_CREATION_DEBUG(                                                       \
+            print_diff_step(tree, node, #num);                                       \
+        )                                                                            \
+        return c(num);                                                               \
+    } while (0)
+
+tree_node_t* get_diff(tree_node_t* node,
+                      args_arr_t   args_arr
+                      ON_TEX_CREATION_DEBUG(, tree_t* tree))
+{
     HARD_ASSERT(args_arr.size == 0 || args_arr.arr != nullptr, "Wrong arg list");
-    if(!node) return nullptr;
 
-    tree_node_t* new_node = nullptr;
+    if (!node)
+        return nullptr;
+
     if (node->type == CONSTANT) {
-        MAKE_CONST_STEP(0);
+        print_tex_const_diff_comment(*tree->tex_file);
+        MAKE_STEP(zero, 0);
     }
-    if(node->type == VARIABLE) {
-        if(args_arr.size == 0) {
-            MAKE_CONST_STEP(1);
+    if (node->type == VARIABLE) {
+        if (args_arr.size == 0 || check_in(node->value.var_idx, args_arr)) {
+            print_tex_var_diff_comment(*tree->tex_file);
+            MAKE_STEP(one, 1);
         }
-        if(check_in(node->value.var_idx, args_arr)) {
-            MAKE_CONST_STEP(1);
-        }
-        MAKE_CONST_STEP(0);
+        print_tex_const_diff_comment(*tree->tex_file);
+        MAKE_STEP(zero, 0);
     }
 
     tree_node_t* l = node->left;
     tree_node_t* r = node->right;
 
     #define HANDLE_FUNC(op_code, str_name, impl_func, args_cnt, priority, pattern, rule_pattern, DSL_deriv) \
-    case op_code:                                                                                       \
-        ON_TEX_CREATION_DEBUG(                                                                          \
-        print_diff_step(tree, node, rule_pattern);                                                      \
-        )                                                                                               \
-        return DSL_deriv;             
+        case op_code: {                                                                                     \
+            ON_TEX_CREATION_DEBUG(                                                                          \
+                print_tex_basic_diff_comment(*tree->tex_file);                                              \
+                print_diff_step(tree, node, rule_pattern);                                                  \
+            )                                                                                               \
+            return DSL_deriv;                                                                               \
+        }
 
-    switch(node->value.func) {
+    switch (node->value.func) {
         #include "copy_past_file"
         default:
             LOGGER_ERROR("Unknown func");
@@ -67,6 +78,7 @@ tree_node_t* get_diff(tree_node_t* node, args_arr_t args_arr ON_TEX_CREATION_DEB
 
     #undef HANDLE_FUNC
 }
+
 #undef MAKE_STEP
 
 //================================================================================

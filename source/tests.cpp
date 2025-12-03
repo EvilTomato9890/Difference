@@ -829,7 +829,7 @@ static void test_tree_tex_print() {
     HARD_ASSERT(error == ERROR_NO, "creating root failed");
     tree_replace_root(tree, new_root);
 
-    error |= tree_print_tex_expr(tree, tree->root, "f(x, y) = ");
+    error |= print_tex_expr(tree, tree->root, "f(x, y) = ");
     HARD_ASSERT(error == ERROR_NO, "tree_dump before optimize failed");
 
     ON_DEBUG(
@@ -893,23 +893,23 @@ static void test_tree_hard_tex() {
     tree_replace_root(tree, new_root);
     error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree"); //TODO
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
-    error = tree_print_tex_expr(tree, tree->root, "f(x) = ");
+    error = print_tex_expr(tree, tree->root, "f(x) = ");
 
 
     tree_node_t* new_root_2 = get_diff(tree->root, {nullptr, 0} ON_TEX_CREATION_DEBUG(, tree));
     tree_replace_root(tree, new_root_2);
     error = tree_dump(tree, VER_INIT, true, "Diff tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
-    error = tree_print_tex_expr(tree, tree->root, "f(x)|dx = ");
+    error = print_tex_expr(tree, tree->root, "f(x)|dx = ");
 
     error = tree_optimize(tree);
     HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
-    error = tree_print_tex_expr(tree, tree->root, "optimized f(x)|dx = ");
+    error = print_tex_expr(tree, tree->root, "optimized f(x)|dx = ");
 
     error = tree_dump(tree, VER_INIT, true, "optimized tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    error = tree_print_tex_expr(tree, tree->root, "f(x)` = ");
+    error = print_tex_expr(tree, tree->root, "f(x)` = ");
     ON_DEBUG(
     forest_close_dump_file(&forest);
     forest_close_tex_file(&forest);
@@ -949,7 +949,7 @@ static void test_teylor() {
     error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree"); //TODO
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    error = tree_print_tex_expr(tree, tree->root, "f(x) = ");
+    error = print_tex_expr(tree, tree->root, "f(x) = ");
 
     ssize_t temp = get_var_idx({"x", 1}, tree->var_stack);
     HARD_ASSERT(temp != -1, "Failed to find x");
@@ -960,7 +960,7 @@ static void test_teylor() {
 
     tree_t* tree_teylor = make_teylor(&forest, tree, x_idx, 1);
     HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
-    error = tree_print_tex_expr(tree_teylor, tree_teylor->root, "teylor f(x)|dx = ");
+    error = print_tex_expr(tree_teylor, tree_teylor->root, "teylor f(x)|dx = ");
 
     error = tree_dump(tree_teylor, VER_INIT, true, "teylor tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
@@ -974,6 +974,60 @@ static void test_teylor() {
     free(forest_buff.ptr);
     forest_dest(&forest);
     LOGGER_INFO("Тест пройден: тейлор \n");
+}
+
+static void test_main() {
+    LOGGER_INFO("=== Тест: основа ===");
+
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    string_t forest_buff = {};
+    error |= read_file_to_buffer_by_name(&forest_buff,  "main.tree");
+    HARD_ASSERT(error == ERROR_NO, "read tree failed");
+    forest.buff = {.ptr = forest_buff.ptr, .len = forest_buff.len};
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+    
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "main.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    forest_open_tex_file(&forest, "main.tex");
+    HARD_ASSERT(forest.tex_file != nullptr, "failed to create tex file");
+    )
+
+    tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
+    tree_replace_root(tree, new_root);
+
+    error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree"); //TODO
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    error = print_tex_expr(tree, tree->root, "f(x) = ");
+
+    ssize_t temp = get_var_idx({"x", 1}, tree->var_stack);
+    HARD_ASSERT(temp != -1, "Failed to find x");
+    size_t x_idx = (size_t)temp; 
+    
+    tree_t* tree_teylor = make_teylor(&forest, tree, x_idx, 1);
+    HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
+
+    print_tex_H2(forest.tex_file, "Полный план сражения с Тейлором-Боблином");
+    error = print_tex_expr(tree_teylor, tree_teylor->root, "f(x) = ");
+
+    error = tree_dump(tree_teylor, VER_INIT, true, "teylor tree");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    forest_close_tex_file(&forest);
+    )
+    tree_plot_to_gnuplot(tree, x_idx, -5, 5, 100, "teylor_plot.dat", "teylor_plot.png");
+    free(forest_buff.ptr);
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: тейлор \n"); 
 }
 
 //================================================================================
@@ -1007,7 +1061,8 @@ int run_tests() {
     test_tree_input();
     test_tree_hard_tex();
     test_teylor();
-
+    test_main();
+    
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
     LOGGER_INFO("========================================\n");

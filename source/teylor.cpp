@@ -10,9 +10,11 @@
 #include "teylor.h"
 #include "tree_verification.h"
 #include "list_verification.h"
+#include "tex_io.h"
+
 #include <math.h>
 
-static const int TEYLOR_DEPTH  = 3;
+static const int TEYLOR_DEPTH  = 4;
 
 static unsigned long long calc_fact(int n) {
     if(n > 20) LOGGER_WARNING("Fact wil be overloaded");
@@ -33,7 +35,8 @@ static tree_t* add_diff(forest_t* forest, tree_t* target_tree, args_arr_t args_a
         LOGGER_ERROR("add_diff: failed add tree");
         return nullptr;
     }
-
+    print_tex_expr(target_tree, target_tree->root, "Текущий ход событий: ");
+    print_tex_delimeter(forest->tex_file);
     LOGGER_DEBUG("add_diff: get_diff started");
     tree_node_t* diff_root = get_diff(target_tree->root, args_arr ON_TEX_CREATION_DEBUG(, target_tree));
     if(diff_root == nullptr) {
@@ -90,12 +93,13 @@ tree_t* make_teylor(forest_t* forest, tree_t* root_tree, size_t var_idx, const_v
     LOGGER_DEBUG("make_teylor: started");
 
     error_code error = ERROR_NO;
-    
+    print_tex_H1(forest->tex_file, "Прибывает Тейлор и куча дальних родственников");
     tree_t* teylor_tree = forest_add_tree(forest, &error);
     if(error != ERROR_NO) {
         LOGGER_ERROR("add_tree failed");
         return nullptr;
     }
+    print_tex_expr(teylor_tree, root_tree->root, "Текущий ход событий: "); //REVIEW - СТоит ли делать отдельный парсер
     put_var_val(teylor_tree, var_idx, target_val);
 
     const_val_type first_val = calculate_tree(root_tree, false);
@@ -104,7 +108,7 @@ tree_t* make_teylor(forest_t* forest, tree_t* root_tree, size_t var_idx, const_v
 
     for(int i = 1; i < TEYLOR_DEPTH; i++) {
         LOGGER_DEBUG("make_teylor: making %d diff", i);
-        
+        print_tex_H2(forest->tex_file, "Прибывает %d-ая волна родственников Тейлора-Боблина", i);
         const_val_type res = add_and_calculate_diff(forest, root_tree, &root_tree, {&var_idx, 1}, &error);
 
         tree_node_t* target_var = init_node(VARIABLE, make_union_var(var_idx), nullptr, nullptr);
