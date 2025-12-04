@@ -175,7 +175,7 @@ static void print_node_label(const tree_t* tree, const tree_node_t* node, FILE* 
             const char* val_str = node_val_to_str(tree, self, val_buf, sizeof val_buf);       \
             fprintf(file,                                                               \
                     "  node_%p[shape=record,"                                           \
-                    "label=\"{ {ptr: %p} | {val: %s} | { prev: %p | next: %p } }\","    \
+                    "label=\"{ {ptr: %p} | {val: %s } | { prev: %p | next: %p } }\","    \
                     "color=\"" node_color "\",fillcolor=\"" node_fill "\"];\n",         \
                     self, self, val_str,                                                \
                     left, right);                                                       \

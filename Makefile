@@ -57,9 +57,14 @@ $(BIN_DIR):
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_DIR)
-	rm -rf *.html
-	rm -rf *.tex
+	rm -rf $(BUILD_DIR) $(BIN_DIR)  \
+	rm -rf *.html                   \
+    rm -rf *.pdf                    \
+    rm -rf *.toc                    \
+    rm -rf *.log                    \
+    rm -rf *.out                    \
+    rm -rf *.aux                    \
+    rm -rf *.fls                    \
+    rm -rf *.gz                     \
+    rm -rf *.fdb_latexmk            \
 	rm -rf $(DUMP_DIR)
-
-    

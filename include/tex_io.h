@@ -14,9 +14,9 @@ error_code print_tex_expr     (const tree_t* tree, tree_node_t* node, const char
 
 error_code print_tex_expr_full(const tree_t* tree, tree_node_t* node, const char* fmt, ...);
 
-error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pattern);
+error_code print_diff_step(tree_t* tree, tree_node_t* node, const char* pattern);
 
-error_code print_diff_step_tex_fmt(const tree_t* tree, tree_node_t* node);
+error_code print_diff_step_tex_fmt(tree_t* tree, tree_node_t* node);
 
 error_code print_tex_expr_with_squashes(tree_t* tree, tree_node_t* node, const char* fmt, ...);
 
@@ -46,8 +46,8 @@ void tex_clear_squash(tree_t* tree);
 
 //================================================================================
 
-#define EXPR_HEAD "\\begin{align*}\n\\begin{autobreak}\n" //REVIEW - Так или функцию
-#define EXPR_TAIL "\n\\end{autobreak}\n\\end{align*}\n\n"
+#define EXPR_HEAD "\n\\begin{math}\n" //REVIEW - Так или функцию
+#define EXPR_TAIL "\n\\end{math}\n\n"
 #define DIFFERENTIAL "\\frac{d}{dx}"
 
 //================================================================================

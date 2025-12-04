@@ -970,7 +970,7 @@ static void test_teylor() {
     forest_close_tex_file(&forest);
     )
     
-    tree_plot_to_gnuplot(tree, x_idx, -5, 5, 100, "teylor_plot.dat", "teylor_plot.png");
+    tree_plot_to_gnuplot(tree, x_idx, -5, 5, "teylor_plot.dat", "teylor_plot.png");
     free(forest_buff.ptr);
     forest_dest(&forest);
     LOGGER_INFO("Тест пройден: тейлор \n");
@@ -1005,17 +1005,17 @@ static void test_main() {
     error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree"); //TODO
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
-    error = print_tex_expr(tree, tree->root, "f(x) = ");
+    error = print_tex_expr_with_squashes(tree, tree->root, "f(x) = ");
 
     ssize_t temp = get_var_idx({"x", 1}, tree->var_stack);
     HARD_ASSERT(temp != -1, "Failed to find x");
     size_t x_idx = (size_t)temp; 
     
-    tree_t* tree_teylor = make_teylor(&forest, tree, x_idx, 1);
+    tree_t* tree_teylor = make_teylor(&forest, tree, x_idx, 0);
     HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
 
     print_tex_H1(forest.tex_file, "Полный план сражения с Тейлором-Боблином");
-    error = print_tex_expr(tree_teylor, tree_teylor->root, "f(x) = ");
+    error = print_tex_expr_with_squashes(tree_teylor, tree_teylor->root, "f(x) = ");
 
     error = tree_dump(tree_teylor, VER_INIT, true, "teylor tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
@@ -1024,7 +1024,7 @@ static void test_main() {
     forest_close_dump_file(&forest);
     forest_close_tex_file(&forest);
     )
-    tree_plot_to_gnuplot(tree, x_idx, -5, 5, 100, "teylor_plot.dat", "teylor_plot.png");
+    tree_plot_to_gnuplot(tree, x_idx, -5, 5, "teylor_plot.dat", "teylor_plot.png");
     free(forest_buff.ptr);
     forest_dest(&forest);
     LOGGER_INFO("Тест пройден: тейлор \n"); 

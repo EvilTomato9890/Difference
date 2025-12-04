@@ -11,10 +11,16 @@
 #include "tree_verification.h"
 #include "list_verification.h"
 #include "tex_io.h"
+#include "make_graph.h"
 
 #include <math.h>
 
-static const int TEYLOR_DEPTH  = 4;
+//================================================================================
+
+static const int MAX_FILE_NAME = 256;
+static const int TEYLOR_DEPTH  = 6;
+
+//================================================================================
 
 static unsigned long long calc_fact(int n) {
     if(n > 20) LOGGER_WARNING("Fact wil be overloaded");
@@ -35,7 +41,7 @@ static tree_t* add_diff(forest_t* forest, tree_t* target_tree, args_arr_t args_a
         LOGGER_ERROR("add_diff: failed add tree");
         return nullptr;
     }
-    print_tex_expr(target_tree, target_tree->root, "Текущий ход событий: ");
+    print_tex_expr_with_squashes(target_tree, target_tree->root, "Текущий ход событий: ");
     print_tex_delimeter(forest->tex_file);
     LOGGER_DEBUG("add_diff: get_diff started");
     tree_node_t* diff_root = get_diff(target_tree->root, args_arr ON_TEX_CREATION_DEBUG(, target_tree));
@@ -99,12 +105,16 @@ tree_t* make_teylor(forest_t* forest, tree_t* root_tree, size_t var_idx, const_v
         LOGGER_ERROR("add_tree failed");
         return nullptr;
     }
-    print_tex_expr(teylor_tree, root_tree->root, "Текущий ход событий: "); //REVIEW - СТоит ли делать отдельный парсер
+    print_tex_expr_with_squashes(root_tree, root_tree->root, "Текущий ход событий: "); //REVIEW - СТоит ли делать отдельный парсер
     put_var_val(teylor_tree, var_idx, target_val);
 
-    const_val_type first_val = calculate_tree(root_tree, false);
 
+    const_val_type first_val = calculate_tree(root_tree, false);
     tree_init_root(teylor_tree, CONSTANT, make_union_const(first_val));
+
+    FILE* dat_file = nullptr;
+    char  data_file_name[MAX_FILE_NAME] = {};
+    open_dat_file(&dat_file, data_file_name, MAX_FILE_NAME, nullptr, 1);
 
     for(int i = 1; i < TEYLOR_DEPTH; i++) {
         LOGGER_DEBUG("make_teylor: making %d diff", i);
@@ -116,6 +126,11 @@ tree_t* make_teylor(forest_t* forest, tree_t* root_tree, size_t var_idx, const_v
                                     POW_(SUB_(target_var, c(target_val)),
                                          c(i)));
         teylor_add_summand(teylor_tree, summand);
+
+        dat_add_tree_graph(dat_file, teylor_tree, var_idx, 0, 30);
     }
+
+    close_dat_file(dat_file);
+    plot_dat_with_gnuplot(data_file_name, "graphs/teylor.png");
     return teylor_tree;
 }

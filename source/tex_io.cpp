@@ -18,6 +18,7 @@
 #include "my_string.h"
 #include "file_operations.h"
 #include "tex_io.h"
+
 //================================================================================
 
 static const size_t TEX_SQUASH_MAX_VARS        = 26; 
@@ -26,6 +27,8 @@ static const size_t TEX_SQUASH_MAX_SUBEXPR_LEN = 80;
 static const size_t TEX_SQUASH_MIN_SUBEXPR_LEN = 1;  
 static const size_t MAX_CONST_LEN              = 64;
 static const size_t COST_LETTER                = 1; 
+static const double TEX_LEN_REDUCTION          = 2.5;
+
 //================================================================================
 
 struct tex_squash_candidate_t {
@@ -95,7 +98,7 @@ static const char* get_pow_diff_pattern(const tree_node_t* node) {
     const tree_node_t* r = node->right;
 
     if (is_subree_const(r)) {
-        return "%r \\cdot %l^{%r - 1} \\cdot %d(%l)";
+        return "%r \\cdot {%l}^{%r - 1} \\cdot %d(%l)";
     }
     if (is_subree_const(l)) {
         return "%p \\cdot \\ln(%l) \\cdot %d(%r)";
@@ -114,7 +117,7 @@ static const char* get_log_diff_pattern(const tree_node_t* node) {
         return "%d(%r) / (%r \\cdot \\ln(%l))";
     }
     if (is_subree_const(r)) {
-        return "-\\ln(%r) \\cdot %d(%l) / (%l \\cdot (\\ln(%l))^{2})";
+        return "-\\ln(%r) \\cdot %d(%l) / (%l \\cdot {\\ln(%l)}^{2})";
     }
     return " %d(%r) / %r - %d(%l) / %l ) / \\ln(%l)";
 }
@@ -163,6 +166,18 @@ static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node
                                          const char* fmt,
                                          int my_prec);
 
+static void tex_add_candidate(tree_t* tree, tree_node_t* node);
+
+static void tex_collect_candidates(tree_t* tree, tree_node_t* node);
+
+static error_code print_tex_squashes(const tree_t* tree);
+
+static void tex_try_take_candidate(tree_t* tree, tree_node_t* node,
+                                   size_t* used, size_t* curr_len);
+
+static error_code tex_prepare_squash(tree_t* tree, tree_node_t* root);
+
+static error_code tex_prepare_squash_ex(tree_t* tree, tree_node_t* root, size_t min_total_len);
 
 //--------------------------------------------------------------------------------
 
@@ -556,7 +571,7 @@ error_code print_tex_expr_full(const tree_t* tree, tree_node_t* node, const char
     return error;
 }
 
-error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pattern) {
+error_code print_diff_step(tree_t* tree, tree_node_t* node, const char* pattern) {
     HARD_ASSERT(tree  != nullptr, "tree is nullptr");
     HARD_ASSERT(node  != nullptr, "node is nullptr");
 
@@ -564,9 +579,17 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pa
         LOGGER_WARNING("print_diff_step: tex is nullptr");
         return ERROR_NO;
     }
-
+    
     FILE* tex = *tree->tex_file;
     error_code error = ERROR_NO;
+
+    error |= tex_prepare_squash_ex(tree, node, TEX_SQUASH_MAX_TOTAL_LEN / TEX_LEN_REDUCTION);
+    RETURN_IF_ERROR(error);
+
+    if (tree->squash_bindings && tree->squash_count > 0) {
+        error |= print_tex_squashes(tree);
+        RETURN_IF_ERROR(error);
+    }
 
     if (fprintf(tex, EXPR_HEAD) < 0) {
         LOGGER_ERROR("print_diff_step: begin failed");
@@ -597,6 +620,7 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pa
         }
 
         if (sub) {
+            tree_t* sub_tree = tree;
             print_node_tex(tex, tree, sub);
         }
     }
@@ -605,12 +629,12 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pa
         LOGGER_ERROR("print_diff_step: end failed");
         error |= ERROR_OPEN_FILE;
     }
-
+    tex_clear_squash(tree);
     fflush(tex);
     return error;
 }
 
-error_code print_diff_step_tex_fmt(const tree_t* tree, tree_node_t* node) {
+error_code print_diff_step_tex_fmt(tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(node != nullptr, "node is nullptr");
 
@@ -769,7 +793,7 @@ static void tex_try_take_candidate(tree_t* tree, tree_node_t* node,
     ++(*used);
 }
 
-static error_code tex_prepare_squash(tree_t* tree, tree_node_t* root) {
+static error_code tex_prepare_squash_ex(tree_t* tree, tree_node_t* root, size_t min_total_len) {
     if (!tree || !root) return ERROR_NO;
 
     tex_clear_squash(tree);
@@ -781,10 +805,12 @@ static error_code tex_prepare_squash(tree_t* tree, tree_node_t* root) {
     }
 
     size_t total_len = (size_t)total_len_signed;
-    if (total_len <= TEX_SQUASH_MAX_TOTAL_LEN) {
+    LOGGER_WARNING("tex_prepare_squash_ex: total_len = %zu, min_total_len = %zu",
+             total_len, min_total_len);
+
+    if (total_len <= min_total_len) {
         return ERROR_NO;
     }
-
     tree->squash_bindings = (tex_squash_binding_t*)calloc(TEX_SQUASH_MAX_VARS, sizeof(tex_squash_binding_t));
     if (!tree->squash_bindings) {
         LOGGER_ERROR("tex_prepare_squash: calloc squash_bindings failed");
@@ -809,7 +835,7 @@ static error_code tex_prepare_squash(tree_t* tree, tree_node_t* root) {
     size_t used          = 0;
 
     for (size_t i = 0;
-         i < tree->squash_count && curr_len > TEX_SQUASH_MAX_TOTAL_LEN && used < TEX_SQUASH_MAX_VARS;
+         i < tree->squash_count && curr_len > min_total_len && used < TEX_SQUASH_MAX_VARS;
          ++i) {
 
         tree_node_t* node = tree->squash_bindings[i].expr_subtree;
@@ -822,6 +848,10 @@ static error_code tex_prepare_squash(tree_t* tree, tree_node_t* root) {
     }
     tree->squash_count = used;
     return ERROR_NO;
+}
+
+static error_code tex_prepare_squash(tree_t* tree, tree_node_t* root) {
+    return tex_prepare_squash_ex(tree, root, TEX_SQUASH_MAX_TOTAL_LEN);
 }
 
 error_code print_tex_expr_with_squashes(tree_t* tree, tree_node_t* node, const char* fmt, ...) {
