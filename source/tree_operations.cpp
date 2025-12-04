@@ -173,6 +173,13 @@ bool tree_is_empty(const tree_t* tree) {
     return tree->root == nullptr;
 }
 
+bool is_subree_const(const tree_node_t* node) {
+    if (!node) return false;
+    if (node->type == CONSTANT) return true;
+    if (node->type == VARIABLE) return false;
+    return is_subree_const(node->left) && is_subree_const(node->right);
+}
+
 size_t count_nodes_recursive(const tree_node_t* node) {
     if (node == nullptr) return 0;
     return 1 + count_nodes_recursive(node->left) + count_nodes_recursive(node->right);

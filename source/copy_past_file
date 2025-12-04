@@ -10,11 +10,9 @@ HANDLE_FUNC(DIV,     /,        true,       a / b,            2,        DIV_(SUB_
                                                                             MUL_(cpy(r), cpy(r))))  
  
  
-HANDLE_FUNC(POW,     ^,        true,       pow(a, b),        2,        MUL_(POW_(cpy(l), cpy(r)), ADD_(MUL_(d(r),   LN_(cpy(l))),                     //(u^v) = u^v * (v' ln u + v u'/u)
-                                                                                                       MUL_(cpy(r), DIV_(d(l), cpy(l))))))  
-HANDLE_FUNC(LOG,     log,      false,      log(b) / log(a),  2,        DIV_(SUB_(MUL_(DIV_(d(r), cpy(r)), LN_(cpy(l))),       //log_u(v) = [ (v'/v) ln u - (u'/u) ln v ] / (ln u)^2       
-                                                                                 MUL_(DIV_(d(l), cpy(l)), LN_(cpy(r)))), 
-                                                                            MUL_(LN_(cpy(l)), LN_(cpy(l)))))
+HANDLE_FUNC(POW,     ^,        true,       pow(a, b),        2,        get_pow_diff(l, r, args_arr ON_TEX_CREATION_DEBUG(, tree)))
+HANDLE_FUNC(LOG,     log,      false,      log(b) / log(a),  2,        get_log_diff(l, r, args_arr ON_TEX_CREATION_DEBUG(, tree))) 
+
 HANDLE_FUNC(LN,      ln,       false,      log(a),           1,        DIV_(d(l), cpy(l)))                // (ln u)' = 1 / u * u'
 HANDLE_FUNC(EXP,     exp,      false,      exp(a),           1,        MUL_(POW_(c(M_E), cpy(l)), d(l)))  // (e^u)'  = e^u * u'
                     

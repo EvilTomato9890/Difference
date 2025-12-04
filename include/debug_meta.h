@@ -22,6 +22,11 @@
     #define ON_TEX_CREATION_DEBUG(...)
 #endif
 
+#ifdef TEX_SQUASH(...) 
+    #define ON_TEX_SQUASH(...) __VA_ARGS__
+#else
+    #define ON_TEX_SQUASH(...)
+#endif
 
 #ifdef HASH_DEBUG
 	#define VERIFY_DEBUG

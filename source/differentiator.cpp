@@ -27,6 +27,39 @@ static bool check_in(size_t target, args_arr_t args_arr) {
 
 //================================================================================
 
+static tree_node_t* get_log_diff(tree_node_t* l, tree_node_t* r, args_arr_t args_arr ON_TEX_CREATION_DEBUG(, tree_t* tree)) {
+    if (r == nullptr && l != nullptr) {
+        return DIV_(d(l), cpy(l));
+    }
+    if (is_subree_const(l)) {
+        return DIV_(d(r), MUL_(cpy(r), LN_(cpy(l))));
+    }
+    if (is_subree_const(r)) {
+        return MUL_(MUL_(SUB_(0, LN_(cpy(r))), d(l)),
+                         DIV_(c(1), MUL_(cpy(l), POW_(LN_(cpy(l)), c(2)))));
+    }
+    return DIV_(SUB_(DIV_(d(r), cpy(r)),
+                         DIV_(d(l), cpy(l))),
+                    LN_(cpy(l)));
+}
+
+static tree_node_t* get_pow_diff(tree_node_t* l, tree_node_t* r, args_arr_t args_arr ON_TEX_CREATION_DEBUG(, tree_t* tree)) {
+    if (is_subree_const(r)) {
+        return MUL_(POW_(cpy(l), SUB_(cpy(r), c(1))),
+                    cpy(r));
+    }
+
+    if (is_subree_const(l)) {
+        return MUL_(POW_(cpy(l), cpy(r)),
+                    MUL_(d(r), LN_(cpy(l))));
+    }
+
+    return MUL_(POW_(cpy(l), cpy(r)),
+                ADD_(MUL_(d(r), LN_(cpy(l))),
+                     MUL_(d(l),
+                          DIV_(cpy(r), cpy(l)))));
+}
+
 #define MAKE_STEP(str_num, num)                                                      \
     do {                                                                             \
         ON_TEX_CREATION_DEBUG(                                                       \
@@ -70,7 +103,7 @@ tree_node_t* get_diff(tree_node_t* node,
         case op_code: {                                                                                     \
             ON_TEX_CREATION_DEBUG(                                                                          \
                 print_tex_basic_diff_comment(*tree->tex_file);                                              \
-                print_diff_step_tex_fmt(tree, node);                                                                \
+                print_diff_step_tex_fmt(tree, node);                                                        \
             )                                                                                               \
             return DSL_deriv;                                                                               \
         }

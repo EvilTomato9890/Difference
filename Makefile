@@ -19,7 +19,7 @@ CXXFLAGS := -Iinclude -I$(STACK_DIR) -I$(LIST_DIR)/include \
             -Wstack-usage=8192 -Wstrict-aliasing \
             -Wstrict-null-sentinel -Wtype-limits \
             -Wwrite-strings -Werror=vla \
-            -D_DEBUG -D_EJUDGE_CLIENT_SIDE -DVERIFY_DEBUG -DLIST_CANARY_DEBUG -DTEX_CREATION_DEBUG #-DDUMP_CREATION_DEBUG 
+            -D_DEBUG -D_EJUDGE_CLIENT_SIDE -DVERIFY_DEBUG -DLIST_CANARY_DEBUG -DTEX_SQUASH -DTEX_CREATION_DEBUG #-DDUMP_CREATION_DEBUG 
 
 LDFLAGS := -fsanitize=address,undefined,leak
 

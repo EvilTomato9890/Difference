@@ -15,6 +15,8 @@ tree_node_t* init_node_with_dump(node_type_t node_type, value_t value, tree_node
 error_code tree_destroy(tree_t* tree);
 
 bool tree_is_empty(const tree_t* tree);
+bool is_subree_const(const tree_node_t* node);
+
 size_t count_nodes_recursive(const tree_node_t* node);
 
 error_code   tree_change_root(tree_t* tree, tree_node_t* node);

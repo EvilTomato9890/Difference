@@ -78,6 +78,37 @@ static bool tex_need_parens(const tree_node_t* node, int parent_prec, assoc_pos_
     return false;
 }
 
+//================================================================================
+
+static const char* get_pow_diff_pattern(const tree_node_t* node) {
+    const tree_node_t* l = node->left;
+    const tree_node_t* r = node->right;
+
+    if (is_subree_const(r)) {
+        return "%r \\cdot %l^{%r - 1} \\cdot %d(%l)";
+    }
+    if (is_subree_const(l)) {
+        return "%p \\cdot \\ln(%l) \\cdot %d(%r)";
+    }
+    return "%p \\cdot ( %d(%r) \\cdot \\ln(%l) + %r \\cdot %d(%l) / %l )";
+}
+
+static const char* get_log_diff_pattern(const tree_node_t* node) {
+    const tree_node_t* l = node->left;
+    const tree_node_t* r = node->right;
+
+    if (r == nullptr && l != nullptr) {
+        return "%d(%l) / %l";
+    }
+    if (is_subree_const(l)) {
+        return "%d(%r) / (%r \\cdot \\ln(%l))";
+    }
+    if (is_subree_const(r)) {
+        return "-\\ln(%r) \\cdot %d(%l) / (%l \\cdot (\\ln(%l))^{2})";
+    }
+    return " %d(%r) / %r - %d(%l) / %l ) / \\ln(%l)";
+}
+
 static const char* get_tex_fmt(func_type_t func_type) {
     #define HANDLE_FUNC(op_code, str_name, fmt, ...) \
         if (func_type == op_code) {                                     \
@@ -125,7 +156,7 @@ static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node
 
 //--------------------------------------------------------------------------------
 
-static void print_node_tex_const(FILE* tex, const tree_t* /*tree*/,
+static void print_node_tex_const(FILE* tex, const tree_t* tree,
                                   const tree_node_t* node) {
     fprintf(tex, "%.6g", (double)node->value.constant);
 }
@@ -321,6 +352,7 @@ void print_tex_delimeter(FILE* tex) {
     if(!tex) return ;
     fprintf(tex, "\\noindent\\hrulefill");  
 }
+
 //================================================================================
 
 void print_tex_introduction(FILE* tex) {
@@ -537,9 +569,32 @@ error_code print_diff_step(const tree_t* tree, tree_node_t* node, const char* pa
 }
 
 error_code print_diff_step_tex_fmt(const tree_t* tree, tree_node_t* node) {
-    const char* pattern = get_tex_fmt_diff(node->value.func);
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(node != nullptr, "node is nullptr");
+
+    const char* pattern = nullptr;
+
+    if (node->type == FUNCTION) {
+        switch (node->value.func) {
+            case POW:
+                pattern = get_pow_diff_pattern(node);
+                break;
+
+            case LOG:
+                pattern = get_log_diff_pattern(node);
+                break;
+
+            default:
+                pattern = get_tex_fmt_diff(node->value.func);
+                break;
+        }
+    } else {
+        pattern = get_tex_fmt_diff(node->value.func);
+    }
+
     return print_diff_step(tree, node, pattern);
 }
+
 //================================================================================
 
 static size_t get_double_len(double target) {
