@@ -1016,7 +1016,7 @@ static void test_main() {
 
     print_tex_H1(forest.tex_file, "Полный план сражения с Тейлором-Боблином");
     error = print_tex_expr_with_squashes(tree_teylor, tree_teylor->root, "f(x) = ");
-
+    print_tex_image(forest.tex_file);
     error = tree_dump(tree_teylor, VER_INIT, true, "teylor tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
 
@@ -1024,7 +1024,7 @@ static void test_main() {
     forest_close_dump_file(&forest);
     forest_close_tex_file(&forest);
     )
-    tree_plot_to_gnuplot(tree, x_idx, -5, 5, "teylor_plot.dat", "teylor_plot.png");
+    
     free(forest_buff.ptr);
     forest_dest(&forest);
     LOGGER_INFO("Тест пройден: тейлор \n"); 
@@ -1051,7 +1051,6 @@ static void test_squashes() {
     HARD_ASSERT(error == ERROR_NO, "add_tree failed");
     tree_node_t* len_test_root = POW_(v("x"), c(1000));
     tree_replace_root(tree_len_test, len_test_root);
-    LOGGER_WARNING("Size of len_test tree: %zu", get_tex_len(tree_len_test, tree_len_test->root));
     ON_DEBUG(
     forest_open_dump_file(&forest, "squashes.html");
     HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");

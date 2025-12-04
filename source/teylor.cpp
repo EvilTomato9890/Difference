@@ -91,7 +91,7 @@ static tree_t* teylor_add_summand(tree_t* teylor_tree, tree_node_t* summand) {
     return teylor_tree;
 }
 
-
+//FIXME - Графики не в функции
 tree_t* make_teylor(forest_t* forest, tree_t* root_tree, size_t var_idx, const_val_type target_val) { //TODO - Обнаруживание функций 2-х переменных
     HARD_ASSERT(forest    != nullptr, "forest is nullptr");
     HARD_ASSERT(root_tree != nullptr, "tree is nullptr");
@@ -105,16 +105,18 @@ tree_t* make_teylor(forest_t* forest, tree_t* root_tree, size_t var_idx, const_v
         LOGGER_ERROR("add_tree failed");
         return nullptr;
     }
-    print_tex_expr_with_squashes(root_tree, root_tree->root, "Текущий ход событий: "); //REVIEW - СТоит ли делать отдельный парсер
+
+    print_tex_expr_with_squashes(root_tree, root_tree->root, "Текущий ход событий: "); //REVIEW - СТоит ли делать отдельный парсер 
+    
     put_var_val(teylor_tree, var_idx, target_val);
-
-
     const_val_type first_val = calculate_tree(root_tree, false);
     tree_init_root(teylor_tree, CONSTANT, make_union_const(first_val));
 
-    FILE* dat_file = nullptr;
-    char  data_file_name[MAX_FILE_NAME] = {};
-    open_dat_file(&dat_file, data_file_name, MAX_FILE_NAME, nullptr, 1);
+    error |= dat_add_tree_first(teylor_tree, var_idx, -5, 5, nullptr, "teylor_plot.png", "f(x)");
+    if(error != ERROR_NO) {
+        LOGGER_ERROR("dat_add_tree_first failed");
+        return nullptr;
+    }
 
     for(int i = 1; i < TEYLOR_DEPTH; i++) {
         LOGGER_DEBUG("make_teylor: making %d diff", i);
@@ -122,15 +124,21 @@ tree_t* make_teylor(forest_t* forest, tree_t* root_tree, size_t var_idx, const_v
         const_val_type res = add_and_calculate_diff(forest, root_tree, &root_tree, {&var_idx, 1}, &error);
 
         tree_node_t* target_var = init_node(VARIABLE, make_union_var(var_idx), nullptr, nullptr);
-        tree_node_t* summand = MUL_(DIV_(c(res), c((double)calc_fact(i))),
+        tree_node_t* summand    = MUL_(DIV_(c(res), c((double)calc_fact(i))),
                                     POW_(SUB_(target_var, c(target_val)),
                                          c(i)));
         teylor_add_summand(teylor_tree, summand);
 
-        dat_add_tree_graph(dat_file, teylor_tree, var_idx, 0, 30);
+        char title[TEYLOR_DEPTH] = {};
+        snprintf(title, TEYLOR_DEPTH, "f%d(x)", i);
+        error |= dat_add_tree(teylor_tree, var_idx, -5, 5, nullptr, title); //TODO: va_args
+        if(error != ERROR_NO) {
+            LOGGER_ERROR("dat_add_tree failed");
+            return nullptr;
+        }
     }
+    dat_finish_all_graphs();
 
-    close_dat_file(dat_file);
-    plot_dat_with_gnuplot(data_file_name, "graphs/teylor.png");
+
     return teylor_tree;
 }

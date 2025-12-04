@@ -1,0 +1,8 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{Прибывает Тейлор и куча дальних родственников}{2}{section*.2}%
+\contentsline {subsection}{Прибывает 1-ая волна родственников Тейлора-Боблина}{2}{section*.3}%
+\contentsline {subsection}{Прибывает 2-ая волна родственников Тейлора-Боблина}{3}{section*.4}%
+\contentsline {subsection}{Прибывает 3-ая волна родственников Тейлора-Боблина}{5}{section*.5}%
+\contentsline {subsection}{Прибывает 4-ая волна родственников Тейлора-Боблина}{9}{section*.6}%
+\contentsline {subsection}{Прибывает 5-ая волна родственников Тейлора-Боблина}{18}{section*.7}%
+\contentsline {section}{Полный план сражения с Тейлором-Боблином}{42}{section*.8}%

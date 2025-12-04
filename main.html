@@ -1,0 +1,121 @@
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #33 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-04 13:40:13</span>
+<span style="color:#ff4d4f;font-weight:700;">Test dump input tree</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr  : 0x50b0000019b0
+root ptr  : 0x504000036dd0
+size      : 8
+stack ptr : 0x506000000b60
+buff.ptr  : 0x502000001f7f
+buff.len  : 15
+list idx  : 1
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_main
+line: 1005
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x504000036dd0  FUNCTION        0x504000036cd0  0x504000036d90  +
+1     0x504000036cd0  FUNCTION        0x504000036c90  (nil)           cos
+2     0x504000036c90  FUNCTION        0x504000036c10  0x504000036c50  ^
+3     0x504000036c10  VARIABLE        (nil)           (nil)           x
+4     0x504000036c50  CONSTANT        (nil)           (nil)           2.000000
+5     0x504000036d90  FUNCTION        0x504000036d10  0x504000036d50  ^
+6     0x504000036d10  CONSTANT        (nil)           (nil)           3.000000
+7     0x504000036d50  VARIABLE        (nil)           (nil)           x
+
+SVG: dumps/tree_dump_033.svg
+</pre>
+<img src="dumps/tree_dump_033.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #34 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-04 13:40:13</span>
+<span style="color:#ff4d4f;font-weight:700;">teylor tree</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr  : 0x50b000001a60
+root ptr  : 0x504000048fd0
+size      : 51
+stack ptr : 0x506000000b60
+buff.ptr  : 0x502000001f70
+buff.len  : 15
+list idx  : 2
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_main
+line: 1020
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x504000048fd0  FUNCTION        0x50400003e550  0x504000048f90  +
+1     0x50400003e550  FUNCTION        0x50400003a310  0x50400003e510  +
+2     0x50400003a310  FUNCTION        0x504000038550  0x50400003a2d0  +
+3     0x504000038550  FUNCTION        0x504000037650  0x504000038510  +
+4     0x504000037650  FUNCTION        0x504000036e10  0x504000037610  +
+5     0x504000036e10  CONSTANT        (nil)           (nil)           2.000000
+6     0x504000037610  FUNCTION        0x5040000375d0  0x504000037510  *
+7     0x5040000375d0  FUNCTION        0x504000037590  0x504000037550  /
+8     0x504000037590  CONSTANT        (nil)           (nil)           268.286304
+9     0x504000037550  CONSTANT        (nil)           (nil)           1.000000
+10    0x504000037510  FUNCTION        0x5040000374d0  0x504000037450  ^
+11    0x5040000374d0  FUNCTION        0x504000037410  0x504000037490  -
+12    0x504000037410  VARIABLE        (nil)           (nil)           x
+13    0x504000037490  CONSTANT        (nil)           (nil)           0.000000
+14    0x504000037450  CONSTANT        (nil)           (nil)           1.000000
+15    0x504000038510  FUNCTION        0x5040000384d0  0x504000038410  *
+16    0x5040000384d0  FUNCTION        0x504000038490  0x504000038450  /
+17    0x504000038490  CONSTANT        (nil)           (nil)           194.433020
+18    0x504000038450  CONSTANT        (nil)           (nil)           2.000000
+19    0x504000038410  FUNCTION        0x5040000383d0  0x504000038350  ^
+20    0x5040000383d0  FUNCTION        0x504000038310  0x504000038390  -
+21    0x504000038310  VARIABLE        (nil)           (nil)           x
+22    0x504000038390  CONSTANT        (nil)           (nil)           0.000000
+23    0x504000038350  CONSTANT        (nil)           (nil)           2.000000
+24    0x50400003a2d0  FUNCTION        0x50400003a290  0x50400003a1d0  *
+25    0x50400003a290  FUNCTION        0x50400003a250  0x50400003a210  /
+26    0x50400003a250  CONSTANT        (nil)           (nil)           130.386539
+27    0x50400003a210  CONSTANT        (nil)           (nil)           6.000000
+28    0x50400003a1d0  FUNCTION        0x50400003a190  0x50400003a110  ^
+29    0x50400003a190  FUNCTION        0x50400003a0d0  0x50400003a150  -
+30    0x50400003a0d0  VARIABLE        (nil)           (nil)           x
+31    0x50400003a150  CONSTANT        (nil)           (nil)           0.000000
+32    0x50400003a110  CONSTANT        (nil)           (nil)           3.000000
+33    0x50400003e510  FUNCTION        0x50400003e4d0  0x50400003e410  *
+34    0x50400003e4d0  FUNCTION        0x50400003e490  0x50400003e450  /
+35    0x50400003e490  CONSTANT        (nil)           (nil)           10095.295953
+36    0x50400003e450  CONSTANT        (nil)           (nil)           24.000000
+37    0x50400003e410  FUNCTION        0x50400003e3d0  0x50400003e350  ^
+38    0x50400003e3d0  FUNCTION        0x50400003e310  0x50400003e390  -
+39    0x50400003e310  VARIABLE        (nil)           (nil)           x
+40    0x50400003e390  CONSTANT        (nil)           (nil)           0.000000
+41    0x50400003e350  CONSTANT        (nil)           (nil)           4.000000
+42    0x504000048f90  FUNCTION        0x504000048f50  0x504000048e90  *
+43    0x504000048f50  FUNCTION        0x504000048f10  0x504000048ed0  /
+44    0x504000048f10  CONSTANT        (nil)           (nil)           33368.711774
+45    0x504000048ed0  CONSTANT        (nil)           (nil)           120.000000
+46    0x504000048e90  FUNCTION        0x504000048e50  0x504000048dd0  ^
+47    0x504000048e50  FUNCTION        0x504000048d90  0x504000048e10  -
+48    0x504000048d90  VARIABLE        (nil)           (nil)           x
+49    0x504000048e10  CONSTANT        (nil)           (nil)           0.000000
+50    0x504000048dd0  CONSTANT        (nil)           (nil)           5.000000
+
+SVG: dumps/tree_dump_034.svg
+</pre>
+<img src="dumps/tree_dump_034.svg" style="max-width:2250px;"/>
+
+<hr>

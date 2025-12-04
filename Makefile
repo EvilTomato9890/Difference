@@ -67,4 +67,5 @@ clean:
     rm -rf *.fls                    \
     rm -rf *.gz                     \
     rm -rf *.fdb_latexmk            \
+    rm -rf graphs
 	rm -rf $(DUMP_DIR)

@@ -1,22 +1,24 @@
-#ifndef MAKE_GRAPH_H_INCLUDED
-#define MAKE_GRAPH_H_INCLUDED
+#ifndef MAKE_GRAPH_H
+#define MAKE_GRAPH_H
 
-#include "tree_info.h"
 #include "error_handler.h"
+#include "tree_info.h"
 
-error_code tree_plot_to_gnuplot(tree_t *treeData, size_t varIndex,
-                                double xMin, double xMax,
-                                const char *dataPath, const char *pngPath);
-error_code dat_add_tree_graph(FILE* data_file, tree_t* tree,
+error_code dat_add_tree_graph(FILE* data_file, tree_t* tree_data,
                               size_t var_idx, double x_min, double x_max);
 
-void print_dat_header(FILE *gnu_file, const char *data_file_name, const char *png_file_name);
 
-error_code open_dat_file(FILE** data_file, char*  data_file_name,
-                                size_t buff_size, const char* data_path, int file_cnt);
+error_code tree_plot_to_gnuplot(tree_t* tree_data, size_t var_idx, double x_min, double x_max,
+                                const char* data_name, const char* image_name);
 
-void close_dat_file(FILE* data_file);
+error_code dat_add_tree_first(tree_t* tree_data, size_t var_idx, double x_min, double x_max,
+                              const char* data_name, const char* image_name, const char* legend_title);
 
-error_code plot_dat_with_gnuplot(const char* data_file_name, const char* png_file_name);
+error_code dat_add_tree(tree_t* tree_data, size_t var_idx,
+                        double x_min, double x_max,
+                        const char* data_name, const char* legend_title);
 
-#endif
+void dat_finish_all_graphs();
+
+
+#endif 

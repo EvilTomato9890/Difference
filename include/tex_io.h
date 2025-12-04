@@ -43,11 +43,13 @@ void print_tex_basic_diff_comment(FILE* tex);
 ssize_t get_tex_len(const tree_t* tree, tree_node_t* node);
 
 void tex_clear_squash(tree_t* tree);
-
+void print_tex_image(FILE* tex); //FIXME - 
 //================================================================================
 
-#define EXPR_HEAD "\n\\begin{math}\n" //REVIEW - Так или функцию
-#define EXPR_TAIL "\n\\end{math}\n\n"
+#define EXPR_HEAD "\\begin{math}\n" //REVIEW - Так или функцию
+#define EXPR_TAIL "\n\\end{math}\\par\\vspace{2em}\n"
+#define TEXT_HEAD "\\begin{center}\n"
+#define TEXT_TAIL "\\end{center}\n"
 #define DIFFERENTIAL "\\frac{d}{dx}"
 
 //================================================================================

@@ -22,8 +22,8 @@
 //================================================================================
 
 static const size_t TEX_SQUASH_MAX_VARS        = 26; 
-static const size_t TEX_SQUASH_MAX_TOTAL_LEN   = 80; 
-static const size_t TEX_SQUASH_MAX_SUBEXPR_LEN = 80;  
+static const size_t TEX_SQUASH_MAX_TOTAL_LEN   = 70; 
+static const size_t TEX_SQUASH_MAX_SUBEXPR_LEN = 70;  
 static const size_t TEX_SQUASH_MIN_SUBEXPR_LEN = 1;  
 static const size_t MAX_CONST_LEN              = 64;
 static const size_t COST_LETTER                = 1; 
@@ -327,6 +327,7 @@ void print_tex_header(FILE* tex) {
         "\\usepackage{amssymb}\n"
         "\\usepackage{autobreak}\n"
         "\\usepackage{hyperref}\n"
+        "\\usepackage{graphicx}\n"
         "\\setcounter{secnumdepth}{0}\n"
         "\\begin{document}\n"
         "\\title{Сокращение рода боблина}\n"
@@ -347,7 +348,9 @@ void print_tex_footer(FILE* tex) {
             "\\end{document}\n");
     fflush(tex);
 }
-    
+   
+
+
 void print_tex_H2(FILE* tex, const char* fmt, ...) {
     if(!tex) return ;
     if (fmt && *fmt) {
@@ -393,6 +396,11 @@ void print_tex_P(FILE* tex,   const char* fmt, ...) {
 void print_tex_delimeter(FILE* tex) {
     if(!tex) return ;
     fprintf(tex, "\\noindent\\hrulefill");  
+}
+
+void print_tex_image(FILE* tex) {
+    if(!tex) return ;
+    fprintf(tex, "\\includegraphics[height=7.5cm]{./graphs/teylor_plot.png}");
 }
 
 //================================================================================
@@ -531,14 +539,14 @@ static error_code print_tex_expr_impl(const tree_t* tree, tree_node_t*  node, bo
     FILE* tex = *tree->tex_file;
     error_code error = ERROR_NO;
 
+    if(fprintf(tex, TEXT_HEAD) < 0) {
+        LOGGER_ERROR("print_tex_expr_impl: fprintf begin center failed");
+        error |= ERROR_OPEN_FILE;
+    }
     if (fmt && *fmt) {
         vfprintf(tex, fmt, args);
     }
-
-    if (fprintf(tex, EXPR_HEAD) < 0) {
-        LOGGER_ERROR("print_tex_expr_impl: fprintf begin align* failed");
-        error |= ERROR_OPEN_FILE;
-    }
+    fprintf(tex, EXPR_HEAD);
 
     if (ignore_root_flag) {
         print_node_tex_full(tex, tree, node);
@@ -546,10 +554,7 @@ static error_code print_tex_expr_impl(const tree_t* tree, tree_node_t*  node, bo
         print_node_tex(tex, tree, node);
     }
 
-    if (fprintf(tex, EXPR_TAIL) < 0) {
-        LOGGER_ERROR("print_tex_expr_impl: fprintf end align* failed");
-        error |= ERROR_OPEN_FILE;
-    }
+    fprintf(tex, EXPR_TAIL TEXT_TAIL);
 
     fflush(tex);
     return error;
@@ -591,14 +596,14 @@ error_code print_diff_step(tree_t* tree, tree_node_t* node, const char* pattern)
         RETURN_IF_ERROR(error);
     }
 
-    if (fprintf(tex, EXPR_HEAD) < 0) {
+    if (fprintf(tex, TEXT_HEAD EXPR_HEAD) < 0) {
         LOGGER_ERROR("print_diff_step: begin failed");
         error |= ERROR_OPEN_FILE;
     }
     fprintf(tex, DIFFERENTIAL "(");
     print_node_tex(tex, tree, node);
     fprintf(tex, ") = ");
-
+    tex_clear_squash(tree);
 
     for (const char* p = pattern; *p; ++p) {
         if (*p != '%') {
@@ -620,16 +625,13 @@ error_code print_diff_step(tree_t* tree, tree_node_t* node, const char* pattern)
         }
 
         if (sub) {
-            tree_t* sub_tree = tree;
+            //if(sub->subtree_tex_len > TEX_SQUASH_MAX_SUBEXPR_LEN / TEX_LEN_REDUCTION)
             print_node_tex(tex, tree, sub);
         }
     }
 
-    if (fprintf(tex, EXPR_TAIL) < 0) {
-        LOGGER_ERROR("print_diff_step: end failed");
-        error |= ERROR_OPEN_FILE;
-    }
-    tex_clear_squash(tree);
+    fprintf(tex, EXPR_TAIL TEXT_TAIL);
+    
     fflush(tex);
     return error;
 }
@@ -805,8 +807,6 @@ static error_code tex_prepare_squash_ex(tree_t* tree, tree_node_t* root, size_t 
     }
 
     size_t total_len = (size_t)total_len_signed;
-    LOGGER_WARNING("tex_prepare_squash_ex: total_len = %zu, min_total_len = %zu",
-             total_len, min_total_len);
 
     if (total_len <= min_total_len) {
         return ERROR_NO;

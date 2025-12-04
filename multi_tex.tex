@@ -6,6 +6,7 @@
 \usepackage{amssymb}
 \usepackage{autobreak}
 \usepackage{hyperref}
+\usepackage{graphicx}
 \setcounter{secnumdepth}{0}
 \begin{document}
 \title{Сокращение рода боблина}
@@ -39,46 +40,40 @@
 \end{titlepage}
 \tableofcontents
 \newpage
-f(x) = \begin{align*}
-\begin{autobreak}
+\begin{center}
+f(x) = \begin{math}
 \operatorname{arsh}(x^{2})
-\end{autobreak}
-\end{align*}
-
+\end{math}\par\vspace{2em}
+\end{center}
 \begin{center}
 Небольшой взмах посохом — и план сражения выглядит куда приличнее.
 \end{center}
-\begin{align*}
-\begin{autobreak}
+\begin{center}
+\begin{math}
 \frac{d}{dx}(\operatorname{arsh}(x^{2})) = \frac{\frac{d}{dx}(x^{2})}{\sqrt{1 + {x^{2}}^2}}
-\end{autobreak}
-\end{align*}
-
+\end{math}\par\vspace{2em}
+\end{center}
 \begin{center}
 Один из гоблинов упал
 \end{center}
-\begin{align*}
-\begin{autobreak}
+\begin{center}
+\begin{math}
 \frac{d}{dx}(x^{2}) = 2 \cdot {x}^{2 - 1} \cdot \frac{d}{dx}(x)
-\end{autobreak}
-\end{align*}
-
-f(x)|dx = \begin{align*}
-\begin{autobreak}
+\end{math}\par\vspace{2em}
+\end{center}
+\begin{center}
+f(x)|dx = \begin{math}
 \frac{x^{(2 - 1)} \cdot 2}{(1 + x^{2} \cdot x^{2})^{0.5}}
-\end{autobreak}
-\end{align*}
-
-optimized f(x)|dx = \begin{align*}
-\begin{autobreak}
+\end{math}\par\vspace{2em}
+\end{center}
+\begin{center}
+optimized f(x)|dx = \begin{math}
 \frac{x \cdot 2}{(1 + x^{2} \cdot x^{2})^{0.5}}
-\end{autobreak}
-\end{align*}
-
-f(x)` = \begin{align*}
-\begin{autobreak}
+\end{math}\par\vspace{2em}
+\end{center}
+\begin{center}
+f(x)` = \begin{math}
 \frac{x \cdot 2}{(1 + x^{2} \cdot x^{2})^{0.5}}
-\end{autobreak}
-\end{align*}
-
+\end{math}\par\vspace{2em}
+\end{center}
 \end{document}

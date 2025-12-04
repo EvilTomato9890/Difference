@@ -6,6 +6,7 @@
 \usepackage{amssymb}
 \usepackage{autobreak}
 \usepackage{hyperref}
+\usepackage{graphicx}
 \setcounter{secnumdepth}{0}
 \begin{document}
 \title{Сокращение рода боблина}
@@ -39,10 +40,9 @@
 \end{titlepage}
 \tableofcontents
 \newpage
-f(x, y) = \begin{align*}
-\begin{autobreak}
+\begin{center}
+f(x, y) = \begin{math}
 \frac{x^{2} \cdot \ln(x) + e^{y}}{\sin(x) + \cos(y)}^{3} + \ln(\frac{x^{2} + y^{2}}{1 + x \cdot y})
-\end{autobreak}
-\end{align*}
-
+\end{math}\par\vspace{2em}
+\end{center}
 \end{document}
