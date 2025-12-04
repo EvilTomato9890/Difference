@@ -16,6 +16,7 @@
 #include "forest_operations.h"
 #include "forest_info.h"
 #include "my_string.h"
+#include "tex_io.h"
 
 //================================================================================
 
@@ -146,7 +147,7 @@ error_code tree_destroy(tree_t* tree) {
     error |= destroy_node_recursive(tree->root, &removed);
     tree->root = nullptr;
     tree->size = 0;
-
+    tex_clear_squash(tree);
     return error;
 }
 

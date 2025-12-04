@@ -1,0 +1,356 @@
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #30 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-04 06:45:18</span>
+<span style="color:#ff4d4f;font-weight:700;">Test dump input tree</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr  : 0x50b0000016f0
+root ptr  : 0x504000006c10
+size      : 17
+stack ptr : 0x506000000b00
+buff.ptr  : 0x50400000673e
+buff.len  : 46
+list idx  : 1
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_squashes
+line: 1064
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x504000006c10  FUNCTION        0x504000006a90  0x504000006bd0  ^
+1     0x504000006a90  FUNCTION        0x5040000069d0  0x504000006a50  *
+2     0x5040000069d0  FUNCTION        0x504000006910  0x504000006990  *
+3     0x504000006910  FUNCTION        0x504000006850  0x5040000068d0  *
+4     0x504000006850  FUNCTION        0x504000006810  (nil)           cos
+5     0x504000006810  VARIABLE        (nil)           (nil)           x
+6     0x5040000068d0  FUNCTION        0x504000006890  (nil)           cos
+7     0x504000006890  VARIABLE        (nil)           (nil)           x
+8     0x504000006990  FUNCTION        0x504000006950  (nil)           cos
+9     0x504000006950  VARIABLE        (nil)           (nil)           x
+10    0x504000006a50  FUNCTION        0x504000006a10  (nil)           cos
+11    0x504000006a10  VARIABLE        (nil)           (nil)           x
+12    0x504000006bd0  FUNCTION        0x504000006b10  0x504000006b90  *
+13    0x504000006b10  FUNCTION        0x504000006ad0  (nil)           cos
+14    0x504000006ad0  VARIABLE        (nil)           (nil)           x
+15    0x504000006b90  FUNCTION        0x504000006b50  (nil)           cos
+16    0x504000006b50  VARIABLE        (nil)           (nil)           x
+
+SVG: dumps/tree_dump_030.svg
+</pre>
+<img src="dumps/tree_dump_030.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #31 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-04 06:45:18</span>
+<span style="color:#ff4d4f;font-weight:700;">Diff tree</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr  : 0x50b0000016f0
+root ptr  : 0x504000008ad0
+size      : 106
+stack ptr : 0x506000000b00
+buff.ptr  : 0x50400000673e
+buff.len  : 46
+list idx  : 1
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_squashes
+line: 1071
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x504000008ad0  FUNCTION        0x504000008a90  0x504000008650  *
+1     0x504000008a90  FUNCTION        0x504000008a50  0x504000008790  ^
+2     0x504000008a50  FUNCTION        0x504000008990  0x504000008a10  *
+3     0x504000008990  FUNCTION        0x5040000088d0  0x504000008950  *
+4     0x5040000088d0  FUNCTION        0x504000008810  0x504000008890  *
+5     0x504000008810  FUNCTION        0x5040000087d0  (nil)           cos
+6     0x5040000087d0  VARIABLE        (nil)           (nil)           x
+7     0x504000008890  FUNCTION        0x504000008850  (nil)           cos
+8     0x504000008850  VARIABLE        (nil)           (nil)           x
+9     0x504000008950  FUNCTION        0x504000008910  (nil)           cos
+10    0x504000008910  VARIABLE        (nil)           (nil)           x
+11    0x504000008a10  FUNCTION        0x5040000089d0  (nil)           cos
+12    0x5040000089d0  VARIABLE        (nil)           (nil)           x
+13    0x504000008790  FUNCTION        0x5040000086d0  0x504000008750  *
+14    0x5040000086d0  FUNCTION        0x504000008690  (nil)           cos
+15    0x504000008690  VARIABLE        (nil)           (nil)           x
+16    0x504000008750  FUNCTION        0x504000008710  (nil)           cos
+17    0x504000008710  VARIABLE        (nil)           (nil)           x
+18    0x504000008650  FUNCTION        0x504000008610  0x504000007e10  +
+19    0x504000008610  FUNCTION        0x5040000085d0  0x504000008110  *
+20    0x5040000085d0  FUNCTION        0x504000008590  0x504000008350  +
+21    0x504000008590  FUNCTION        0x504000008550  0x5040000083d0  *
+22    0x504000008550  FUNCTION        0x504000008510  0x504000008410  *
+23    0x504000008510  FUNCTION        0x5040000084d0  0x504000008490  -
+24    0x5040000084d0  CONSTANT        (nil)           (nil)           0.000000
+25    0x504000008490  FUNCTION        0x504000008450  (nil)           sin
+26    0x504000008450  VARIABLE        (nil)           (nil)           x
+27    0x504000008410  CONSTANT        (nil)           (nil)           1.000000
+28    0x5040000083d0  FUNCTION        0x504000008390  (nil)           cos
+29    0x504000008390  VARIABLE        (nil)           (nil)           x
+30    0x504000008350  FUNCTION        0x504000008310  0x504000008290  *
+31    0x504000008310  FUNCTION        0x5040000082d0  (nil)           cos
+32    0x5040000082d0  VARIABLE        (nil)           (nil)           x
+33    0x504000008290  FUNCTION        0x504000008250  0x504000008150  *
+34    0x504000008250  FUNCTION        0x504000008210  0x5040000081d0  -
+35    0x504000008210  CONSTANT        (nil)           (nil)           0.000000
+36    0x5040000081d0  FUNCTION        0x504000008190  (nil)           sin
+37    0x504000008190  VARIABLE        (nil)           (nil)           x
+38    0x504000008150  CONSTANT        (nil)           (nil)           1.000000
+39    0x504000008110  FUNCTION        0x5040000080d0  (nil)           ln
+40    0x5040000080d0  FUNCTION        0x504000008010  0x504000008090  *
+41    0x504000008010  FUNCTION        0x504000007f50  0x504000007fd0  *
+42    0x504000007f50  FUNCTION        0x504000007e90  0x504000007f10  *
+43    0x504000007e90  FUNCTION        0x504000007e50  (nil)           cos
+44    0x504000007e50  VARIABLE        (nil)           (nil)           x
+45    0x504000007f10  FUNCTION        0x504000007ed0  (nil)           cos
+46    0x504000007ed0  VARIABLE        (nil)           (nil)           x
+47    0x504000007fd0  FUNCTION        0x504000007f90  (nil)           cos
+48    0x504000007f90  VARIABLE        (nil)           (nil)           x
+49    0x504000008090  FUNCTION        0x504000008050  (nil)           cos
+50    0x504000008050  VARIABLE        (nil)           (nil)           x
+51    0x504000007e10  FUNCTION        0x504000007dd0  0x504000007050  *
+52    0x504000007dd0  FUNCTION        0x504000007d90  0x504000007410  +
+53    0x504000007d90  FUNCTION        0x504000007d50  0x504000007490  *
+54    0x504000007d50  FUNCTION        0x504000007d10  0x504000007790  +
+55    0x504000007d10  FUNCTION        0x504000007cd0  0x504000007810  *
+56    0x504000007cd0  FUNCTION        0x504000007c90  0x504000007a50  +
+57    0x504000007c90  FUNCTION        0x504000007c50  0x504000007ad0  *
+58    0x504000007c50  FUNCTION        0x504000007c10  0x504000007b10  *
+59    0x504000007c10  FUNCTION        0x504000007bd0  0x504000007b90  -
+60    0x504000007bd0  CONSTANT        (nil)           (nil)           0.000000
+61    0x504000007b90  FUNCTION        0x504000007b50  (nil)           sin
+62    0x504000007b50  VARIABLE        (nil)           (nil)           x
+63    0x504000007b10  CONSTANT        (nil)           (nil)           1.000000
+64    0x504000007ad0  FUNCTION        0x504000007a90  (nil)           cos
+65    0x504000007a90  VARIABLE        (nil)           (nil)           x
+66    0x504000007a50  FUNCTION        0x504000007a10  0x504000007990  *
+67    0x504000007a10  FUNCTION        0x5040000079d0  (nil)           cos
+68    0x5040000079d0  VARIABLE        (nil)           (nil)           x
+69    0x504000007990  FUNCTION        0x504000007950  0x504000007850  *
+70    0x504000007950  FUNCTION        0x504000007910  0x5040000078d0  -
+71    0x504000007910  CONSTANT        (nil)           (nil)           0.000000
+72    0x5040000078d0  FUNCTION        0x504000007890  (nil)           sin
+73    0x504000007890  VARIABLE        (nil)           (nil)           x
+74    0x504000007850  CONSTANT        (nil)           (nil)           1.000000
+75    0x504000007810  FUNCTION        0x5040000077d0  (nil)           cos
+76    0x5040000077d0  VARIABLE        (nil)           (nil)           x
+77    0x504000007790  FUNCTION        0x504000007750  0x504000007610  *
+78    0x504000007750  FUNCTION        0x504000007690  0x504000007710  *
+79    0x504000007690  FUNCTION        0x504000007650  (nil)           cos
+80    0x504000007650  VARIABLE        (nil)           (nil)           x
+81    0x504000007710  FUNCTION        0x5040000076d0  (nil)           cos
+82    0x5040000076d0  VARIABLE        (nil)           (nil)           x
+83    0x504000007610  FUNCTION        0x5040000075d0  0x5040000074d0  *
+84    0x5040000075d0  FUNCTION        0x504000007590  0x504000007550  -
+85    0x504000007590  CONSTANT        (nil)           (nil)           0.000000
+86    0x504000007550  FUNCTION        0x504000007510  (nil)           sin
+87    0x504000007510  VARIABLE        (nil)           (nil)           x
+88    0x5040000074d0  CONSTANT        (nil)           (nil)           1.000000
+89    0x504000007490  FUNCTION        0x504000007450  (nil)           cos
+90    0x504000007450  VARIABLE        (nil)           (nil)           x
+91    0x504000007410  FUNCTION        0x5040000073d0  0x5040000071d0  *
+92    0x5040000073d0  FUNCTION        0x504000007310  0x504000007390  *
+93    0x504000007310  FUNCTION        0x504000007250  0x5040000072d0  *
+94    0x504000007250  FUNCTION        0x504000007210  (nil)           cos
+95    0x504000007210  VARIABLE        (nil)           (nil)           x
+96    0x5040000072d0  FUNCTION        0x504000007290  (nil)           cos
+97    0x504000007290  VARIABLE        (nil)           (nil)           x
+98    0x504000007390  FUNCTION        0x504000007350  (nil)           cos
+99    0x504000007350  VARIABLE        (nil)           (nil)           x
+100   0x5040000071d0  FUNCTION        0x504000007190  0x504000007090  *
+101   0x504000007190  FUNCTION        0x504000007150  0x504000007110  -
+102   0x504000007150  CONSTANT        (nil)           (nil)           0.000000
+103   0x504000007110  FUNCTION        0x5040000070d0  (nil)           sin
+104   0x5040000070d0  VARIABLE        (nil)           (nil)           x
+105   0x504000007090  CONSTANT        (nil)           (nil)           1.000000
+106   0x504000007050  FUNCTION        0x504000007010  0x504000006ed0  /
+107   0x504000007010  FUNCTION        0x504000006f50  0x504000006fd0  *
+108   0x504000006f50  FUNCTION        0x504000006f10  (nil)           cos
+109   0x504000006f10  VARIABLE        (nil)           (nil)           x
+110   0x504000006fd0  FUNCTION        0x504000006f90  (nil)           cos
+111   0x504000006f90  VARIABLE        (nil)           (nil)           x
+112   0x504000006ed0  FUNCTION        0x504000006e10  0x504000006e90  *
+113   0x504000006e10  FUNCTION        0x504000006d50  0x504000006dd0  *
+114   0x504000006d50  FUNCTION        0x504000006c90  0x504000006d10  *
+115   0x504000006c90  FUNCTION        0x504000006c50  (nil)           cos
+116   0x504000006c50  VARIABLE        (nil)           (nil)           x
+117   0x504000006d10  FUNCTION        0x504000006cd0  (nil)           cos
+118   0x504000006cd0  VARIABLE        (nil)           (nil)           x
+119   0x504000006dd0  FUNCTION        0x504000006d90  (nil)           cos
+120   0x504000006d90  VARIABLE        (nil)           (nil)           x
+121   0x504000006e90  FUNCTION        0x504000006e50  (nil)           cos
+122   0x504000006e50  VARIABLE        (nil)           (nil)           x
+
+SVG: dumps/tree_dump_031.svg
+</pre>
+<img src="dumps/tree_dump_031.svg" style="max-width:2250px;"/>
+
+<hr>
+<pre style="font-family:'Fira Mono', monospace;font-size:16px; line-height:1.28;background:#0b0e14; color:#e6e1cf;padding:12px; border-radius:10px;">
+<span style="color:#6b8fd6;font-weight:700;">====================[ TREE DUMP #32 ]====================</span>
+Timestamp: <span style="color:#8be9fd;">2025-12-04 06:45:18</span>
+<span style="color:#ff4d4f;font-weight:700;">optimized tree</span>
+<span style="color:#6b8fd6;font-weight:700;">===================================================</span>
+tree ptr  : 0x50b0000016f0
+root ptr  : 0x504000008ad0
+size      : 106
+stack ptr : 0x506000000b00
+buff.ptr  : 0x50400000673e
+buff.len  : 46
+list idx  : 1
+
+-- Created at (tree ver_info) --
+file: source/forest_operations.cpp
+func: forest_add_tree
+line: 105
+
+-- Called at (passed ver_info) --
+file: source/tests.cpp
+func: test_squashes
+line: 1075
+
+IDX   NODE PTR          TYPE          LEFT PTR        RIGHT PTR           VALUE
+----  --------------  --------------  --------------  --------------  --------------------
+0     0x504000008ad0  FUNCTION        0x504000008a90  0x504000008650  *
+1     0x504000008a90  FUNCTION        0x504000008a50  0x504000008790  ^
+2     0x504000008a50  FUNCTION        0x504000008990  0x504000008a10  *
+3     0x504000008990  FUNCTION        0x5040000088d0  0x504000008950  *
+4     0x5040000088d0  FUNCTION        0x504000008810  0x504000008890  *
+5     0x504000008810  FUNCTION        0x5040000087d0  (nil)           cos
+6     0x5040000087d0  VARIABLE        (nil)           (nil)           x
+7     0x504000008890  FUNCTION        0x504000008850  (nil)           cos
+8     0x504000008850  VARIABLE        (nil)           (nil)           x
+9     0x504000008950  FUNCTION        0x504000008910  (nil)           cos
+10    0x504000008910  VARIABLE        (nil)           (nil)           x
+11    0x504000008a10  FUNCTION        0x5040000089d0  (nil)           cos
+12    0x5040000089d0  VARIABLE        (nil)           (nil)           x
+13    0x504000008790  FUNCTION        0x5040000086d0  0x504000008750  *
+14    0x5040000086d0  FUNCTION        0x504000008690  (nil)           cos
+15    0x504000008690  VARIABLE        (nil)           (nil)           x
+16    0x504000008750  FUNCTION        0x504000008710  (nil)           cos
+17    0x504000008710  VARIABLE        (nil)           (nil)           x
+18    0x504000008650  FUNCTION        0x504000008610  0x504000007e10  +
+19    0x504000008610  FUNCTION        0x5040000085d0  0x504000008110  *
+20    0x5040000085d0  FUNCTION        0x504000008590  0x504000008350  +
+21    0x504000008590  FUNCTION        0x504000008550  0x5040000083d0  *
+22    0x504000008550  FUNCTION        0x504000008510  0x504000008410  *
+23    0x504000008510  FUNCTION        0x5040000084d0  0x504000008490  -
+24    0x5040000084d0  CONSTANT        (nil)           (nil)           0.000000
+25    0x504000008490  FUNCTION        0x504000008450  (nil)           sin
+26    0x504000008450  VARIABLE        (nil)           (nil)           x
+27    0x504000008410  CONSTANT        (nil)           (nil)           1.000000
+28    0x5040000083d0  FUNCTION        0x504000008390  (nil)           cos
+29    0x504000008390  VARIABLE        (nil)           (nil)           x
+30    0x504000008350  FUNCTION        0x504000008310  0x504000008290  *
+31    0x504000008310  FUNCTION        0x5040000082d0  (nil)           cos
+32    0x5040000082d0  VARIABLE        (nil)           (nil)           x
+33    0x504000008290  FUNCTION        0x504000008250  0x504000008150  *
+34    0x504000008250  FUNCTION        0x504000008210  0x5040000081d0  -
+35    0x504000008210  CONSTANT        (nil)           (nil)           0.000000
+36    0x5040000081d0  FUNCTION        0x504000008190  (nil)           sin
+37    0x504000008190  VARIABLE        (nil)           (nil)           x
+38    0x504000008150  CONSTANT        (nil)           (nil)           1.000000
+39    0x504000008110  FUNCTION        0x5040000080d0  (nil)           ln
+40    0x5040000080d0  FUNCTION        0x504000008010  0x504000008090  *
+41    0x504000008010  FUNCTION        0x504000007f50  0x504000007fd0  *
+42    0x504000007f50  FUNCTION        0x504000007e90  0x504000007f10  *
+43    0x504000007e90  FUNCTION        0x504000007e50  (nil)           cos
+44    0x504000007e50  VARIABLE        (nil)           (nil)           x
+45    0x504000007f10  FUNCTION        0x504000007ed0  (nil)           cos
+46    0x504000007ed0  VARIABLE        (nil)           (nil)           x
+47    0x504000007fd0  FUNCTION        0x504000007f90  (nil)           cos
+48    0x504000007f90  VARIABLE        (nil)           (nil)           x
+49    0x504000008090  FUNCTION        0x504000008050  (nil)           cos
+50    0x504000008050  VARIABLE        (nil)           (nil)           x
+51    0x504000007e10  FUNCTION        0x504000007dd0  0x504000007050  *
+52    0x504000007dd0  FUNCTION        0x504000007d90  0x504000007410  +
+53    0x504000007d90  FUNCTION        0x504000007d50  0x504000007490  *
+54    0x504000007d50  FUNCTION        0x504000007d10  0x504000007790  +
+55    0x504000007d10  FUNCTION        0x504000007cd0  0x504000007810  *
+56    0x504000007cd0  FUNCTION        0x504000007c90  0x504000007a50  +
+57    0x504000007c90  FUNCTION        0x504000007c50  0x504000007ad0  *
+58    0x504000007c50  FUNCTION        0x504000007c10  0x504000007b10  *
+59    0x504000007c10  FUNCTION        0x504000007bd0  0x504000007b90  -
+60    0x504000007bd0  CONSTANT        (nil)           (nil)           0.000000
+61    0x504000007b90  FUNCTION        0x504000007b50  (nil)           sin
+62    0x504000007b50  VARIABLE        (nil)           (nil)           x
+63    0x504000007b10  CONSTANT        (nil)           (nil)           1.000000
+64    0x504000007ad0  FUNCTION        0x504000007a90  (nil)           cos
+65    0x504000007a90  VARIABLE        (nil)           (nil)           x
+66    0x504000007a50  FUNCTION        0x504000007a10  0x504000007990  *
+67    0x504000007a10  FUNCTION        0x5040000079d0  (nil)           cos
+68    0x5040000079d0  VARIABLE        (nil)           (nil)           x
+69    0x504000007990  FUNCTION        0x504000007950  0x504000007850  *
+70    0x504000007950  FUNCTION        0x504000007910  0x5040000078d0  -
+71    0x504000007910  CONSTANT        (nil)           (nil)           0.000000
+72    0x5040000078d0  FUNCTION        0x504000007890  (nil)           sin
+73    0x504000007890  VARIABLE        (nil)           (nil)           x
+74    0x504000007850  CONSTANT        (nil)           (nil)           1.000000
+75    0x504000007810  FUNCTION        0x5040000077d0  (nil)           cos
+76    0x5040000077d0  VARIABLE        (nil)           (nil)           x
+77    0x504000007790  FUNCTION        0x504000007750  0x504000007610  *
+78    0x504000007750  FUNCTION        0x504000007690  0x504000007710  *
+79    0x504000007690  FUNCTION        0x504000007650  (nil)           cos
+80    0x504000007650  VARIABLE        (nil)           (nil)           x
+81    0x504000007710  FUNCTION        0x5040000076d0  (nil)           cos
+82    0x5040000076d0  VARIABLE        (nil)           (nil)           x
+83    0x504000007610  FUNCTION        0x5040000075d0  0x5040000074d0  *
+84    0x5040000075d0  FUNCTION        0x504000007590  0x504000007550  -
+85    0x504000007590  CONSTANT        (nil)           (nil)           0.000000
+86    0x504000007550  FUNCTION        0x504000007510  (nil)           sin
+87    0x504000007510  VARIABLE        (nil)           (nil)           x
+88    0x5040000074d0  CONSTANT        (nil)           (nil)           1.000000
+89    0x504000007490  FUNCTION        0x504000007450  (nil)           cos
+90    0x504000007450  VARIABLE        (nil)           (nil)           x
+91    0x504000007410  FUNCTION        0x5040000073d0  0x5040000071d0  *
+92    0x5040000073d0  FUNCTION        0x504000007310  0x504000007390  *
+93    0x504000007310  FUNCTION        0x504000007250  0x5040000072d0  *
+94    0x504000007250  FUNCTION        0x504000007210  (nil)           cos
+95    0x504000007210  VARIABLE        (nil)           (nil)           x
+96    0x5040000072d0  FUNCTION        0x504000007290  (nil)           cos
+97    0x504000007290  VARIABLE        (nil)           (nil)           x
+98    0x504000007390  FUNCTION        0x504000007350  (nil)           cos
+99    0x504000007350  VARIABLE        (nil)           (nil)           x
+100   0x5040000071d0  FUNCTION        0x504000007190  0x504000007090  *
+101   0x504000007190  FUNCTION        0x504000007150  0x504000007110  -
+102   0x504000007150  CONSTANT        (nil)           (nil)           0.000000
+103   0x504000007110  FUNCTION        0x5040000070d0  (nil)           sin
+104   0x5040000070d0  VARIABLE        (nil)           (nil)           x
+105   0x504000007090  CONSTANT        (nil)           (nil)           1.000000
+106   0x504000007050  FUNCTION        0x504000007010  0x504000006ed0  /
+107   0x504000007010  FUNCTION        0x504000006f50  0x504000006fd0  *
+108   0x504000006f50  FUNCTION        0x504000006f10  (nil)           cos
+109   0x504000006f10  VARIABLE        (nil)           (nil)           x
+110   0x504000006fd0  FUNCTION        0x504000006f90  (nil)           cos
+111   0x504000006f90  VARIABLE        (nil)           (nil)           x
+112   0x504000006ed0  FUNCTION        0x504000006e10  0x504000006e90  *
+113   0x504000006e10  FUNCTION        0x504000006d50  0x504000006dd0  *
+114   0x504000006d50  FUNCTION        0x504000006c90  0x504000006d10  *
+115   0x504000006c90  FUNCTION        0x504000006c50  (nil)           cos
+116   0x504000006c50  VARIABLE        (nil)           (nil)           x
+117   0x504000006d10  FUNCTION        0x504000006cd0  (nil)           cos
+118   0x504000006cd0  VARIABLE        (nil)           (nil)           x
+119   0x504000006dd0  FUNCTION        0x504000006d90  (nil)           cos
+120   0x504000006d90  VARIABLE        (nil)           (nil)           x
+121   0x504000006e90  FUNCTION        0x504000006e50  (nil)           cos
+122   0x504000006e50  VARIABLE        (nil)           (nil)           x
+
+SVG: dumps/tree_dump_032.svg
+</pre>
+<img src="dumps/tree_dump_032.svg" style="max-width:2250px;"/>
+
+<hr>

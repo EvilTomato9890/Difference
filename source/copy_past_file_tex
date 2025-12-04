@@ -4,7 +4,7 @@ HANDLE_FUNC(op_code, priority, LaTex format,                LaTex_len,     LaTex
 HANDLE_FUNC(ADD,     1,        "%a + %b",                   3 + a + b,     "%d(%l) + %d(%r)")                                                  
 HANDLE_FUNC(SUB,     1,        "%a - %b",                   3 + a + b,     "%d(%l) - %d(%r)")                                                   
 HANDLE_FUNC(MUL,     2,        "%a \\cdot %b",              3 + a + b,     "%d(%l) \\cdot %r + %l \\cdot %d(%r)")   
-HANDLE_FUNC(DIV,     4,        "\\frac{%a}{%b}",            max(a, b),    "\\frac{%d(%l) \\cdot %r - %l \\cdot %d(%r)}{%r^2}")  
+HANDLE_FUNC(DIV,     4,        "\\frac{%a}{%b}",            max_ss(a, b),  "\\frac{%d(%l) \\cdot %r - %l \\cdot %d(%r)}{%r^2}")  
        
 HANDLE_FUNC(POW,     3,        "%a^{%b}",                   a + (ssize_t)((double)b*0.7),     "%l^%r \\cdot (%d(%r) \\cdot \\ln(%l) + %r \\cdot \\frac{%d(%l)}{%l})") 
 HANDLE_FUNC(LOG,     4,        "\\log_{%a}(%b)",            4 + (ssize_t)((double)a*0.7) + b, "\\frac{\\frac{%d(%r)}{%r} \\cdot \\ln(%l) - \\frac{%d(%l)}{%l} \\cdot \\ln(%r)}{(\\ln(%l))^2}")           

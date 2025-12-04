@@ -1030,6 +1030,60 @@ static void test_main() {
     LOGGER_INFO("Тест пройден: тейлор \n"); 
 }
 
+static void test_squashes() {
+    LOGGER_INFO("=== Тест: сжатие тех ===");
+
+    error_code error = ERROR_NO;
+
+    forest_t forest = {};
+    error |= forest_init(&forest ON_DEBUG(, VER_INIT));
+    HARD_ASSERT(error == ERROR_NO, "forest_init failed");
+
+    string_t forest_buff = {};
+    error |= read_file_to_buffer_by_name(&forest_buff,  "squashes.tree");    //TODO: Почему не рбаотает ассерт
+    HARD_ASSERT(error == ERROR_NO, "read tree failed");
+    forest.buff = {.ptr = forest_buff.ptr, .len = forest_buff.len};
+    
+    tree_t* tree = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+
+    tree_t* tree_len_test = forest_add_tree(&forest, &error);
+    HARD_ASSERT(error == ERROR_NO, "add_tree failed");
+    tree_node_t* len_test_root = POW_(v("x"), c(1000));
+    tree_replace_root(tree_len_test, len_test_root);
+    LOGGER_WARNING("Size of len_test tree: %zu", get_tex_len(tree_len_test, tree_len_test->root));
+    ON_DEBUG(
+    forest_open_dump_file(&forest, "squashes.html");
+    HARD_ASSERT(forest.dump_file != nullptr, "failed to create dump file");
+    forest_open_tex_file(&forest, "squashes.tex");
+    HARD_ASSERT(forest.tex_file != nullptr, "failed to create tex file");
+    )
+    
+    tree_node_t* new_root = get_g(tree, &tree->buff.ptr);
+    tree_replace_root(tree, new_root);
+    error = tree_dump(tree, VER_INIT, /* is_visual = */ true, "Test dump input tree"); //TODO
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    error = print_tex_expr(tree, tree->root, "f(x) = ");
+
+
+    tree_node_t* new_root_2 = get_diff(tree->root, {nullptr, 0} ON_TEX_CREATION_DEBUG(, tree));
+    tree_replace_root(tree, new_root_2);
+    error = tree_dump(tree, VER_INIT, true, "Diff tree");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    error = print_tex_expr(tree, tree->root, "f(x)|dx = ");
+    error = print_tex_expr_with_squashes(tree, tree->root, "f(x)|dx with squashes = ");
+    error = tree_dump(tree, VER_INIT, true, "optimized tree");
+    HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
+    ON_DEBUG(
+    forest_close_dump_file(&forest);
+    forest_close_tex_file(&forest);
+    )
+    
+    free(forest_buff.ptr);
+    forest_dest(&forest);
+    LOGGER_INFO("Тест пройден: сжатие тех \n");
+}
+
 //================================================================================
 
 int run_tests() {
@@ -1061,8 +1115,9 @@ int run_tests() {
     test_tree_input();
     test_tree_hard_tex();
     test_teylor();
+    test_squashes();
     test_main();
-    
+
     LOGGER_INFO("========================================\n");
     LOGGER_INFO("Все тесты успешно пройдены!\n");
     LOGGER_INFO("========================================\n");

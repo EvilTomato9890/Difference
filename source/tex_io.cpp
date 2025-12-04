@@ -20,9 +20,18 @@
 #include "tex_io.h"
 //================================================================================
 
-const int MAX_CONST_LEN = 64;
-
+static const size_t TEX_SQUASH_MAX_VARS        = 26; 
+static const size_t TEX_SQUASH_MAX_TOTAL_LEN   = 80; 
+static const size_t TEX_SQUASH_MAX_SUBEXPR_LEN = 80;  
+static const size_t TEX_SQUASH_MIN_SUBEXPR_LEN = 1;  
+static const size_t MAX_CONST_LEN              = 64;
+static const size_t COST_LETTER                = 1; 
 //================================================================================
+
+struct tex_squash_candidate_t {
+    tree_node_t* node;
+    size_t       tex_len;
+};
 
 enum tex_prec_t {
     TEX_PREC_LOWEST = 0,
@@ -143,7 +152,7 @@ static void print_node_tex_var   (FILE* tex, const tree_t* tree, const tree_node
 
 
 static void print_node_tex_impl  (FILE* tex, const tree_t* tree, tree_node_t* node,
-                                   int parent_prec, assoc_pos_t pos);
+                                   int parent_prec, assoc_pos_t pos, bool ignore_this_flag);
 
 static void print_node_tex_leaf      (FILE* tex, const tree_t* tree, const tree_node_t* node);
 
@@ -182,7 +191,11 @@ static void print_node_tex_var(FILE* tex, const tree_t* tree,
 }
 
 static void print_node_tex(FILE* tex, const tree_t* tree, tree_node_t* node) {
-    print_node_tex_impl(tex, tree, node, TEX_PREC_LOWEST, ASSOC_ROOT);
+    print_node_tex_impl(tex, tree, node, TEX_PREC_LOWEST, ASSOC_ROOT, false);
+}
+
+static void print_node_tex_full(FILE* tex, const tree_t* tree, tree_node_t* node) {
+    print_node_tex_impl(tex, tree, node, TEX_PREC_LOWEST, ASSOC_ROOT, true);
 }
 
 static void print_node_tex_leaf(FILE* tex, const tree_t* tree,
@@ -230,7 +243,7 @@ static void print_node_tex_pattern_impl(FILE* tex, const tree_t* tree, tree_node
             if ((node->value.func == SUB || node->value.func == DIV) && pos == ASSOC_RIGHT)
                 child_parent_prec = child_prec + 1;
             
-            print_node_tex_impl(tex, tree, child, child_parent_prec, pos);
+            print_node_tex_impl(tex, tree, child, child_parent_prec, pos, false);
 
             ++p; 
         } else {
@@ -258,11 +271,24 @@ static void print_node_tex_function(FILE* tex, const tree_t* tree, tree_node_t* 
 }
 
 static void print_node_tex_impl(FILE* tex, const tree_t* tree, tree_node_t* node,
-                                 int parent_prec, assoc_pos_t pos) {
+                                int parent_prec, assoc_pos_t pos,
+                                bool ignore_this_flag) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+
     if (!node) {
         fprintf(tex, "\\varnothing");
         return;
     }
+
+    ON_TEX_SQUASH(
+    if (!ignore_this_flag && node->squash_id >= 0  && tree->squash_bindings && //TODO: FIXME
+        (size_t)node->squash_id < tree->squash_count) {
+
+        char letter = tree->squash_bindings[node->squash_id].letter;
+        fputc(letter, tex);
+        return;
+    }
+    )
 
     if (node->type == CONSTANT || node->type == VARIABLE) {
         print_node_tex_leaf(tex, tree, node);
@@ -477,41 +503,56 @@ void print_tex_basic_diff_comment(FILE* tex) {
 #undef PRINT_DIFF_COMMENT_TEMPLATE
 
 //================================================================================
-
-error_code print_tex_expr(const tree_t* tree, tree_node_t*  node, const char* fmt, ...){
+static error_code print_tex_expr_impl(const tree_t* tree, tree_node_t*  node, bool ignore_root_flag,
+                                      const char* fmt, va_list args) {
     HARD_ASSERT(tree != nullptr, "tree is nullptr");
     HARD_ASSERT(node != nullptr, "node is nullptr");
 
-    LOGGER_DEBUG("print_tex_expr: started");
-
-    error_code error = ERROR_NO;
-
     if (tree->tex_file == nullptr || *tree->tex_file == nullptr) {
-        LOGGER_WARNING("print_tex_expr: tex is nullptr");
+        LOGGER_WARNING("print_tex_expr_impl: tex is nullptr");
         return ERROR_NO;
     }
+
     FILE* tex = *tree->tex_file;
+    error_code error = ERROR_NO;
 
     if (fmt && *fmt) {
-        va_list args = {};
-        va_start(args, fmt);
         vfprintf(tex, fmt, args);
-        va_end(args);
     }
 
     if (fprintf(tex, EXPR_HEAD) < 0) {
-        LOGGER_ERROR("print_tex_expr: fprintf begin align* failed");
+        LOGGER_ERROR("print_tex_expr_impl: fprintf begin align* failed");
         error |= ERROR_OPEN_FILE;
     }
-    print_node_tex(tex, tree, node);
-     
-    if (fprintf(tex, EXPR_TAIL) < 0) {
-        LOGGER_ERROR("print_tex_expr: fprintf end align* failed");
-        error |= ERROR_OPEN_FILE;
-    }
-     
-    fflush(tex);
 
+    if (ignore_root_flag) {
+        print_node_tex_full(tex, tree, node);
+    } else {
+        print_node_tex(tex, tree, node);
+    }
+
+    if (fprintf(tex, EXPR_TAIL) < 0) {
+        LOGGER_ERROR("print_tex_expr_impl: fprintf end align* failed");
+        error |= ERROR_OPEN_FILE;
+    }
+
+    fflush(tex);
+    return error;
+}
+
+error_code print_tex_expr(const tree_t* tree, tree_node_t* node, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    error_code error = print_tex_expr_impl(tree, node, false, fmt, args);
+    va_end(args);
+    return error;
+}
+
+error_code print_tex_expr_full(const tree_t* tree, tree_node_t* node, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    error_code error = print_tex_expr_impl(tree, node, true, fmt, args);
+    va_end(args);
     return error;
 }
 
@@ -596,42 +637,298 @@ error_code print_diff_step_tex_fmt(const tree_t* tree, tree_node_t* node) {
     return print_diff_step(tree, node, pattern);
 }
 
+//--------------------------------------------------------------------------------
+
+void tex_clear_squash(tree_t* tree) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+
+    ON_TEX_SQUASH(
+    if (tree->squash_bindings && tree->squash_count > 0) {
+        for (size_t i = 0; i < tree->squash_count; ++i) {
+            tree_node_t* node = tree->squash_bindings[i].expr_subtree;
+            if (node) {
+                node->squash_id = -1;
+            }
+        }
+        free(tree->squash_bindings);
+        tree->squash_bindings = nullptr;
+        tree->squash_count    = 0;
+    }
+    )
+}
+
+static void tex_add_candidate(tree_t* tree, tree_node_t* node) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(node != nullptr, "node is nullptr");
+    HARD_ASSERT(tree->squash_bindings != nullptr, "tree->squash_bindings is nullptr");
+
+    size_t len   = node->subtree_tex_len;
+    size_t count = tree->squash_count;
+
+    if (count < TEX_SQUASH_MAX_VARS) {
+        tree->squash_bindings[count].expr_subtree = node;
+        tree->squash_bindings[count].letter       = 0;  
+        tree->squash_count = count + 1;
+        return;
+    }
+
+    size_t min_i   = 0;
+    size_t min_len = 0;
+
+    if (tree->squash_bindings[0].expr_subtree)
+        min_len = tree->squash_bindings[0].expr_subtree->subtree_tex_len;
+
+    for (size_t i = 1; i < count; ++i) {
+        tree_node_t* cand = tree->squash_bindings[i].expr_subtree;
+        size_t clen = cand ? cand->subtree_tex_len : 0;
+        if (clen < min_len) {
+            min_len = clen;
+            min_i   = i;
+        }
+    }
+
+    if (len > min_len) {
+        tree->squash_bindings[min_i].expr_subtree = node;
+        tree->squash_bindings[min_i].letter       = 0;
+    }
+}
+
+static void tex_collect_candidates(tree_t* tree, tree_node_t* node) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(node != nullptr, "node is nullptr");
+    HARD_ASSERT(tree->squash_bindings != nullptr, "tree->squash_bindings is nullptr");
+
+    if (node->squash_id >= 0)
+        return;
+
+    size_t len = node->subtree_tex_len;
+
+    if (len > TEX_SQUASH_MAX_SUBEXPR_LEN) {
+        tex_collect_candidates(tree, node->left);
+        tex_collect_candidates(tree, node->right);
+        return;
+    }
+
+    if (len < TEX_SQUASH_MIN_SUBEXPR_LEN) return;
+
+    tex_add_candidate(tree, node);
+}
+
+static int tex_binding_cmp_desc(const void* a, const void* b) {
+    const tex_squash_binding_t* ba = (const tex_squash_binding_t*)a;
+    const tex_squash_binding_t* bb = (const tex_squash_binding_t*)b;
+
+    size_t la = 0;
+    size_t lb = 0;
+
+    if (ba->expr_subtree)
+        la = ba->expr_subtree->subtree_tex_len;
+    if (bb->expr_subtree)
+        lb = bb->expr_subtree->subtree_tex_len;
+
+    if (la < lb) return 1;   // по убыванию
+    if (la > lb) return -1;
+    return 0;
+}
+
+static error_code print_tex_squashes(const tree_t* tree) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(tree->squash_bindings != nullptr, "tree->squash_bindings is nullptr");
+
+    error_code error = ERROR_NO;
+    for (size_t i = 0; i < tree->squash_count; ++i) {
+        char         letter = tree->squash_bindings[i].letter;
+        tree_node_t* sub    = tree->squash_bindings[i].expr_subtree;
+        error |= print_tex_expr_full(tree, sub, "%c = ", letter);
+    }   
+    return error;
+}
+
+static void tex_try_take_candidate(tree_t* tree, tree_node_t* node,
+                                   size_t* used, size_t* curr_len) {
+    HARD_ASSERT(tree     != nullptr, "tree is nullptr");
+    HARD_ASSERT(used     != nullptr, "used is nullptr");
+    HARD_ASSERT(curr_len != nullptr, "curr_len is nullptr");
+
+    if (!node) return;
+
+    if (node->squash_id >= 0)return;
+
+    size_t len = node->subtree_tex_len;
+
+    if (len <= COST_LETTER) return;
+
+    size_t idx = *used;
+
+    node->squash_id = (ssize_t)idx;
+
+    tree->squash_bindings[idx].letter       = (char)('A' + (char)idx);
+    tree->squash_bindings[idx].expr_subtree = node;
+
+    *curr_len -= (len - COST_LETTER);
+    ++(*used);
+}
+
+static error_code tex_prepare_squash(tree_t* tree, tree_node_t* root) {
+    if (!tree || !root) return ERROR_NO;
+
+    tex_clear_squash(tree);
+
+    ssize_t total_len_signed = get_tex_len(tree, root);
+    if (total_len_signed < 0) {
+        LOGGER_ERROR("tex_prepare_squash: get_tex_len(root) failed");
+        return ERROR_UNKNOWN_FUNC;
+    }
+
+    size_t total_len = (size_t)total_len_signed;
+    if (total_len <= TEX_SQUASH_MAX_TOTAL_LEN) {
+        return ERROR_NO;
+    }
+
+    tree->squash_bindings = (tex_squash_binding_t*)calloc(TEX_SQUASH_MAX_VARS, sizeof(tex_squash_binding_t));
+    if (!tree->squash_bindings) {
+        LOGGER_ERROR("tex_prepare_squash: calloc squash_bindings failed");
+        return ERROR_MEM_ALLOC;
+    }
+    tree->squash_count = 0;
+
+    tex_collect_candidates(tree, root);
+
+    if (tree->squash_count == 0) {
+        free(tree->squash_bindings);
+        tree->squash_bindings = nullptr;
+        return ERROR_NO;
+    }
+
+    qsort(tree->squash_bindings,
+          tree->squash_count,
+          sizeof(tex_squash_binding_t),
+          tex_binding_cmp_desc);
+
+    size_t curr_len      = total_len;
+    size_t used          = 0;
+
+    for (size_t i = 0;
+         i < tree->squash_count && curr_len > TEX_SQUASH_MAX_TOTAL_LEN && used < TEX_SQUASH_MAX_VARS;
+         ++i) {
+
+        tree_node_t* node = tree->squash_bindings[i].expr_subtree;
+        tex_try_take_candidate(tree, node, &used, &curr_len);
+    }
+
+    if (used == 0) {
+        tex_clear_squash(tree);
+        return ERROR_NO;
+    }
+    tree->squash_count = used;
+    return ERROR_NO;
+}
+
+error_code print_tex_expr_with_squashes(tree_t* tree, tree_node_t* node, const char* fmt, ...) {
+    HARD_ASSERT(tree != nullptr, "tree is nullptr");
+    HARD_ASSERT(node != nullptr, "node is nullptr");
+
+    error_code error = ERROR_NO;
+
+    LOGGER_DEBUG("print_tex_expr_with_squashes: preparing squashes");
+
+    error |= tex_prepare_squash(tree, node);
+    RETURN_IF_ERROR(error);
+
+    if (tree->squash_bindings && tree->squash_count > 0) {
+        error |= print_tex_squashes(tree);
+        RETURN_IF_ERROR(error);
+    }
+
+    va_list args;
+    va_start(args, fmt);
+    error |= print_tex_expr_impl(tree, node, false, fmt, args);
+    va_end(args);
+    RETURN_IF_ERROR(error);
+
+    tex_clear_squash(tree);
+    return error;
+}
+
 //================================================================================
 
-static ssize_t max(ssize_t a, ssize_t b) {
+static ssize_t max_ss(ssize_t a, ssize_t b) {
     return (a > b) ? a : b;
 }
 
 static size_t get_double_len(double target) {
     char buf[MAX_CONST_LEN] = {};
     int n = snprintf(buf, sizeof(buf), "%.2f", target);
-    return (n > 0 ? (size_t)n : 0);
+    return (n > 0) ? (size_t)n : 0;
 }
 
-ssize_t get_tex_len(const tree_t* tree, const tree_node_t* node) {
+ssize_t get_tex_len(const tree_t* tree, tree_node_t* node) {
     HARD_ASSERT(tree != nullptr, "Tree is nullptr");
+    HARD_ASSERT(node != nullptr, "Node is nullptr");
 
-    error_code error = 0;
+    ON_TEX_SQUASH(
+        node->subtree_tex_len = 0;
+        node->squash_id       = -1;
+    )
 
-    if(node->type == CONSTANT) return get_double_len(node->value.constant);
-    if(node->type == VARIABLE) return strlen(get_var_name(tree, node).ptr);
-    if(node->type != FUNCTION) {LOGGER_ERROR("Unknown type"); return -1;}
-
-    ssize_t a = get_tex_len(tree, node->left);
-    if (a == -1) return -1;
-    ssize_t b = get_tex_len(tree, node->right);
-    if (b == -1) return -1;
-
-    #define HANDLE_FUNC(op_code, str_name, priority, latex_len_code, ...) \
-        case op_code:                                                     \
-            return latex_len_code;              
-
-    switch(node->value.func) {
-        #include "copy_past_file_tex"
-        default:
-            LOGGER_ERROR("Unknown function");
-            return -1;
+    if (node->type == CONSTANT) {
+        size_t len = get_double_len(node->value.constant);
+        ON_TEX_SQUASH(
+        node->subtree_tex_len = len;
+        )
+        return (ssize_t)len;
     }
 
+    if (node->type == VARIABLE) {
+        c_string_t name = get_var_name(tree, node);
+        size_t len = 0;
+        if (name.ptr && name.len > 0) len = name.len; 
+        else                          len = 1; 
+        
+        ON_TEX_SQUASH(
+        node->subtree_tex_len = len;
+        )
+        return (ssize_t)len;
+    }
+
+    if (node->type != FUNCTION) {
+        LOGGER_ERROR("Unknown type");
+        return -1;
+    }
+
+    ssize_t a = 0;
+    ssize_t b = 0;
+
+    if (node->left) {
+        a = get_tex_len(tree, node->left);
+        if (a < 0) return -1;
+    }
+    if (node->right) {
+        b = get_tex_len(tree, node->right);
+        if (b < 0) return -1;
+    }
+
+    ssize_t res = 0;
+
+    switch (node->value.func) {
+    #define HANDLE_FUNC(op_code, str_name, priority, latex_len_code, ...) \
+        case op_code: {                                              \
+            res = (latex_len_code);                                  \
+            break;                                                   \
+        }
+
+        #include "copy_past_file_tex"
+
     #undef HANDLE_FUNC
+
+    default:
+        LOGGER_ERROR("Unknown function");
+        return -1;
+    }
+
+    ON_TEX_SQUASH(
+        node->subtree_tex_len = (res > 0) ? (size_t)res : 0;
+    )
+
+    return res;
 }
