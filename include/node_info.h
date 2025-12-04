@@ -40,7 +40,8 @@ struct tree_node_t {
     tree_node_t* left;
     tree_node_t* right;
     ON_TEX_SQUASH(
-    size_t       subtree_tex_len;
+    size_t       subtree_tex_len;  
+    ssize_t      squash_id;        
     )
 };
 

@@ -74,6 +74,10 @@ tree_node_t* init_node(node_type_t node_type, value_t value, tree_node_t* left, 
     node->value  = value;
     node->left   = left;
     node->right  = right;
+    ON_TEX_SQUASH(
+    node->subtree_tex_len = 0;   
+    node->squash_id = -1;         
+    )
     return node;
 }
 
@@ -125,6 +129,10 @@ error_code tree_init(tree_t* tree, stack_t* stack ON_DEBUG(, ver_info_t ver_info
         tree->ver_info  = ver_info;
         tree->dump_file = nullptr;
     })
+    ON_TEX_SQUASH(
+    tree->squash_bindings = nullptr;
+    tree->squash_count    = 0;
+    )
     return error;
 }
 

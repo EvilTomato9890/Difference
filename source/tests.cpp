@@ -960,7 +960,7 @@ static void test_teylor() {
 
     tree_t* tree_teylor = make_teylor(&forest, tree, x_idx, 1);
     HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
-    error = print_tex_expr(tree_teylor, tree_teylor->root, "teylor f(x)|dx = ");
+    error = print_tex_expr(tree_teylor, tree_teylor->root, "");
 
     error = tree_dump(tree_teylor, VER_INIT, true, "teylor tree");
     HARD_ASSERT(error == ERROR_NO, "tree_dump failed");
@@ -1014,7 +1014,7 @@ static void test_main() {
     tree_t* tree_teylor = make_teylor(&forest, tree, x_idx, 1);
     HARD_ASSERT(error == ERROR_NO, "tree optimize failed");
 
-    print_tex_H2(forest.tex_file, "Полный план сражения с Тейлором-Боблином");
+    print_tex_H1(forest.tex_file, "Полный план сражения с Тейлором-Боблином");
     error = print_tex_expr(tree_teylor, tree_teylor->root, "f(x) = ");
 
     error = tree_dump(tree_teylor, VER_INIT, true, "teylor tree");

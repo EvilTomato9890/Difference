@@ -11,6 +11,11 @@
 
 const int MAX_FOREST_CAP = 10;
 
+struct tex_squash_binding_t {
+    char         letter;      
+    tree_node_t* expr_subtree;  
+};
+
 struct tree_t {
     tree_node_t*   root;
     size_t         size;
@@ -22,7 +27,10 @@ struct tree_t {
         FILE* const * dump_file;
     )
     FILE* const * tex_file;
-    
+    ON_TEX_SQUASH(
+    tex_squash_binding_t* squash_bindings;
+    size_t                squash_count;
+    )
 };
 
 #endif

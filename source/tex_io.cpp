@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <math.h>
 
 #include "asserts.h"
 #include "logger.h"
@@ -597,12 +598,16 @@ error_code print_diff_step_tex_fmt(const tree_t* tree, tree_node_t* node) {
 
 //================================================================================
 
+static ssize_t max(ssize_t a, ssize_t b) {
+    return (a > b) ? a : b;
+}
+
 static size_t get_double_len(double target) {
     char buf[MAX_CONST_LEN] = {};
     int n = snprintf(buf, sizeof(buf), "%.2f", target);
     return (n > 0 ? (size_t)n : 0);
 }
-/*
+
 ssize_t get_tex_len(const tree_t* tree, const tree_node_t* node) {
     HARD_ASSERT(tree != nullptr, "Tree is nullptr");
 
@@ -612,14 +617,21 @@ ssize_t get_tex_len(const tree_t* tree, const tree_node_t* node) {
     if(node->type == VARIABLE) return strlen(get_var_name(tree, node).ptr);
     if(node->type != FUNCTION) {LOGGER_ERROR("Unknown type"); return -1;}
 
-    #define HANDLE_FUNC(op_code, str_name, func, args_cnt, priority, latex_fmt, ...) \
-        case op_code:
-            return strlen(#latex_fmt) - args_cnt * 2;
+    ssize_t a = get_tex_len(tree, node->left);
+    if (a == -1) return -1;
+    ssize_t b = get_tex_len(tree, node->right);
+    if (b == -1) return -1;
+
+    #define HANDLE_FUNC(op_code, str_name, priority, latex_len_code, ...) \
+        case op_code:                                                     \
+            return latex_len_code;              
+
     switch(node->value.func) {
-        #include "copy_past_file"
+        #include "copy_past_file_tex"
         default:
             LOGGER_ERROR("Unknown function");
             return -1;
     }
 
-}*/
+    #undef HANDLE_FUNC
+}
